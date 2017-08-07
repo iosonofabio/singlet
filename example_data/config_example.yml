@@ -1,0 +1,10 @@
+'io':
+  'samplesheets':
+    'example_sheet_googleapi':
+      'description': 'Example Google Spreadsheet for cell metadata'
+      'url': 'https://docs.google.com/spreadsheets/d/1OOjpj1oTzYRV059oFhBHOlhJc1Cya7KwHEMIAUwIpzU'
+      'cells': 'rows'
+    'example_sheet_tsv':
+      'description': 'Example TSV file for cell metadata'
+      'path': 'example_data/example_sample_table - sequenced.tsv'
+      'cells': 'rows'

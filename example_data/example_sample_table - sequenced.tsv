@@ -1,0 +1,5 @@
+barcode	name	index	experiment	sequencing instrument	quantitative phenotype 1 [A.U.]	description
+Barcode 718-502	test_pipeline	GGAGCTAC-ATAGAGAG	test_pipeline	MiSeq		Test the bioinformatics pipeline
+Barcode 718-502	first_sample	GGAGCTAC-ATAGAGAG	exp1	MiSeq	1	example cell 1
+Barcode 719-503	second_sample	GCGTAGTA-AGAGGATA	exp1	MiSeq	3.4	example cell 2
+Barcode 722-507	third_sample	ATGCGCAG-TACTCCTT	exp1	MiSeq	2.1	example cell 3
