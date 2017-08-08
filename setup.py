@@ -18,7 +18,7 @@ if ((sys.version_info[0] < 3) or
 
 # Setuptools but not distutils support build/runtime/optional dependencies
 try:
-    from setuptools import setup, Extension
+    from setuptools import setup, Extension, find_packages
     from setuptools.command.build_py import build_py
     from setuptools import Command
     kwargs = dict(
@@ -36,7 +36,7 @@ try:
 except ImportError:
     sys.stderr.write("Could not import 'setuptools'," +
                      " falling back to 'distutils'.\n")
-    from distutils.core import setup, Extension
+    from distutils.core import setup, Extension, find_packages
     from distutils.command.build_py import build_py
     from distutils.cmd import Command
     kwargs = dict(
@@ -78,6 +78,6 @@ setup(name='singlet',
          'Operating System :: POSIX',
          'Programming Language :: Python'
       ],
-      package_dir={'': 'singlet'},
+      packages=['singlet'] + ['singlet.' + s for s in find_packages(where='singlet')],
       **kwargs
       )
