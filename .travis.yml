@@ -12,19 +12,15 @@ matrix:
     - python: 2.7
       os: linux
       dist: trusty
-      sudo: required
     - python: 3.4
       os: linux
       dist: trusty
-      sudo: required
     - python: 3.5
       os: linux
       dist: trusty
-      sudo: required
     - python: 3.6
       os: linux
       dist: trusty
-      sudo: required
     - env: CC=gcc PYTHON_VERSION='2.7'
       language: generic
       os: osx
