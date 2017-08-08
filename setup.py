@@ -9,10 +9,10 @@ import sys
 import os
 from distutils.log import INFO as logINFO
 
-if ((sys.version_info[0] == 2 and sys.version_info[1] < 7) or
+if ((sys.version_info[0] < 3) or
    (sys.version_info[0] == 3 and sys.version_info[1] < 4)):
     sys.stderr.write("Error in setup script for singlet:\n")
-    sys.stderr.write("Singlet supports Python 2.7 or 3.4+.")
+    sys.stderr.write("Singlet supports Python 3.4+.")
     sys.exit(1)
 
 
