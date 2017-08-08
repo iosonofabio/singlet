@@ -17,6 +17,7 @@ def run(script, **kwargs):
         script,
         env='SINGLET_CONFIG_FILENAME=example_data/config_example.yml',
         check=True,
+        shell=True,
         **kwargs)
 
 
