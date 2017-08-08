@@ -15,7 +15,9 @@ import subprocess as sp
 def run(script, **kwargs):
     sp.check_call(
         script,
-        env='SINGLET_CONFIG_FILENAME=example_data/config_example.yml',
+        env={
+            'SINGLET_CONFIG_FILENAME': 'example_data/config_example.yml'
+            },
         shell=True,
         **kwargs)
 
