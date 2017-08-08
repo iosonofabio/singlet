@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 # vim: fdm=indent
 '''
 author:     Fabio Zanini
