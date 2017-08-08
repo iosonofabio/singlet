@@ -19,7 +19,7 @@ from .filenames import googleapi_config
 # Classes / functions
 class SampleSheet(GoogleAPI):
     def __init__(self, sheetname):
-        sheetid = googleapi_config['samplesheets'][sheetname]['id']
+        sheetid = googleapi_config['samplesheets'][sheetname]['google_id']
         super().__init__(sheetid)
 
     def get_number_virus_reads(self, virus, icols=None):

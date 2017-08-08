@@ -31,3 +31,4 @@ if __name__ == '__main__':
 
     # IO
     run('test/io/csv_parser.py')
+    run('test/io/googleapi_parser.py')
