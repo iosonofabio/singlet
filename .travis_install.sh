@@ -13,6 +13,7 @@ fi
 #fi
 
 # deps #FIXME: do better
+pip insall yaml
 pip install numpy
 pip install pandas
 pip install matplotlib

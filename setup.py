@@ -23,11 +23,13 @@ try:
     from setuptools import Command
     kwargs = dict(
         setup_requires=[
+            'yaml',
             'numpy',
             'pandas',
             'matplotlib',
         ],
         install_requires=[
+            'yaml',
             'numpy',
             'pandas',
             'matplotlib',
@@ -41,9 +43,10 @@ except ImportError:
     from distutils.cmd import Command
     kwargs = dict(
         requires=[
-              'numpy',
-              'pandas',
-              'matplotlib',
+            'yaml',
+            'numpy',
+            'pandas',
+            'matplotlib',
             ]
     )
 
