@@ -12,6 +12,11 @@ fi
 #    exit 1
 #fi
 
+# deps #FIXME: do better
+pip install numpy
+pip install pandas
+pip install matplotlib
+
 # old setuptools also has a bug for extras, but it still compiles
 pip install -v '.'
 if [ $? != 0 ]; then
