@@ -16,6 +16,13 @@ def run(script, **kwargs):
     env = os.environ.copy()
     env['SINGLET_CONFIG_FILENAME'] = 'example_data/config_example.yml'
 
+    # Include local tests
+    import platform
+    if platform.node() == 'X260':
+        singlet_path = os.path.dirname(os.path.dirname(__file__))
+        env['PYTHONPATH'] = singlet_path+':'+env['PYTHONPATH']
+        print(singlet_path)
+
     sp.check_call(
         script,
         env=env,

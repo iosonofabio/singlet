@@ -9,7 +9,6 @@ import os
 import numpy as np
 import pandas as pd
 
-from ..filenames import support_foldername
 
 
 # Classes / functions
@@ -19,14 +18,13 @@ class GoogleIOError(IOError):
 
 class GoogleAPI:
     # If modifying these scopes, delete your previously saved credentials
-    SCOPES = 'https://www.googleapis.com/auth/spreadsheets'
-    CLIENT_ID_FILE = support_foldername+'GoogleSheetAPI/client_id.json'
-    CLIENT_SECRET_FILE = os.getenv('HOME')+'/.credentials/sheets.googleapis.com-virus_singlecell.json'
-    APPLICATION_NAME = 'Google Sheet API to virus_singlecell'
+    scopes = 'https://www.googleapis.com/auth/spreadsheets'
+    application_name = 'Google Sheet API to singlet'
+    MAX_COLUMN = 'AZ'
 
-    MAX_COLUMN = 'AK'
-
-    def __init__(self, spreadsheetId):
+    def __init__(self, spreadsheetId, spreadsheetname, client_id_filename):
+        self.spreadsheetname = spreadsheetname
+        self.client_id_filename = client_id_filename
         self.spreadsheetId = spreadsheetId
         self.set_service()
 
@@ -44,18 +42,25 @@ class GoogleAPI:
         from oauth2client.file import Storage
 
         # Cached credentials
-        credential_dir = os.path.dirname(self.CLIENT_SECRET_FILE)
+        client_secret_filename = ''.join([
+            os.getenv('HOME'),
+            '/.credentials/sheets.googleapis.com-singlet-',
+            self.spreadsheetname,
+            '.json'
+            ])
+        credential_dir = os.path.dirname(client_secret_filename)
         if not os.path.exists(credential_dir):
             os.makedirs(credential_dir)
 
-        store = Storage(self.CLIENT_SECRET_FILE)
+        store = Storage(client_secret_filename)
         credentials = store.get()
         if not credentials or credentials.invalid:
-            flow = client.flow_from_clientsecrets(self.CLIENT_ID_FILE,
-                                                  self.SCOPES)
-            flow.user_agent = self.APPLICATION_NAME
+            flow = client.flow_from_clientsecrets(self.client_id_filename,
+                                                  self.scopes)
+            flow.user_agent = self.application_name
+            print('Storing credentials to '+client_secret_filename)
             credentials = tools.run_flow(flow, store)
-            print('Storing credentials to '+self.CLIENT_SECRET_FILE)
+            print('Stored credentials into:', client_secret_filename)
         return credentials
 
     def set_service(self):
@@ -66,8 +71,9 @@ class GoogleAPI:
         http = credentials.authorize(httplib2.Http())
         discoveryUrl = ('https://sheets.googleapis.com/$discovery/rest?'
                         'version=v4')
-        self.service = discovery.build('sheets', 'v4', http=http,
-                                  discoveryServiceUrl=discoveryUrl)
+        self.service = discovery.build(
+                'sheets', 'v4', http=http,
+                discoveryServiceUrl=discoveryUrl)
 
     def get_sheet_shape(self, sheetname):
         '''Get the data range of the sheet'''
