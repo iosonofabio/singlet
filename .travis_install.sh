@@ -17,8 +17,8 @@ pip install pyyaml
 pip install numpy
 pip install pandas
 pip install matplotlib
-# FIXME: Make this an optional dep
-pip install google-api-python-client
+# Google API tests are only local anyway
+#pip install google-api-python-client
 
 
 # old setuptools also has a bug for extras, but it still compiles
