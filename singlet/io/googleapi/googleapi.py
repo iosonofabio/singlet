@@ -18,7 +18,8 @@ class GoogleIOError(IOError):
 
 class GoogleAPI:
     # If modifying these scopes, delete your previously saved credentials
-    scopes = 'https://www.googleapis.com/auth/spreadsheets'
+    # NOTE: readonly for now
+    scopes = 'https://www.googleapis.com/auth/spreadsheets.readonly'
     application_name = 'Google Sheet API to singlet'
     MAX_COLUMN = 'AZ'
 

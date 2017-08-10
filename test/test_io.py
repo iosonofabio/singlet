@@ -12,18 +12,24 @@ import subprocess as sp
 
 
 # Controlled sp environment
-def run(script, **kwargs):
+def run(script, where=None, **kwargs):
+    import platform
+
+    if where == 'local' and platform.node() != 'X260':
+        return
+    if where == 'remote' and platform.node() == 'X260':
+        return
+
     env = os.environ.copy()
     env['SINGLET_CONFIG_FILENAME'] = 'example_data/config_example.yml'
 
     # Include local tests
-    import platform
     if platform.node() == 'X260':
         singlet_path = os.path.dirname(os.path.dirname(__file__))
         env['PYTHONPATH'] = singlet_path+':'+env['PYTHONPATH']
         print(singlet_path)
 
-    sp.check_call(
+    return sp.check_call(
         script,
         env=env,
         shell=True,
@@ -38,4 +44,4 @@ if __name__ == '__main__':
 
     # IO
     run('test/io/csv_parser.py')
-    run('test/io/googleapi_parser.py')
+    run('test/io/googleapi_parser.py', where='local')
