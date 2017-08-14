@@ -11,9 +11,17 @@ echo "python: ${PYTHON}"
 
 echo 'Running tests...'
 
-echo 'Parser tests...'
+echo 'IO tests...'
 ${PYTHON} "test/test_io.py"
 if [ $? != 0 ]; then
     exit 1
 fi
 echo 'done!'
+
+echo 'Dataset tests...'
+${PYTHON} "test/test_dataset.py"
+if [ $? != 0 ]; then
+    exit 1
+fi
+echo 'done!'
+
