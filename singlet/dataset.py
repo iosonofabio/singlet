@@ -10,8 +10,8 @@ content:    Dataset that combines feature counts with metadata.
 # Classes / functions
 class Dataset():
     def __init__(self, samplesheet, counts_table):
-        from .io import parse_samplesheet
+        from .samplesheet import SampleSheet
         from .counts_table import CountsTable
 
-        self.samplesheet = parse_samplesheet(samplesheet)
+        self.samplesheet = SampleSheet.from_sheetname(samplesheet)
         self.counts = CountsTable.from_tablename(counts_table)
