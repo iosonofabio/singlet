@@ -16,6 +16,10 @@ for sheetname, sheet in config['io']['samplesheets'].items():
     if ('format' not in sheet) and ('path' in sheet):
         path = sheet['path']
         config['io']['samplesheets'][sheetname]['format'] = path.split('.')[-1].lower()
+for tablename, sheet in config['io']['count_tables'].items():
+    if ('format' not in sheet) and ('path' in sheet):
+        path = sheet['path']
+        config['io']['count_tables'][tablename]['format'] = path.split('.')[-1].lower()
 
 
 # Parser
@@ -23,6 +27,26 @@ def parse_samplesheet(sheetname):
     import pandas as pd
 
     sheet = config['io']['samplesheets'][sheetname]
+    fmt = sheet['format']
+    if fmt == 'tsv':
+        sep = '\t'
+    elif fmt == 'csv':
+        sep = ','
+    else:
+        raise ValueError('Format not understood')
+
+    table = pd.read_csv(sheet['path'], sep=sep)
+
+    if ('cells' in sheet) and (sheet['cells'] != 'rows'):
+        table = table.T
+
+    return table
+
+
+def parse_counts_table(tablename):
+    import pandas as pd
+
+    sheet = config['io']['count_tables'][tablename]
     fmt = sheet['format']
     if fmt == 'tsv':
         sep = '\t'

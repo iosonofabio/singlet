@@ -10,3 +10,11 @@
       'description': 'Example TSV file for cell metadata'
       'path': 'example_data/example_sample_table - sequenced.tsv'
       'cells': 'rows'
+
+  'count_tables':
+    'example_table_tsv':
+      'description': 'Example table of gene counts (not normalized)'
+      'path': 'example_data/example_counts_table.tsv'
+      'cells': 'columns'
+      'spikein-regex': '(ERCC-|NIST_ConsensusVector)'
+      'other-regex': '__'

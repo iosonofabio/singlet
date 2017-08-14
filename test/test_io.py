@@ -42,6 +42,9 @@ if __name__ == '__main__':
 
     # Config
 
-    # IO
-    run('test/io/csv_parser.py')
-    run('test/io/googleapi_parser.py', where='local')
+    # IO samplesheet
+    run('test/io/samplesheet_csv_parser.py')
+    run('test/io/samplesheet_googleapi_parser.py', where='local')
+
+    # IO count_table
+    run('test/io/count_table_csv_parser.py')
