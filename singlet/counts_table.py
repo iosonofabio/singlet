@@ -40,3 +40,15 @@ class CountsTable(pd.DataFrame):
             index = [ix for ix in index if not reg.match(ix)]
 
         return self.loc[index]
+
+    def get_spikeins(self):
+        import re
+        reg = re.compile('^'+self.sheet['spikein-regex'])
+        index = [ix for ix in self.index if reg.match(ix)]
+        return self.loc[index]
+
+    def get_other_features(self):
+        import re
+        reg = re.compile('^'+self.sheet['other-regex'])
+        index = [ix for ix in self.index if reg.match(ix)]
+        return self.loc[index]
