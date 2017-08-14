@@ -23,7 +23,7 @@ class CountsTable(pd.DataFrame):
 
         self = cls(parse_counts_table(tablename))
         self.name = tablename
-        self.sheet = config['io']['count_tables'][self.tablename]
+        self.sheet = config['io']['count_tables'][tablename]
 
         return self
 
