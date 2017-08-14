@@ -7,7 +7,6 @@ content:    Tests for the library.
 '''
 # Modules
 import os
-import sys
 import subprocess as sp
 
 
@@ -36,11 +35,11 @@ def run(script, where=None, **kwargs):
         **kwargs)
 
 
-
 # Script
 if __name__ == '__main__':
 
     # Config
+    run('test/io/config.py')
 
     # IO samplesheet
     run('test/io/samplesheet_csv_parser.py')
