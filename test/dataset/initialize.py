@@ -14,3 +14,11 @@ if __name__ == '__main__':
     from singlet.dataset import Dataset
     ds = Dataset(samplesheet='example_sheet_tsv', counts_table='example_table_tsv')
     print('Done!')
+
+    print('Testing Dataset.__str__')
+    assert(str(ds) == 'Dataset with 4 samples and 60721 features')
+    print('Done!')
+
+    print('Testing Dataset.__repr__')
+    assert(ds.__repr__() == 'Dataset("example_sheet_tsv", "example_table_tsv")')
+    print('Done!')

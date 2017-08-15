@@ -8,7 +8,13 @@ import pandas as pd
 
 # Classes / functions
 class CountsTable(pd.DataFrame):
-    _metadata = ['sheet']
+    '''Table of gene expression counts
+
+    - Rows are features, e.g. genes.
+    - Columns are samples.
+    '''
+
+    _metadata = ['sheet', 'name']
 
     @property
     def _constructor(self):
@@ -16,6 +22,14 @@ class CountsTable(pd.DataFrame):
 
     @classmethod
     def from_tablename(cls, tablename):
+        '''Instantiate a CountsTable from its name in the config file.
+
+        Args:
+            tablename (string): name of the counts table in the config file.
+
+        Returns:
+            CountsTable: the counts table.
+        '''
         from .config import config
         from .io.csv import parse_counts_table
 
@@ -25,29 +39,35 @@ class CountsTable(pd.DataFrame):
 
         return self
 
-    def exclude_features(self, spikeins=True, other=True):
-        # FIXME: this is VERY slow!
-        import re
-        index = self.index
+    def exclude_features(self, spikeins=True, other=True, inplace=False):
+        '''Get a slice that excludes secondary features.
 
+        Args:
+            spikeins (bool): whether to exclude spike-ins
+            other (bool): whether to exclude other features, e.g. unmapped reads
+
+        Returns:
+            CountsTable: a slice of self without those features.
+        '''
+        drop = []
         if spikeins:
-            reg = re.compile('^'+self.sheet['spikein-regex'])
-            index = [ix for ix in index if not reg.match(ix)]
-
+            drop.extend(self.sheet['spikeins'])
         if other:
-            reg = re.compile('^'+self.sheet['other-regex'])
-            index = [ix for ix in index if not reg.match(ix)]
-
-        return self.loc[index]
+            drop.extend(self.sheet['other'])
+        return self.drop(drop, axis=0, inplace=inplace)
 
     def get_spikeins(self):
-        import re
-        reg = re.compile('^'+self.sheet['spikein-regex'])
-        index = [ix for ix in self.index if reg.match(ix)]
-        return self.loc[index]
+        '''Get spike-in features
+
+        Returns:
+            CountsTable: a slice of self with only spike-ins.
+        '''
+        return self.loc[self.sheet['spikeins']]
 
     def get_other_features(self):
-        import re
-        reg = re.compile('^'+self.sheet['other-regex'])
-        index = [ix for ix in self.index if reg.match(ix)]
-        return self.loc[index]
+        '''Get other features
+
+        Returns:
+            CountsTable: a slice of self with only other features (e.g. unmapped).
+        '''
+        return self.loc[self.sheet['other']]

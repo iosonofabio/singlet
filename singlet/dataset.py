@@ -31,6 +31,26 @@ class Dataset():
         assert(set(self._samplesheet.index) == set(self._counts.columns))
         self._counts = self._counts.loc[:, self._samplesheet.index]
 
+    def __str__(self):
+        return '{:} with {:} samples and {:} features'.format(
+                self.__class__.__name__,
+                self.n_samples,
+                self.n_features)
+
+    def __repr__(self):
+        return '{:}("{:}", "{:}")'.format(
+                self.__class__.__name__,
+                self._samplesheet.sheetname,
+                self._counts.name)
+
+    @property
+    def n_samples(self):
+        return self._samplesheet.shape[0]
+
+    @property
+    def n_features(self):
+        return self._counts.shape[0]
+
     @property
     def samplenames(self):
         '''pandas.Index of sample names'''
@@ -89,7 +109,6 @@ class Dataset():
             drop.append('total')
         if ('mapped' in expression) and ('mapped' not in counts.index):
             counts.loc['mapped'] = counts.exclude_features(spikeins=True, other=True).sum(axis=0)
-            print(counts.loc['mapped'])
             drop.append('mapped')
 
         counts_table = counts.T.query(expression, inplace=False).T
