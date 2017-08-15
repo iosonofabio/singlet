@@ -14,11 +14,11 @@ if __name__ == '__main__':
     ds = Dataset(samplesheet='example_sheet_tsv', counts_table='example_table_tsv')
 
     print('Query sample by counts')
-    ds.query_samples_by_counts('KRIT1 > 100', inplace=True)
-    assert(tuple(ds.samplenames) == ('third_sample',))
+    ds_tmp = ds.query_samples_by_counts('KRIT1 > 100', inplace=False)
+    assert(tuple(ds_tmp.samplenames) == ('third_sample',))
     print('Done!')
 
     print('Query features')
-    ds.query_features('first_sample > 1000000', inplace=True)
-    assert(tuple(ds.featurenames) == ('__alignment_not_unique',))
+    ds_tmp = ds.query_features('first_sample > 1000000', inplace=False)
+    assert(tuple(ds_tmp.featurenames) == ('__alignment_not_unique',))
     print('Done!')

@@ -35,7 +35,7 @@ def parse_samplesheet(sheetname):
     else:
         raise ValueError('Format not understood')
 
-    table = pd.read_csv(sheet['path'], sep=sep)
+    table = pd.read_csv(sheet['path'], sep=sep, index_col='name')
 
     if ('cells' in sheet) and (sheet['cells'] != 'rows'):
         table = table.T
@@ -55,9 +55,9 @@ def parse_counts_table(tablename):
     else:
         raise ValueError('Format not understood')
 
-    table = pd.read_csv(sheet['path'], sep=sep)
+    table = pd.read_csv(sheet['path'], sep=sep, index_col=0)
 
-    if ('cells' in sheet) and (sheet['cells'] != 'rows'):
+    if ('cells' in sheet) and (sheet['cells'] != 'columns'):
         table = table.T
 
     return table

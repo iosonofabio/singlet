@@ -10,7 +10,7 @@ import pandas as pd
 
 # Classes / functions
 class SampleSheet(pd.DataFrame):
-    _metadata = ['sheet']
+    _metadata = ['sheet', 'sheetname']
 
     @property
     def _constructor(self):
@@ -22,7 +22,7 @@ class SampleSheet(pd.DataFrame):
         from .io import parse_samplesheet
 
         self = cls(parse_samplesheet(sheetname))
-        self.name = sheetname
+        self.sheetname = sheetname
         self.sheet = config['io']['samplesheets'][sheetname]
 
         return self
