@@ -24,7 +24,7 @@ if __name__ == '__main__':
     print('Done!')
 
     print('Query sample by mapped counts')
-    ds_tmp = ds.query_samples_by_counts('mapped < 100000', inplace=False)
+    ds_tmp = ds.query_samples_by_counts('mapped < 1000000', inplace=False)
     assert(tuple(ds_tmp.samplenames) == ('second_sample',))
     print('Done!')
 
