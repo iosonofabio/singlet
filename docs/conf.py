@@ -23,6 +23,7 @@
 import os
 import sys
 sys.path.insert(0, os.path.abspath('..'))
+os.environ['SINGLET_CONFIG_FILENAME'] = os.path.abspath('../example_data/config_example.yml')
 
 
 # -- General configuration ------------------------------------------------

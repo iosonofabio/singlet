@@ -12,7 +12,6 @@ import yaml
 # Globals
 config_filename = os.getenv(
         'SINGLET_CONFIG_FILENAME',
-        os.getenv('HOME') + '.singlet/config.yml')
+        os.getenv('HOME') + '/.singlet/config.yml')
 with open(config_filename) as stream:
     config = yaml.load(stream)
-
