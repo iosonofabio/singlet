@@ -33,14 +33,17 @@ class Dataset():
 
     @property
     def samplenames(self):
+        '''pandas.Index of sample names'''
         return self._samplesheet.index.copy()
 
     @property
     def featurenames(self):
+        '''pandas.Index of feature names'''
         return self._counts.index.copy()
 
     @property
     def metadatanames(self):
+        '''pandas.Index of metadata column names'''
         return self._samplesheet.columns.copy()
 
     @property
