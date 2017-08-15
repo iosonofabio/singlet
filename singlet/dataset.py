@@ -9,6 +9,8 @@ content:    Dataset that combines feature counts with metadata.
 
 # Classes / functions
 class Dataset():
+    '''Collection of cells, with feature counts and metadata'''
+
     def __init__(self, samplesheet, counts_table):
         from .samplesheet import SampleSheet
         from .counts_table import CountsTable
