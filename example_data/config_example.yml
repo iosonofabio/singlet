@@ -16,6 +16,7 @@
       'description': 'Example table of gene counts (not normalized)'
       'path': 'example_data/example_counts_table.tsv'
       'cells': 'columns'
+      'normalized': no
       'spikeins':
          - 'ERCC-00002'
          - 'ERCC-00003'
@@ -127,6 +128,7 @@
         - 'example_data/example_counts_table_split1.tsv'
         - 'example_data/example_counts_table_split2.tsv'
       'cells': 'columns'
+      'normalized': no
       'spikeins':
          - 'ERCC-00002'
          - 'ERCC-00003'
