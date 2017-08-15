@@ -37,6 +37,7 @@ os.environ['SINGLET_CONFIG_FILENAME'] = os.path.abspath('../example_data/config_
 # ones.
 extensions = [
     'sphinx.ext.autodoc',
+    'sphinx.ext.napoleon',
     'sphinx.ext.todo',
     'sphinx.ext.coverage',
     'sphinx.ext.mathjax',
