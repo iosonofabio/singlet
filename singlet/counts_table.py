@@ -28,6 +28,7 @@ class CountsTable(pd.DataFrame):
         return self
 
     def exclude_features(self, spikeins=True, other=True):
+        # FIXME: this is VERY slow!
         import re
         index = self.index
 

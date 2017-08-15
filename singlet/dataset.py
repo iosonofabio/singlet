@@ -56,7 +56,20 @@ class Dataset():
         self._counts = value
 
     def query_samples_by_counts(self, expression, inplace=False):
-        counts_table = self._counts.T.query(expression, inplace=False).T
+        counts = self._counts.copy()
+        drop = []
+        if ('total' in expression) and ('total' not in counts.index):
+            counts.loc['total'] = counts.sum(axis=0)
+            drop.append('total')
+        if ('mapped' in expression) and ('mapped' not in counts.index):
+            counts.loc['mapped'] = counts.exclude_features(spikeins=True, other=True).sum(axis=0)
+            print(counts.loc['mapped'])
+            drop.append('mapped')
+
+        counts_table = counts.T.query(expression, inplace=False).T
+        if drop:
+            counts_table.drop(drop, axis=0, inplace=True)
+
         if inplace:
             self.counts = counts_table
         else:

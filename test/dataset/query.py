@@ -13,9 +13,19 @@ if __name__ == '__main__':
     from singlet.dataset import Dataset
     ds = Dataset(samplesheet='example_sheet_tsv', counts_table='example_table_tsv')
 
-    print('Query sample by counts')
+    print('Query sample by counts in one gene')
     ds_tmp = ds.query_samples_by_counts('KRIT1 > 100', inplace=False)
     assert(tuple(ds_tmp.samplenames) == ('third_sample',))
+    print('Done!')
+
+    print('Query sample by total counts')
+    ds_tmp = ds.query_samples_by_counts('total < 3000000', inplace=False)
+    assert(tuple(ds_tmp.samplenames) == ('second_sample',))
+    print('Done!')
+
+    print('Query sample by mapped counts')
+    ds_tmp = ds.query_samples_by_counts('mapped < 100000', inplace=False)
+    assert(tuple(ds_tmp.samplenames) == ('second_sample',))
     print('Done!')
 
     print('Query features')
