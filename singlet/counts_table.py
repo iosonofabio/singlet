@@ -78,10 +78,12 @@ class CountsTable(pd.DataFrame):
         '''Normalize counts and return new CountsTable.
 
         Args:
-            method (string or function): The method to use for normalization. One of
-            'counts_per_million', 'counts_per_thousand_spikeins',
-            'counts_per_thousand_features'. If this argument is a function, it
-            must take the CountsTable as input and return the normalized one as output.
+            method (string or function): The method to use for normalization. \
+                    One of 'counts_per_million', \
+                    'counts_per_thousand_spikeins', \
+                    'counts_per_thousand_features'. If this argument is a \
+                    function, it must take the CountsTable as input and \
+                    return the normalized one as output.
             include_spikeins (bool): Whether to include spike-ins in the
             normalization and result.
             inplace (bool): Whether to modify the CountsTable in place or return
