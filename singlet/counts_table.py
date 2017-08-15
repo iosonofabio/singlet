@@ -14,7 +14,7 @@ class CountsTable(pd.DataFrame):
     - Columns are samples.
     '''
 
-    _metadata = ['sheet', 'name']
+    _metadata = ['name', '_spikeins', '_otherfeatures']
 
     @property
     def _constructor(self):
@@ -35,7 +35,8 @@ class CountsTable(pd.DataFrame):
 
         self = cls(parse_counts_table(tablename))
         self.name = tablename
-        self.sheet = config['io']['count_tables'][tablename]
+        self._spikeins = config['io']['count_tables'][tablename]['spikeins']
+        self._otherfeatures = config['io']['count_tables'][tablename]['other']
 
         return self
 
@@ -51,9 +52,9 @@ class CountsTable(pd.DataFrame):
         '''
         drop = []
         if spikeins:
-            drop.extend(self.sheet['spikeins'])
+            drop.extend(self._spikeins)
         if other:
-            drop.extend(self.sheet['other'])
+            drop.extend(self._otherfeatures)
         return self.drop(drop, axis=0, inplace=inplace)
 
     def get_spikeins(self):
@@ -62,7 +63,7 @@ class CountsTable(pd.DataFrame):
         Returns:
             CountsTable: a slice of self with only spike-ins.
         '''
-        return self.loc[self.sheet['spikeins']]
+        return self.loc[self._spikeins]
 
     def get_other_features(self):
         '''Get other features
@@ -70,4 +71,4 @@ class CountsTable(pd.DataFrame):
         Returns:
             CountsTable: a slice of self with only other features (e.g. unmapped).
         '''
-        return self.loc[self.sheet['other']]
+        return self.loc[self._otherfeatures]

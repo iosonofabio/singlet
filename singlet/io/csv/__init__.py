@@ -17,7 +17,11 @@ for sheetname, sheet in config['io']['samplesheets'].items():
 for tablename, sheet in config['io']['count_tables'].items():
     if ('format' not in sheet) and ('path' in sheet):
         path = sheet['path']
-        config['io']['count_tables'][tablename]['format'] = path.split('.')[-1].lower()
+        if isinstance(path, str):
+            fmt = path.split('.')[-1].lower()
+        else:
+            fmt = [p.split('.')[-1].lower() for p in path]
+        config['io']['count_tables'][tablename]['format'] = fmt
 
 
 # Parser
@@ -26,6 +30,7 @@ def parse_samplesheet(sheetname):
 
     sheet = config['io']['samplesheets'][sheetname]
     fmt = sheet['format']
+
     if fmt == 'tsv':
         sep = '\t'
     elif fmt == 'csv':
@@ -45,17 +50,30 @@ def parse_counts_table(tablename):
     import pandas as pd
 
     sheet = config['io']['count_tables'][tablename]
-    fmt = sheet['format']
-    if fmt == 'tsv':
-        sep = '\t'
-    elif fmt == 'csv':
-        sep = ','
+    paths = sheet['path']
+    fmts = sheet['format']
+    if isinstance(paths, str):
+        paths = [paths]
+        fmts = [fmts]
+
+    tables = []
+    for path, fmt in zip(paths, fmts):
+        if fmt == 'tsv':
+            sep = '\t'
+        elif fmt == 'csv':
+            sep = ','
+        else:
+            raise ValueError('Format not understood')
+
+        table = pd.read_csv(path, sep=sep, index_col=0)
+
+        if ('cells' in sheet) and (sheet['cells'] != 'columns'):
+            table = table.T
+
+        tables.append(table)
+
+    if len(tables) == 1:
+        table = tables[0]
     else:
-        raise ValueError('Format not understood')
-
-    table = pd.read_csv(sheet['path'], sep=sep, index_col=0)
-
-    if ('cells' in sheet) and (sheet['cells'] != 'columns'):
-        table = table.T
-
+        table = pd.concat(tables, axis=1)
     return table

@@ -14,3 +14,8 @@ if __name__ == '__main__':
     from singlet.io.csv import parse_counts_table
     table = parse_counts_table('example_table_tsv')
     print('Done!')
+
+    print('Parsing example TSV count table (split)')
+    from singlet.io.csv import parse_counts_table
+    table = parse_counts_table('example_table_tsv_split')
+    print('Done!')

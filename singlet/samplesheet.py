@@ -8,7 +8,7 @@ import pandas as pd
 
 # Classes / functions
 class SampleSheet(pd.DataFrame):
-    _metadata = ['sheet', 'sheetname']
+    _metadata = ['sheetname']
 
     @property
     def _constructor(self):
@@ -21,6 +21,5 @@ class SampleSheet(pd.DataFrame):
 
         self = cls(parse_samplesheet(sheetname))
         self.sheetname = sheetname
-        self.sheet = config['io']['samplesheets'][sheetname]
 
         return self
