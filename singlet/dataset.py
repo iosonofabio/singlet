@@ -10,6 +10,12 @@ class Dataset():
     '''Collection of cells, with feature counts and metadata'''
 
     def __init__(self, samplesheet, counts_table):
+        '''Collection of cells, with feature counts and metadata
+
+        Args:
+            samplesheet (string): Name of the samplesheet (from a config file)
+            counts_table (string): Name of the counts table (from a config file)
+        '''
         from .samplesheet import SampleSheet
         from .counts_table import CountsTable
 
@@ -34,11 +40,15 @@ class Dataset():
         return self._counts.index.copy()
 
     @property
-    def metadata(self):
+    def metadatanames(self):
         return self._samplesheet.columns.copy()
 
     @property
     def samplesheet(self):
+        '''Matrix of metadata.
+
+        Rows are samples, columns are metadata (e.g. phenotypes).
+        '''
         return self._samplesheet.copy()
 
     @samplesheet.setter
@@ -48,6 +58,10 @@ class Dataset():
 
     @property
     def counts(self):
+        '''Matrix of gene expression counts.
+
+        Rows are features, columns are samples.
+        '''
         return self._counts.copy()
 
     @counts.setter
@@ -56,6 +70,15 @@ class Dataset():
         self._counts = value
 
     def query_samples_by_counts(self, expression, inplace=False):
+        '''Select samples based on gene expression.
+
+        Args:
+            expression (string): An expression compatible with pandas.DataFrame.query.
+            inplace (bool): Whether to change the Dataset in place or return a new one.
+
+        Returns:
+            If `inplace` is True, None. Else, a Dataset.
+        '''
         counts = self._counts.copy()
         drop = []
         if ('total' in expression) and ('total' not in counts.index):
@@ -79,6 +102,15 @@ class Dataset():
                     counts_table=counts_table)
 
     def query_features(self, expression, inplace=False):
+        '''Select features based on their expression.
+
+        Args:
+            expression (string): An expression compatible with pandas.DataFrame.query.
+            inplace (bool): Whether to change the Dataset in place or return a new one.
+
+        Returns:
+            If `inplace` is True, None. Else, a Dataset.
+        '''
         if inplace:
             self._counts.query(expression, inplace=True)
         else:
