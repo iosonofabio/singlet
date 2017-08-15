@@ -1,9 +1,7 @@
 # vim: fdm=indent
-'''
-author:     Fabio Zanini
-date:       14/08/17
-content:    Samplesheet with metadata.
-'''
+# author:     Fabio Zanini
+# date:       14/08/17
+# content:    Samplesheet with metadata.
 # Modules
 import pandas as pd
 

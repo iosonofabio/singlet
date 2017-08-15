@@ -1,9 +1,7 @@
 # vim: fdm=indent
-'''
-author:     Fabio Zanini
-date:       16/01/17
-content:    Google Sheets API for the sample sheet.
-'''
+# author:     Fabio Zanini
+# date:       16/01/17
+# content:    Google Sheets API for the sample sheet.
 # Modules
 import os
 import numpy as np
@@ -102,4 +100,3 @@ class SampleSheet(GoogleAPI):
         table_tsv = '\n'.join(map('\t'.join, table))+'\n'
         with open(fn, 'w') as f:
             f.write(table_tsv)
-

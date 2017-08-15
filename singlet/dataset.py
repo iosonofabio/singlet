@@ -1,9 +1,7 @@
 # vim: fdm=indent
-'''
-author:     Fabio Zanini
-date:       14/08/17
-content:    Dataset that combines feature counts with metadata.
-'''
+# author:     Fabio Zanini
+# date:       14/08/17
+# content:    Dataset that combines feature counts with metadata.
 # Modules
 
 

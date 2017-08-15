@@ -1,9 +1,7 @@
 # vim: fdm=indent
-'''
-author:     Fabio Zanini
-date:       14/08/17
-content:    Parse sample sheets.
-'''
+# author:     Fabio Zanini
+# date:       14/08/17
+# content:    Parse sample sheets.
 # Modules
 from singlet.config import config
 

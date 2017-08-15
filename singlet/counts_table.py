@@ -1,9 +1,7 @@
 # vim: fdm=indent
-'''
-author:     Fabio Zanini
-date:       09/08/17
-content:    Table of gene counts
-'''
+# author:     Fabio Zanini
+# date:       09/08/17
+# content:    Table of gene counts
 # Modules
 import pandas as pd
 

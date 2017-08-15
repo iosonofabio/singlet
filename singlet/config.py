@@ -1,9 +1,7 @@
 # vim: fdm=indent
-'''
-author:     Fabio Zanini
-date:       02/08/17
-content:    Support module for filenames related to the Google Sheet APIs.
-'''
+# author:     Fabio Zanini
+# date:       02/08/17
+# content:    Support module for filenames related to the Google Sheet APIs.
 # Modules
 import os
 import yaml

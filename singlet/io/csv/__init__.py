@@ -1,9 +1,7 @@
 # vim: fdm=indent
-'''
-author:     Fabio Zanini
-date:       02/08/17
-content:    Support module for filenames related to CSV/TSV files.
-'''
+# author:     Fabio Zanini
+# date:       02/08/17
+# content:    Support module for filenames related to CSV/TSV files.
 # Modules
 import os
 import yaml

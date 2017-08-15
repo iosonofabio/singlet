@@ -1,9 +1,7 @@
 # vim: fdm=indent
-'''
-author:     Fabio Zanini
-date:       09/01/17
-content:    Access Google Sheets via the REST API.
-'''
+# author:     Fabio Zanini
+# date:       09/01/17
+# content:    Access Google Sheets via the REST API.
 # Modules
 import os
 import numpy as np
