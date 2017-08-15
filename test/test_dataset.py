@@ -40,3 +40,6 @@ if __name__ == '__main__':
 
     # Init
     run('test/dataset/initialize.py')
+
+    # Queries
+    run('test/dataset/query.py')

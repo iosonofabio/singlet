@@ -13,5 +13,64 @@ class Dataset():
         from .samplesheet import SampleSheet
         from .counts_table import CountsTable
 
-        self.samplesheet = SampleSheet.from_sheetname(samplesheet)
-        self.counts = CountsTable.from_tablename(counts_table)
+        if not isinstance(samplesheet, SampleSheet):
+            samplesheet = SampleSheet.from_sheetname(samplesheet)
+        self._samplesheet = samplesheet
+
+        if not isinstance(counts_table, CountsTable):
+            counts_table = CountsTable.from_tablename(counts_table)
+        self._counts = counts_table
+
+        # Allow sorting of the counts columns
+        assert(set(self._samplesheet.index) == set(self._counts.columns))
+        self._counts = self._counts.loc[:, self._samplesheet.index]
+
+    @property
+    def samplenames(self):
+        return self._samplesheet.index.copy()
+
+    @property
+    def featurenames(self):
+        return self._counts.index.copy()
+
+    @property
+    def metadata(self):
+        return self._samplesheet.columns.copy()
+
+    @property
+    def samplesheet(self):
+        return self._samplesheet.copy()
+
+    @samplesheet.setter
+    def samplesheet(self, value):
+        self._counts = self._counts.loc[:, value.index]
+        self._samplesheet = value
+
+    @property
+    def counts(self):
+        return self._counts.copy()
+
+    @counts.setter
+    def counts(self, value):
+        self._samplesheet = self._samplesheet.loc[value.columns]
+        self._counts = value
+
+    def query_samples_by_counts(self, expression, inplace=False):
+        counts_table = self._counts.T.query(expression, inplace=False).T
+        if inplace:
+            self.counts = counts_table
+        else:
+            samplesheet = self.samplesheet.loc[counts_table.columns]
+            return self.__class__(
+                    samplesheet=samplesheet,
+                    counts_table=counts_table)
+
+    def query_features(self, expression, inplace=False):
+        if inplace:
+            self._counts.query(expression, inplace=True)
+        else:
+            counts_table = self._counts.query(expression, inplace=False)
+            samplesheet = self._samplesheet.copy()
+            return self.__class__(
+                    samplesheet=samplesheet,
+                    counts_table=counts_table)
