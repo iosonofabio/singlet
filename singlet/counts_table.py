@@ -122,7 +122,10 @@ class CountsTable(pd.DataFrame):
             raise ValueError('Method not understood')
 
         if inplace:
-            self.loc[:, :] = counts_norm.values
+            # The new CountsTable lacks other features and maybe spikeins
+            drop = np.setdiff1d(self.index, counts_norm.index)
+            self.drop(drop, inplace=True)
+            self.loc[:, :] = counts_norm
             self._normalized = method
         else:
             counts_norm._normalized = method

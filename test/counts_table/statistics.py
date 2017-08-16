@@ -21,3 +21,9 @@ if __name__ == '__main__':
     ctn = ct.normalize('counts_per_million')
     assert(int(ctn.iloc[0, 0]) == 147)
     print('Done!')
+
+    print('Test inplace normalization of CountsTable')
+    ctn = ct.copy()
+    ctn.normalize('counts_per_million', inplace=True)
+    assert(int(ctn.iloc[0, 0]) == 147)
+    print('Done!')
