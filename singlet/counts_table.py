@@ -91,10 +91,10 @@ class CountsTable(pd.DataFrame):
                     'counts_per_thousand_features'. If this argument is a \
                     function, it must take the CountsTable as input and \
                     return the normalized one as output.
-            include_spikeins (bool): Whether to include spike-ins in the
-            normalization and result.
-            inplace (bool): Whether to modify the CountsTable in place or return
-            a new one.
+            include_spikeins (bool): Whether to include spike-ins in the \
+                    normalization and result.
+            inplace (bool): Whether to modify the CountsTable in place or \
+                    return a new one.
 
         Returns:
             If `inplace` is False, a new, normalized CountsTable.

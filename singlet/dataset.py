@@ -46,7 +46,7 @@ class Dataset():
     def __eq__(self, other):
         if type(other) is not type(self):
             return False
-        # FIXME: fillna(0) is sloppy
+        # FIXME: fillna(0) is sloppy but not so bad
         ss = (self._samplesheet.fillna(0) == other._samplesheet.fillna(0)).values.all()
         ct = (self._counts == other._counts).values.all()
         return ss and ct
