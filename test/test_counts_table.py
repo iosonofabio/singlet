@@ -40,3 +40,6 @@ if __name__ == '__main__':
 
     # Init
     run('test/counts_table/initialize.py')
+
+    # Statistics
+    run('test/counts_table/statistics.py')

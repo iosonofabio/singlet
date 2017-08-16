@@ -14,7 +14,13 @@ class CountsTable(pd.DataFrame):
     - Columns are samples.
     '''
 
-    _metadata = ['name', '_spikeins', '_otherfeatures', '_normalized']
+    _metadata = [
+            'name',
+            '_spikeins', '_otherfeatures',
+            '_normalized', 'pseudocount',
+            ]
+
+    pseudocount = 0.1
 
     @property
     def _constructor(self):
@@ -120,3 +126,31 @@ class CountsTable(pd.DataFrame):
         else:
             counts_norm._normalized = method
             return counts_norm
+
+    def get_statistics(self, metrics=('mean', 'cv')):
+        '''Get statistics of the counts.
+
+        Args:
+            metrics (sequence of strings): any of 'mean', 'var', 'std', 'cv', \
+                    'fano', 'min', 'max'.
+        '''
+        st = {}
+        if 'mean' in metrics or 'cv' in metrics or 'fano' in metrics:
+            st['mean'] = self.mean(axis=1)
+        if ('std' in metrics or 'cv' in metrics or 'fano' in metrics or
+           'var' in metrics):
+            st['std'] = self.std(axis=1)
+        if 'var' in metrics:
+            st['var'] = st['std'] ** 2
+        if 'cv' in metrics:
+            st['cv'] = st['std'] / st['mean']
+        if 'fano' in metrics:
+            st['fano'] = st['std'] ** 2 / st['mean']
+        if 'min' in metrics:
+            st['min'] = self.min(axis=1)
+        if 'max' in metrics:
+            st['max'] = self.max(axis=1)
+
+        df = pd.concat([st[m] for m in metrics], axis=1)
+        df.columns = pd.Index(list(metrics), name='metrics')
+        return df
