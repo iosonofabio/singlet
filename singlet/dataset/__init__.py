@@ -16,8 +16,8 @@ class Dataset():
             samplesheet (string): Name of the samplesheet (from a config file)
             counts_table (string): Name of the counts table (from a config file)
         '''
-        from .samplesheet import SampleSheet
-        from .counts_table import CountsTable
+        from ..samplesheet import SampleSheet
+        from ..counts_table import CountsTable
 
         if not isinstance(samplesheet, SampleSheet):
             samplesheet = SampleSheet.from_sheetname(samplesheet)
