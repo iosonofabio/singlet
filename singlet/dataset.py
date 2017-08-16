@@ -43,6 +43,17 @@ class Dataset():
                 self._samplesheet.sheetname,
                 self._counts.name)
 
+    def __eq__(self, other):
+        if type(other) is not type(self):
+            return False
+        # FIXME: fillna(0) is sloppy
+        ss = (self._samplesheet.fillna(0) == other._samplesheet.fillna(0)).values.all()
+        ct = (self._counts == other._counts).values.all()
+        return ss and ct
+
+    def __ne__(self, other):
+        return not self == other
+
     @property
     def n_samples(self):
         '''Number of samples'''
@@ -74,7 +85,7 @@ class Dataset():
 
         Rows are samples, columns are metadata (e.g. phenotypes).
         '''
-        return self._samplesheet.copy()
+        return self._samplesheet
 
     @samplesheet.setter
     def samplesheet(self, value):
@@ -87,12 +98,18 @@ class Dataset():
 
         Rows are features, columns are samples.
         '''
-        return self._counts.copy()
+        return self._counts
 
     @counts.setter
     def counts(self, value):
         self._samplesheet = self._samplesheet.loc[value.columns]
         self._counts = value
+
+    def copy(self):
+        '''Copy of the Dataset including a new SampleSheet and CountsTable'''
+        return self.__class__(
+                self._samplesheet.copy(),
+                self._counts.copy())
 
     def query_samples_by_counts(self, expression, inplace=False):
         '''Select samples based on gene expression.
@@ -120,7 +137,7 @@ class Dataset():
         if inplace:
             self.counts = counts_table
         else:
-            samplesheet = self.samplesheet.loc[counts_table.columns]
+            samplesheet = self._samplesheet.loc[counts_table.columns].copy()
             return self.__class__(
                     samplesheet=samplesheet,
                     counts_table=counts_table)

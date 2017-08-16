@@ -22,3 +22,13 @@ if __name__ == '__main__':
     print('Testing Dataset.__repr__')
     assert(ds.__repr__() == 'Dataset("example_sheet_tsv", "example_table_tsv")')
     print('Done!')
+
+    print('Testing Dataset.copy')
+    assert(ds.copy() == ds)
+    print('Done!')
+
+    print('Testing Dataset.copy with modifications')
+    dsp = ds.copy()
+    dsp._counts.iloc[0, 0] = -5
+    assert(dsp != ds)
+    print('Done!')
