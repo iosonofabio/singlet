@@ -45,10 +45,12 @@ class Dataset():
 
     @property
     def n_samples(self):
+        '''Number of samples'''
         return self._samplesheet.shape[0]
 
     @property
     def n_features(self):
+        '''Number of features'''
         return self._counts.shape[0]
 
     @property
