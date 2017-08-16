@@ -3,6 +3,7 @@
 # date:       09/08/17
 # content:    Table of gene counts
 # Modules
+import numpy as np
 import pandas as pd
 
 
@@ -133,6 +134,9 @@ class CountsTable(pd.DataFrame):
         Args:
             metrics (sequence of strings): any of 'mean', 'var', 'std', 'cv', \
                     'fano', 'min', 'max'.
+
+        Returns:
+            pandas.DataFrame with features as rows and metrics as columns.
         '''
         st = {}
         if 'mean' in metrics or 'cv' in metrics or 'fano' in metrics:
@@ -143,9 +147,9 @@ class CountsTable(pd.DataFrame):
         if 'var' in metrics:
             st['var'] = st['std'] ** 2
         if 'cv' in metrics:
-            st['cv'] = st['std'] / st['mean']
+            st['cv'] = st['std'] / np.maximum(st['mean'], 1e-10)
         if 'fano' in metrics:
-            st['fano'] = st['std'] ** 2 / st['mean']
+            st['fano'] = st['std'] ** 2 / np.maximum(st['mean'], 1e-10)
         if 'min' in metrics:
             st['min'] = self.min(axis=1)
         if 'max' in metrics:
