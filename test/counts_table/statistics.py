@@ -16,3 +16,8 @@ if __name__ == '__main__':
     print('Test statistics of CountsTable')
     assert(ct.get_statistics(metrics=('min', 'cv')).iloc[0, 0] == 29.0)
     print('Done!')
+
+    print('Test normalization of CountsTable')
+    ctn = ct.normalize('counts_per_million')
+    assert(int(ctn.iloc[0, 0]) == 147)
+    print('Done!')
