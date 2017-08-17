@@ -35,6 +35,14 @@ singlet\.dataset module
     :undoc-members:
     :show-inheritance:
 
+singlet\.dataset\.correlations module
+-----------------------
+
+.. automodule:: singlet.dataset.correlations
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 singlet\.samplesheet module
 ---------------------------
 
