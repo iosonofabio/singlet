@@ -17,10 +17,15 @@ if __name__ == '__main__':
     from singlet.dataset import Dataset
     ds = Dataset(samplesheet='example_sheet_tsv', counts_table='example_table_tsv')
 
-    print('Correlation features to phenotypes')
+    print('Plot coverage')
     ax = ds.plot.plot_coverage(color='blue', lw=3)
     ax = ds.plot.plot_coverage(
             features='other', color='red', linewidth=1,
             ax=ax)
     plt.show()
+    print('Done!')
+
+    print('Plot coverage')
+    selected = ds.plot.gate_features_from_statistics(color='blue', lw=3)
+    print(selected)
     print('Done!')
