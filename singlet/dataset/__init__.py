@@ -18,6 +18,7 @@ class Dataset():
         '''
         from ..samplesheet import SampleSheet
         from ..counts_table import CountsTable
+        from .correlations import Correlation
 
         if not isinstance(samplesheet, SampleSheet):
             samplesheet = SampleSheet.from_sheetname(samplesheet)
@@ -30,6 +31,10 @@ class Dataset():
         # Allow sorting of the counts columns
         assert(set(self._samplesheet.index) == set(self._counts.columns))
         self._counts = self._counts.loc[:, self._samplesheet.index]
+
+        # Plugins
+        self.correlation = Correlation(self)
+
 
     def __str__(self):
         return '{:} with {:} samples and {:} features'.format(

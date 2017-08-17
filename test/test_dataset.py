@@ -39,7 +39,10 @@ def run(script, where=None, **kwargs):
 if __name__ == '__main__':
 
     # Init
-    run('test/dataset/initialize.py')
+    #run('test/dataset/initialize.py')
 
-    # Queries
-    run('test/dataset/query.py')
+    ## Queries
+    #run('test/dataset/query.py')
+
+    # Correlations
+    run('test/dataset/correlation.py')
