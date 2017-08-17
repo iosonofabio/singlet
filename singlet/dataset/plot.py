@@ -56,7 +56,9 @@ class Plot():
         Args:
             features (list or string): Features to sum over. The string \
                     'total' means all features including spikeins and other, \
-                    'mapped' means all features excluding spikeins and other.
+                    'mapped' means all features excluding spikeins and other, \
+                    'spikeins' means only spikeins, and 'other' means only \
+                    'other' features.
             kind (string): Kind of plot (default: cumulative distribution).
             ax (matplotlib.axes.Axes): The axes to plot into. If None \
                     (default), a new figure with one axes is created. ax must \
@@ -76,7 +78,10 @@ class Plot():
         '''
 
         if ax is None:
+            new_axes = True
             fig, ax = plt.subplots(nrows=1, ncols=1, figsize=(13, 8))
+        else:
+            new_axes = False
 
         defaults = {
                 'linewidth': 2,
@@ -89,6 +94,10 @@ class Plot():
             pass
         elif features == 'mapped':
             counts = counts.exclude_features(spikeins=True, other=True)
+        elif features == 'spikeins':
+            counts = counts.get_spikeins()
+        elif features == 'other':
+            counts = counts.get_other_features()
         else:
             counts = counts.loc[features]
 
@@ -97,7 +106,9 @@ class Plot():
             x.sort()
             y = 1.0 - np.linspace(0, 1, len(x))
             ax.plot(x, y, **kwargs)
-            ax_props = {'ylim': (0, 1)}
+            ax_props = {
+                    'ylim': (-0.05, 1.05),
+                    'ylabel': 'Cumulative distribution'}
         else:
             raise ValueError('Plot kind not understood')
 
@@ -106,10 +117,12 @@ class Plot():
         elif counts._normalized != 'custom':
             ax_props['xlabel'] = counts._normalized.capitalize().replace('_', ' ')
 
-        xmin = np.maximum(x.min(), 0.1)
-        xmax = 1.05 * x.max()
-        ax_props['xlim'] = (xmin, xmax)
-        ax_props['xscale'] = 'log'
+        if new_axes:
+            xmin = 0.5
+            xmax = 1.05 * x.max()
+            ax_props['xlim'] = (xmin, xmax)
+            ax_props['xscale'] = 'log'
+            ax.grid(True)
 
         ax.set(**ax_props)
 
