@@ -1,9 +1,6 @@
 singlet\.dataset package
 ========================
 
-Submodules
-----------
-
 Module contents
 ---------------
 
@@ -12,6 +9,8 @@ Module contents
     :undoc-members:
     :show-inheritance:
 
+Submodules
+----------
 
 singlet\.dataset\.correlations module
 -------------------------------------
