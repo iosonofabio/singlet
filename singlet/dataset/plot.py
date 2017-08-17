@@ -214,7 +214,7 @@ class Plot():
 
         ax.set(**ax_props)
 
-        # TODO: event handling
+        # event handling
         cids = {'press': None, 'release': None}
         polygon = []
         selected = []
@@ -251,9 +251,8 @@ class Plot():
             if event.dblclick:
                 return ondblclick_left(event)
 
-
         def ondblclick_left(event):
-            from time import sleep
+            from matplotlib import path
 
             # Close the polygon
             xp = polygon[0]['x']
@@ -264,8 +263,6 @@ class Plot():
             polygon[0]['handle'] = h
             fig.canvas.draw()
 
-            # TODO check which features are inside
-            from matplotlib import path
             xv = x.values.copy()
             yv = y.values.copy()
             iv = x.index.values
@@ -293,7 +290,8 @@ class Plot():
 
             # Annotate plot
             for ix in ind:
-                h = ax.text(x.iloc[ix], y.iloc[ix],
+                h = ax.text(
+                        x.iloc[ix], y.iloc[ix],
                         ' '+x.index[ix],
                         ha='left',
                         va='bottom')
@@ -321,11 +319,6 @@ class Plot():
 
         def onrelease(event):
             pass
-            #for ax, hs in highlights.items():
-            #    for h in hs:
-            #        h.remove()
-            #    highlights[ax] = []
-            #fig.canvas.draw()
 
         def axes_enter(event):
             cids['press'] = fig.canvas.mpl_connect('button_press_event', onpress)
@@ -336,10 +329,6 @@ class Plot():
             fig.canvas.mpl_disconnect(cids['release'])
             cids['press'] = None
             cids['release'] = None
-            #for ax, hs in highlights.items():
-            #    for h in hs:
-            #        h.remove()
-            #    highlights[ax] = []
             fig.canvas.draw()
 
         fig.canvas.mpl_connect('axes_enter_event', axes_enter)
