@@ -25,7 +25,16 @@ if __name__ == '__main__':
     plt.show()
     print('Done!')
 
-    print('Plot coverage')
+    print('Gate features')
     selected = ds.plot.gate_features_from_statistics(color='blue', lw=3)
     print(selected)
+    print('Done!')
+
+    print('Gate features')
+    ax = ds.plot.plot_distributions(
+            kind='swarm',
+            features='spikeins',
+            orientation='horizontal',
+            sort='descending')
+    plt.show()
     print('Done!')

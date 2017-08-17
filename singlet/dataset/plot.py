@@ -7,6 +7,7 @@ import numpy as np
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 from matplotlib import cm
+import seaborn as sns
 
 
 # Classes / functions
@@ -338,3 +339,121 @@ class Plot():
         plt.show()
 
         return selected
+
+    def plot_distributions(
+            self,
+            features,
+            kind='violin',
+            ax=None,
+            tight_layout=True,
+            legend=False,
+            orientation='vertical',
+            sort=False,
+            **kwargs):
+        '''Plot distribution of spike-in controls
+
+        Args:
+            features (list or string): List of features to plot. If it is the \
+                    string 'spikeins', plot all spikeins, if the string \
+                    'other', plot other features.
+            kind (string): Kind of plot, one of 'violin' (default), 'box', \
+                    'swarm'.
+            ax (matplotlib.axes.Axes): Axes to plot into. If None (default), \
+                    create a new figure and axes.
+            tight_layout (bool or dict): Whether to call \
+                    matplotlib.pyplot.tight_layout at the end of the \
+                    plotting. If it is a dict, pass it unpacked to that \
+                    function.
+            legend (bool or 2-ple): If True, call ax.legend(). If a 2-ple, \
+                    pass the first element as *args  and the second as \
+                    **kwargs to ax.legend.
+            orientation (string): 'horizontal' or 'vertical'.
+            sort (bool or string): True or 'ascending' sorts the features by \
+                    median, 'descending' uses the reverse order.
+            **kwargs: named arguments passed to the plot function.
+
+        Return:
+            matplotlib.axes.Axes: The axes with the plot.
+        '''
+        if ax is None:
+            fig, ax = plt.subplots(nrows=1, ncols=1, figsize=(18, 8))
+
+        counts = self.dataset.counts
+
+        if features == 'spikeins':
+            counts = counts.get_spikeins()
+        elif features == 'other':
+            counts = counts.get_other_features()
+        else:
+            counts = counts.loc[features]
+
+        if sort:
+            asc = sort != 'descending'
+            ind = counts.median(axis=1).sort_values(ascending=asc).index
+            counts = counts.loc[ind]
+
+        ax_props = {}
+        if kind == 'violin':
+            defaults = {
+                    'scale': 'width',
+                    'inner': 'stick',
+                    }
+            Plot._update_properties(kwargs, defaults)
+            sns.violinplot(
+                    data=counts.T,
+                    orient=orientation,
+                    ax=ax,
+                    **kwargs)
+        elif kind == 'box':
+            defaults = {}
+            Plot._update_properties(kwargs, defaults)
+            sns.boxplot(
+                    data=counts.T,
+                    orient=orientation,
+                    ax=ax,
+                    **kwargs)
+        elif kind == 'swarm':
+            defaults = {}
+            Plot._update_properties(kwargs, defaults)
+            sns.swarmplot(
+                    data=counts.T,
+                    orient=orientation,
+                    ax=ax,
+                    **kwargs)
+        else:
+            raise ValueError('Plot kind not understood')
+
+        if orientation == 'vertical':
+            ax_props['ylim'] = (0, 1.1 * counts.values.max())
+            if not counts._normalized:
+                ax_props['ylabel'] = 'Number of reads'
+            elif counts._normalized != 'custom':
+                ax_props['ylabel'] = counts._normalized.capitalize().replace('_', ' ')
+            for label in ax.get_xmajorticklabels():
+                label.set_rotation(90)
+                label.set_horizontalalignment("center")
+            ax.grid(True, 'y')
+        elif orientation == 'horizontal':
+            ax_props['xlim'] = (0, 1.1 * counts.values.max())
+            if not counts._normalized:
+                ax_props['xlabel'] = 'Number of reads'
+            elif counts._normalized != 'custom':
+                ax_props['xlabel'] = counts._normalized.capitalize().replace('_', ' ')
+            ax.grid(True, axis='x')
+
+        ax.set(**ax_props)
+
+        if legend:
+            if np.isscalar(legend):
+                ax.legend()
+            else:
+                legend_args, legend_kwargs = legend
+                ax.legend(*legend_args, **legend_kwargs)
+
+        if tight_layout:
+            if isinstance(tight_layout, dict):
+                plt.tight_layout(**tight_layout)
+            else:
+                plt.tight_layout()
+
+        return ax
