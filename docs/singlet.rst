@@ -1,16 +1,13 @@
 singlet package
 ===============
 
-Subpackages
------------
-
-.. toctree::
-   :maxdepth: 4
-
-    singlet.dataset
-
 Submodules
 ----------
+
+.. toctree::
+   :maxdepth: 2
+
+    singlet.dataset
 
 singlet\.config module
 ----------------------
