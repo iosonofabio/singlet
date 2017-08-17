@@ -20,6 +20,7 @@ class Dataset():
         from ..counts_table import CountsTable
         from .correlations import Correlation
         from .plot import Plot
+        from .dimensionality import DimensionalityReduction
 
         if not isinstance(samplesheet, SampleSheet):
             samplesheet = SampleSheet.from_sheetname(samplesheet)
@@ -36,6 +37,7 @@ class Dataset():
         # Plugins
         self.correlation = Correlation(self)
         self.plot = Plot(self)
+        self.dimensionality = DimensionalityReduction(self)
 
     def __str__(self):
         return '{:} with {:} samples and {:} features'.format(
