@@ -15,6 +15,7 @@ fi
 # deps #FIXME: do better
 pip install pyyaml
 pip install numpy
+pip install scipy
 pip install pandas
 pip install matplotlib
 # Google API tests are only local anyway
