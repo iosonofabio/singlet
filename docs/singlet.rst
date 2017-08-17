@@ -6,6 +6,7 @@ Subpackages
 
 .. toctree::
 
+    singlet.dataset
     singlet.io
 
 Submodules
@@ -23,22 +24,6 @@ singlet\.counts\_table module
 -----------------------------
 
 .. automodule:: singlet.counts_table
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-singlet\.dataset module
------------------------
-
-.. automodule:: singlet.dataset
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-singlet\.dataset\.correlations module
------------------------
-
-.. automodule:: singlet.dataset.correlations
     :members:
     :undoc-members:
     :show-inheritance:
