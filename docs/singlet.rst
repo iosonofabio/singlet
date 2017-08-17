@@ -7,7 +7,6 @@ Subpackages
 .. toctree::
 
     singlet.dataset
-    singlet.io
 
 Submodules
 ----------
@@ -32,15 +31,6 @@ singlet\.samplesheet module
 ---------------------------
 
 .. automodule:: singlet.samplesheet
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-
-Module contents
----------------
-
-.. automodule:: singlet
     :members:
     :undoc-members:
     :show-inheritance:

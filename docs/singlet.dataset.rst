@@ -4,6 +4,15 @@ singlet\.dataset package
 Submodules
 ----------
 
+Module contents
+---------------
+
+.. automodule:: singlet.dataset
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+
 singlet\.dataset\.correlations module
 -------------------------------------
 
@@ -13,10 +22,19 @@ singlet\.dataset\.correlations module
     :show-inheritance:
 
 
-Module contents
----------------
+singlet\.dataset\.plot module
+-------------------------------------
 
-.. automodule:: singlet.dataset
+.. automodule:: singlet.dataset.plot
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+
+singlet\.dataset\.dimensionality module
+-------------------------------------
+
+.. automodule:: singlet.dataset.dimensionality
     :members:
     :undoc-members:
     :show-inheritance:
