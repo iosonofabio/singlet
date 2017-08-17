@@ -37,7 +37,7 @@ class Correlation():
         xw = ((xw.T - xw.mean(axis=1)) / xw.std(axis=1)).T
         yw = ((yw.T - yw.mean(axis=1)) / yw.std(axis=1)).T
         n = xw.shape[1]
-        r = (xw @ yw.T) / n
+        r = np.dot(xw, yw.T) / n
         return r
 
     def correlate_features_phenotypes(
