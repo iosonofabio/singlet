@@ -34,7 +34,7 @@ class DimensionalityReduction():
         from sklearn.decomposition import PCA
 
         X = self.dataset.counts.copy()
-        pco = self.dataset.counts._pseudocount
+        pco = self.dataset.counts.pseudocount
         if transform == 'log10':
             X = np.log10(X + pco)
         elif transform == 'log2':
@@ -44,6 +44,8 @@ class DimensionalityReduction():
 
         whiten = lambda x: ((x.T - X.mean(axis=1)) / X.std(axis=1)).T
         Xnorm = whiten(X)
+        # NaN (e.g. features that do not vary i.e. dropout)
+        Xnorm[np.isnan(Xnorm)] = 0
 
         if robust:
             from numpy.linalg import matrix_rank
@@ -52,13 +54,14 @@ class DimensionalityReduction():
             # Principal Component Pursuit (PSP)
             rpca = _RPCA(Xnorm.values)
             # L is low-rank, S is sparse (outliers)
-            L, S = rpca.fit(max_iter=1000, iter_print=100)
+            L, S = rpca.fit(max_iter=1000, iter_print=None)
             L = pd.DataFrame(L, index=X.index, columns=X.columns)
             whiten = lambda x: ((x.T - L.mean(axis=1)) / L.std(axis=1)).T
             Xnorm = whiten(L)
-            print('rPCA: original rank:', rank,
-                  'reduced rank:', matrix_rank(L),
-                  'sparse rank:', matrix_rank(S))
+            Xnorm[np.isnan(Xnorm)] = 0
+            #print('rPCA: original rank:', rank,
+            #      'reduced rank:', matrix_rank(L),
+            #      'sparse rank:', matrix_rank(S))
 
         pca = PCA(n_components=n_dims)
         vs = pd.DataFrame(
@@ -79,6 +82,8 @@ class DimensionalityReduction():
 
 # Supplementary classes
 class _RPCA:
+    '''from: https://github.com/dganguli/robust-pca'''
+
     def __init__(self, D, mu=None, lmbda=None):
         self.D = D
         self.S = np.zeros(self.D.shape)
@@ -108,7 +113,7 @@ class _RPCA:
         U, S, V = np.linalg.svd(M, full_matrices=False)
         return np.dot(U, np.dot(np.diag(self.shrink(S, tau)), V))
 
-    def fit(self, tol=None, max_iter=1000, iter_print=100):
+    def fit(self, tol=None, max_iter=1000, iter_print=None):
         ite = 0
         err = np.Inf
         Sk = self.S
@@ -128,6 +133,8 @@ class _RPCA:
             Yk = Yk + self.mu * (self.D - Lk - Sk)
             err = self.norm_p(np.abs(self.D - Lk - Sk), 2)
             ite += 1
+            if iter_print is None:
+                continue
             if (ite % iter_print) == 0 or ite == 1 or ite > max_iter or err <= _tol:
                 print('iteration: {0}, error: {1}'.format(ite, err))
 
