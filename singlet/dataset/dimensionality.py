@@ -4,6 +4,8 @@
 # content:    Dataset functions to reduce dimensionality of gene expression
 #             and phenotypes.
 # Modules
+import numpy as np
+import pandas as pd
 
 
 # Classes / functions
@@ -16,3 +18,145 @@ class DimensionalityReduction():
             dataset (Dataset): the dataset to analyze.
         '''
         self.dataset = dataset
+
+    def pca(self,
+            n_dims=2,
+            transform='log10',
+            robust=True):
+        '''Principal component analysis
+
+        Args:
+            n_dims (int): Number of dimensions (2+).
+            transform (string or None): Whether to preprocess the data.
+            robust (bool): Whether to use Principal Component Pursuit to \
+                    exclude outliers.
+        '''
+        from sklearn.decomposition import PCA
+
+        X = self.dataset.counts.copy()
+        pco = self.dataset.counts._pseudocount
+        if transform == 'log10':
+            X = np.log10(X + pco)
+        elif transform == 'log2':
+            X = np.log2(X + pco)
+        elif transform == 'log':
+            X = np.log(X + pco)
+
+        whiten = lambda x: ((x.T - X.mean(axis=1)) / X.std(axis=1)).T
+        Xnorm = whiten(X)
+
+        if robust:
+            from numpy.linalg import matrix_rank
+            rank = matrix_rank(Xnorm.values)
+
+            # Principal Component Pursuit (PSP)
+            rpca = _RPCA(Xnorm.values)
+            # L is low-rank, S is sparse (outliers)
+            L, S = rpca.fit(max_iter=1000, iter_print=100)
+            L = pd.DataFrame(L, index=X.index, columns=X.columns)
+            whiten = lambda x: ((x.T - L.mean(axis=1)) / L.std(axis=1)).T
+            Xnorm = whiten(L)
+            print('rPCA: original rank:', rank,
+                  'reduced rank:', matrix_rank(L),
+                  'sparse rank:', matrix_rank(S))
+
+        pca = PCA(n_components=n_dims)
+        vs = pd.DataFrame(
+                pca.fit_transform(Xnorm.values.T),
+                columns=['PC'+str(i+1) for i in range(pca.n_components)],
+                index=X.columns)
+        us = pd.DataFrame(
+                pca.inverse_transform(np.eye(vs.shape[1])),
+                index=vs.columns,
+                columns=X.index).T
+        return {'vs': vs,
+                'us': us,
+                'lambdas': pca.explained_variance_,
+                'transform': pca.transform,
+                'whiten': whiten,
+                }
+
+
+# Supplementary classes
+class _RPCA:
+    def __init__(self, D, mu=None, lmbda=None):
+        self.D = D
+        self.S = np.zeros(self.D.shape)
+        self.Y = np.zeros(self.D.shape)
+
+        if mu:
+            self.mu = mu
+        else:
+            self.mu = np.prod(self.D.shape) / (4 * self.norm_p(self.D, 2))
+
+        self.mu_inv = 1 / self.mu
+
+        if lmbda:
+            self.lmbda = lmbda
+        else:
+            self.lmbda = 1 / np.sqrt(np.max(self.D.shape))
+
+    @staticmethod
+    def norm_p(M, p):
+        return np.sum(np.power(M, p))
+
+    @staticmethod
+    def shrink(M, tau):
+        return np.sign(M) * np.maximum((np.abs(M) - tau), np.zeros(M.shape))
+
+    def svd_threshold(self, M, tau):
+        U, S, V = np.linalg.svd(M, full_matrices=False)
+        return np.dot(U, np.dot(np.diag(self.shrink(S, tau)), V))
+
+    def fit(self, tol=None, max_iter=1000, iter_print=100):
+        ite = 0
+        err = np.Inf
+        Sk = self.S
+        Yk = self.Y
+        Lk = np.zeros(self.D.shape)
+
+        if tol:
+            _tol = tol
+        else:
+            _tol = 1E-7 * self.norm_p(np.abs(self.D), 2)
+
+        while (err > _tol) and ite < max_iter:
+            Lk = self.svd_threshold(
+                self.D - Sk + self.mu_inv * Yk, self.mu_inv)
+            Sk = self.shrink(
+                self.D - Lk + (self.mu_inv * Yk), self.mu_inv * self.lmbda)
+            Yk = Yk + self.mu * (self.D - Lk - Sk)
+            err = self.norm_p(np.abs(self.D - Lk - Sk), 2)
+            ite += 1
+            if (ite % iter_print) == 0 or ite == 1 or ite > max_iter or err <= _tol:
+                print('iteration: {0}, error: {1}'.format(ite, err))
+
+        self.L = Lk
+        self.S = Sk
+        return Lk, Sk
+
+    def plot_fit(self, size=None, tol=0.1, axis_on=True):
+        import matplotlib.pyplot as plt
+        n, d = self.D.shape
+
+        if size:
+            nrows, ncols = size
+        else:
+            sq = np.ceil(np.sqrt(n))
+            nrows = int(sq)
+            ncols = int(sq)
+
+        ymin = np.nanmin(self.D)
+        ymax = np.nanmax(self.D)
+        print('ymin: {0}, ymax: {1}'.format(ymin, ymax))
+
+        numplots = np.min([n, nrows * ncols])
+        plt.figure()
+
+        for n in range(numplots):
+            plt.subplot(nrows, ncols, n + 1)
+            plt.ylim((ymin - tol, ymax + tol))
+            plt.plot(self.L[n, :] + self.S[n, :], 'r')
+            plt.plot(self.L[n, :], 'b')
+            if not axis_on:
+                plt.axis('off')
