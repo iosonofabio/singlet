@@ -4,38 +4,13 @@
 # content:    Dataset functions to reduce dimensionality of gene expression
 #             and phenotypes.
 # Modules
-import inspect
-from functools import wraps
-
 import numpy as np
 import pandas as pd
 
+from ..utils.cache import method_caches
+
 
 # Classes / functions
-def method_caches(f, suffix='result'):
-    @wraps(f)
-    def _wrapped(self, *args, **kwargs):
-        fargs = inspect.getargvalues(inspect.currentframe()).locals['kwargs']
-        fname = f.__name__
-        cachename = '_'+fname+'_'+suffix
-
-        # Check cache
-        if hasattr(self, cachename):
-            cache = getattr(self, cachename)
-            if cache['func_args'] == fargs:
-                return cache['result']
-
-        res = f(self, *args, **kwargs)
-
-        # Cache results
-        cache = {'result': res,
-                 'func_args': dict(fargs)}
-        setattr(self, cachename, cache)
-
-        return res
-    return _wrapped
-
-
 class DimensionalityReduction():
     '''Reduce dimensionality of gene expression and phenotype in single cells'''
     def __init__(self, dataset):

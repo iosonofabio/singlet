@@ -70,9 +70,8 @@ class Plot():
                     matplotlib.pyplot.tight_layout at the end of the \
                     plotting. If it is a dict, pass it unpacked to that \
                     function.
-            legend (bool or 2-ple): If True, call ax.legend(). If a 2-ple, \
-                    pass the first element as *args  and the second as \
-                    **kwargs to ax.legend.
+            legend (bool or dict): If True, call ax.legend(). If a dict, \
+                    pass as **kwargs to ax.legend.
             **kwargs: named arguments passed to the plot function.
 
         Returns:
@@ -132,8 +131,7 @@ class Plot():
             if np.isscalar(legend):
                 ax.legend()
             else:
-                legend_args, legend_kwargs = legend
-                ax.legend(*legend_args, **legend_kwargs)
+                ax.legend(**legend)
 
         if tight_layout:
             if isinstance(tight_layout, dict):
@@ -364,9 +362,8 @@ class Plot():
                     matplotlib.pyplot.tight_layout at the end of the \
                     plotting. If it is a dict, pass it unpacked to that \
                     function.
-            legend (bool or 2-ple): If True, call ax.legend(). If a 2-ple, \
-                    pass the first element as *args  and the second as \
-                    **kwargs to ax.legend.
+            legend (bool or dict): If True, call ax.legend(). If a dict, \
+                    pass as **kwargs to ax.legend.
             orientation (string): 'horizontal' or 'vertical'.
             sort (bool or string): True or 'ascending' sorts the features by \
                     median, 'descending' uses the reverse order.
@@ -447,8 +444,132 @@ class Plot():
             if np.isscalar(legend):
                 ax.legend()
             else:
-                legend_args, legend_kwargs = legend
-                ax.legend(*legend_args, **legend_kwargs)
+                ax.legend(**legend)
+
+        if tight_layout:
+            if isinstance(tight_layout, dict):
+                plt.tight_layout(**tight_layout)
+            else:
+                plt.tight_layout()
+
+        return ax
+
+    def scatter_reduced_samples(
+            self,
+            vectors_reduced,
+            color_by=None,
+            color_log=None,
+            cmap='Greys',
+            ax=None,
+            tight_layout=True,
+            legend=False,
+            **kwargs):
+        '''Scatter samples after dimensionality reduction.
+
+        Args:
+            vectors_reduced (pandas.Dataframe): matrix of coordinates of the \
+                    samples after dimensionality reduction. Rows are samples, \
+                    columns (typically 2 or 3) are the component in the \
+                    low-dimensional embedding.
+            color_by (string or None): color sample dots by phenotype or \
+                    expression of a certain feature.
+            color_log (bool or None): use log of phenotype/expression in the \
+                    colormap. Default None only logs expression, but not \
+                    phenotypes.
+            cmap (string or matplotlib colormap): color map to use for the \
+                    sample dots.
+            ax (matplotlib.axes.Axes): The axes to plot into. If None \
+                    (default), a new figure with one axes is created. ax must \
+                    not strictly be a matplotlib class, but it must have \
+                    common methods such as 'plot' and 'set'.
+            tight_layout (bool or dict): Whether to call \
+                    matplotlib.pyplot.tight_layout at the end of the \
+                    plotting. If it is a dict, pass it unpacked to that \
+                    function.
+            legend (bool or dict): If True, call ax.legend(). If a dict, \
+                    pass as **kwargs to ax.legend.
+            **kwargs: named arguments passed to the plot function.
+
+        Returns:
+            matplotlib.axes.Axes with the axes containing the plot.
+        '''
+
+        if ax is None:
+            new_axes = True
+            fig, ax = plt.subplots(nrows=1, ncols=1, figsize=(13, 8))
+        else:
+            new_axes = False
+
+        defaults = {
+                's': 30,
+                }
+        Plot._update_properties(kwargs, defaults)
+
+        if color_by is None:
+            kwargs['color'] = 'darkgrey'
+        else:
+            if isinstance(cmap, str):
+                cmap = cm.get_cmap(cmap)
+            if color_by in self.dataset.samplesheet.columns:
+                color_data = self.dataset.samplesheet.loc[:, color_by]
+                is_numeric = np.issubdtype(color_data.dtype, np.number)
+                color_by_phenotype = True
+            elif color_by in self.dataset.counts.index:
+                color_data = self.dataset.counts.loc[color_by]
+                is_numeric = True
+                color_by_phenotype = False
+            else:
+                raise ValueError(
+                'The label '+color_by+' is neither a phenotype nor a feature')
+
+            # Categorical columns get just a list of colors
+            if (color_data.dtype.name == 'category') or (not is_numeric):
+                cd_unique = list(np.unique(color_data.values))
+                c_unique = cmap(np.linspace(0, 1, len(cd_unique)))
+                c = c_unique[(cd_unique.index(x) for x in color_data.values)]
+
+            # Non-categorical numeric types are more tricky: check for NaNs
+            else:
+                if np.isnan(color_data.values).any():
+                    unmask = ~np.isnan(color_data.values)
+                else:
+                    unmask = np.ones(len(color_data), bool)
+
+                cd_min = color_data.values[unmask].min()
+                cd_max = color_data.values[unmask].max()
+
+                if color_log:
+                    if color_by_phenotype:
+                        pc = 0.1 * cd_min
+                    else:
+                        pc = self.dataset.counts.pseudocount
+                    color_data = np.log10(color_data + pc)
+                    cd_min = np.log10(cd_min + pc)
+                    cd_max = np.log10(cd_max + pc)
+
+                cd_norm = (color_data.values - cd_min) / (cd_max - cd_min)
+                c = np.zeros((len(color_data), 4), float)
+                c[unmask] = cmap(cd_norm[unmask])
+                # Grey-ish semitransparency for NaNs
+                c[~unmask] = [0.75] * 3 + [0.3]
+
+            kwargs['c'] = c
+
+        vectors_reduced.plot(
+                x=vectors_reduced.columns[0],
+                y=vectors_reduced.columns[1],
+                kind='scatter',
+                ax=ax,
+                **kwargs,
+                )
+
+        ax.grid(True)
+
+        if legend:
+            if np.isscalar(legend):
+                ax.legend()
+            else:
+                ax.legend(**legend)
 
         if tight_layout:
             if isinstance(tight_layout, dict):

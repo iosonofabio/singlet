@@ -29,7 +29,7 @@ if __name__ == '__main__':
     print('Done!')
 
     print('Test cache for PCA')
-    ds.dimensionality._pca_result['func_args']['n_dims'] = 'none'
+    ds.dimensionality._pca_cache['func_args']['n_dims'] = 'none'
     d = ds.dimensionality.pca(
             n_dims='none',
             transform='log10',
@@ -56,7 +56,7 @@ if __name__ == '__main__':
     print('Done!')
 
     print('Test cache for t-SNE')
-    ds.dimensionality._tsne_result['func_args']['n_dims'] = 'none'
+    ds.dimensionality._tsne_cache['func_args']['n_dims'] = 'none'
     vs = ds.dimensionality.tsne(
             n_dims='none',
             transform='log10',

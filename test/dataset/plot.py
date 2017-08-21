@@ -38,3 +38,16 @@ if __name__ == '__main__':
             sort='descending')
     plt.show()
     print('Done!')
+
+    print('Plot t-SNE')
+    ds.counts = ds.counts.iloc[:200]
+    vs = ds.dimensionality.tsne(
+            n_dims=2,
+            transform='log10',
+            theta=0.5,
+            perplexity=0.8)
+    ax = ds.plot.scatter_reduced_samples(
+            vs,
+            color_by='quantitative_phenotype_1_[A.U.]')
+    plt.show()
+    print('Done!')
