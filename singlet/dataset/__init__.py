@@ -13,8 +13,11 @@ class Dataset():
         '''Collection of cells, with feature counts and metadata
 
         Args:
-            samplesheet (string): Name of the samplesheet (from a config file)
-            counts_table (string): Name of the counts table (from a config file)
+            samplesheet (string): Name of the samplesheet (to load from a \
+                    config file) or instance of SampleSheet
+            counts_table (string): Name of the counts table (to load from a \
+                    config file) or instance of CountsTable
+
         '''
         from ..samplesheet import SampleSheet
         from ..counts_table import CountsTable

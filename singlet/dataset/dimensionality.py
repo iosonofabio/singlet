@@ -4,11 +4,38 @@
 # content:    Dataset functions to reduce dimensionality of gene expression
 #             and phenotypes.
 # Modules
+import inspect
+from functools import wraps
+
 import numpy as np
 import pandas as pd
 
 
 # Classes / functions
+def method_caches(f, suffix='result'):
+    @wraps(f)
+    def _wrapped(self, *args, **kwargs):
+        fargs = inspect.getargvalues(inspect.currentframe()).locals['kwargs']
+        fname = f.__name__
+        cachename = '_'+fname+'_'+suffix
+
+        # Check cache
+        if hasattr(self, cachename):
+            cache = getattr(self, cachename)
+            if cache['func_args'] == fargs:
+                return cache['result']
+
+        res = f(self, *args, **kwargs)
+
+        # Cache results
+        cache = {'result': res,
+                 'func_args': dict(fargs)}
+        setattr(self, cachename, cache)
+
+        return res
+    return _wrapped
+
+
 class DimensionalityReduction():
     '''Reduce dimensionality of gene expression and phenotype in single cells'''
     def __init__(self, dataset):
@@ -19,6 +46,7 @@ class DimensionalityReduction():
         '''
         self.dataset = dataset
 
+    @method_caches
     def pca(self,
             n_dims=2,
             transform='log10',
@@ -30,6 +58,12 @@ class DimensionalityReduction():
             transform (string or None): Whether to preprocess the data.
             robust (bool): Whether to use Principal Component Pursuit to \
                     exclude outliers.
+
+        Returns:
+            dict of the left eigenvectors (vs), right eigenvectors (us) \
+                    of the singular value decomposition, eigenvalues \
+                    (lambdas), the transform, and the whiten function (for \
+                    plotting).
         '''
         from sklearn.decomposition import PCA
 
@@ -48,8 +82,8 @@ class DimensionalityReduction():
         Xnorm[np.isnan(Xnorm)] = 0
 
         if robust:
-            from numpy.linalg import matrix_rank
-            rank = matrix_rank(Xnorm.values)
+            #from numpy.linalg import matrix_rank
+            #rank = matrix_rank(Xnorm.values)
 
             # Principal Component Pursuit (PSP)
             rpca = _RPCA(Xnorm.values)
@@ -72,12 +106,67 @@ class DimensionalityReduction():
                 pca.inverse_transform(np.eye(vs.shape[1])),
                 index=vs.columns,
                 columns=X.index).T
-        return {'vs': vs,
+
+        # FIXME: return whole Dataset object??
+        return {
+                'vs': vs,
                 'us': us,
                 'lambdas': pca.explained_variance_,
                 'transform': pca.transform,
                 'whiten': whiten,
+                #'func_args': func_args,
                 }
+
+    @method_caches
+    def tsne(
+            self,
+            n_dims=2,
+            transform='log10',
+            perplexity=30,
+            theta=0.5,
+            rand_seed=0,
+            **kwargs):
+        '''t-SNE algorithm.
+
+        Args:
+            n_dims (int): Number of dimensions to use.
+            perplexity (float): Perplexity of the algorithm.
+            theta (float): A number between 0 and 1. Higher is faster but \
+                    less accurate (via the Barnes-Hut approximation).
+            rand_seed (int): Random seed. -1 randomizes each run.
+            **kwargs: Named arguments passed to the t-SNE algorithm.
+
+        Returns:
+        '''
+        from bhtsne import tsne
+
+        n = self.dataset.n_samples
+        if(n - 1 < 3 * perplexity):
+            raise ValueError('Perplexity too high, reduce to <= {:}'.format((n - 1.)/3))
+
+        X = self.dataset.counts.copy()
+        pco = self.dataset.counts.pseudocount
+        if transform == 'log10':
+            X = np.log10(X + pco)
+        elif transform == 'log2':
+            X = np.log2(X + pco)
+        elif transform == 'log':
+            X = np.log(X + pco)
+
+        # this version does not require pre-whitening
+        Y = tsne(
+                data=X.values.T,
+                dimensions=n_dims,
+                perplexity=perplexity,
+                theta=theta,
+                rand_seed=rand_seed,
+                **kwargs,
+                )
+        vs = pd.DataFrame(
+                Y,
+                index=X.columns,
+                columns=['dimension '+str(i+1) for i in range(n_dims)])
+        return vs
 
 
 # Supplementary classes

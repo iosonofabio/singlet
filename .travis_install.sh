@@ -18,6 +18,8 @@ pip install numpy
 pip install scipy
 pip install pandas
 pip install matplotlib
+# NOTE: one day they shall fix this (sigh!)
+pip install bhtsne
 # Google API tests are only local anyway
 #pip install google-api-python-client
 

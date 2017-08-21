@@ -28,6 +28,14 @@ if __name__ == '__main__':
     assert(tuple(d['lambdas'].astype(int)) == (5, 3))
     print('Done!')
 
+    print('Test cache for PCA')
+    ds.dimensionality._pca_result['func_args']['n_dims'] = 'none'
+    d = ds.dimensionality.pca(
+            n_dims='none',
+            transform='log10',
+            robust=False)
+    print('Done!')
+
     print('Test Dataset robust PCA')
     ds.counts = ds.counts.iloc[:200]
     d = ds.dimensionality.pca(
@@ -35,4 +43,23 @@ if __name__ == '__main__':
             transform='log10',
             robust=True)
     assert(tuple(d['lambdas'].astype(int)) == (11, 1))
+    print('Done!')
+
+    print('Test Dataset t-SNE')
+    ds.counts = ds.counts.iloc[:200]
+    vs = ds.dimensionality.tsne(
+            n_dims=2,
+            transform='log10',
+            theta=0.5,
+            perplexity=0.8)
+    assert(tuple(vs.values[0].astype(int)) == (512, 42))
+    print('Done!')
+
+    print('Test cache for t-SNE')
+    ds.dimensionality._tsne_result['func_args']['n_dims'] = 'none'
+    vs = ds.dimensionality.tsne(
+            n_dims='none',
+            transform='log10',
+            theta=0.5,
+            perplexity=0.8)
     print('Done!')
