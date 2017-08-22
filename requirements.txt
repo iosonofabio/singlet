@@ -3,6 +3,7 @@ numpy
 scipy
 pandas
 xarray
-bhtsne
 matplotlib
 seaborn
+Cython
+bhtsne
