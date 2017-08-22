@@ -24,7 +24,8 @@ if __name__ == '__main__':
     d = ds.dimensionality.pca(
             n_dims=2,
             transform='log10',
-            robust=False)
+            robust=False,
+            random_state=0)
     print(tuple(d['lambdas'].astype(int)))
     assert(tuple(d['lambdas'].astype(int)) == (5, 3))
     print('Done!')
@@ -34,7 +35,8 @@ if __name__ == '__main__':
     d = ds.dimensionality.pca(
             n_dims='none',
             transform='log10',
-            robust=False)
+            robust=False,
+            random_state=0)
     print('Done!')
 
     print('Test Dataset robust PCA')

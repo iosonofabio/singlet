@@ -25,7 +25,8 @@ class DimensionalityReduction():
     def pca(self,
             n_dims=2,
             transform='log10',
-            robust=True):
+            robust=True,
+            random_state=None):
         '''Principal component analysis
 
         Args:
@@ -72,7 +73,7 @@ class DimensionalityReduction():
             #      'reduced rank:', matrix_rank(L),
             #      'sparse rank:', matrix_rank(S))
 
-        pca = PCA(n_components=n_dims)
+        pca = PCA(n_components=n_dims, random_state=random_state)
         vs = pd.DataFrame(
                 pca.fit_transform(Xnorm.values.T),
                 columns=['PC'+str(i+1) for i in range(pca.n_components)],
