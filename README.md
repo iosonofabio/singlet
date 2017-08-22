@@ -1,7 +1,7 @@
 [![Build Status](https://travis-ci.org/iosonofabio/singlet.svg?branch=master)](https://travis-ci.org/iosonofabio/singlet)
 [![Documentation Status](https://readthedocs.org/projects/singlet/badge/?version=master)](http://singlet.readthedocs.io)
 
-![Logo](logo.png)
+![Logo](docs/_static/logo.png)
 # Singlet
 Single cell RNA-Seq analysis.
 
@@ -49,5 +49,5 @@ plt.show()
 
 This will calculate a t-SNE embedding of the first 200 features and then show your samples in the reduced space. It should look like this:
 
-![t-SNE example](example_data/example_tsne.png)
+![t-SNE example](docs/_static/example_tsne.png)
 
