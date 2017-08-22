@@ -135,8 +135,7 @@ class DimensionalityReduction():
                 perplexity=perplexity,
                 theta=theta,
                 rand_seed=rand_seed,
-                **kwargs,
-                )
+                **kwargs)
         vs = pd.DataFrame(
                 Y,
                 index=X.columns,
