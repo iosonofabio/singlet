@@ -10,9 +10,10 @@ Python 3.4+ is required. Moreover, you will need:
 - pyyaml
 - numpy
 - scipy
+- pandas
+- scikit-learn
 - matplotlib
 - seaborn
-- pandas
 - bhtsne (for t-SNE dimensionality reduction)
 
 Get those from pip or conda.

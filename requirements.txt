@@ -3,6 +3,7 @@ numpy
 scipy
 pandas
 xarray
+scikit-learn
 matplotlib
 seaborn
 Cython
