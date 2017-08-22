@@ -24,6 +24,7 @@ class Dataset():
         from .correlations import Correlation
         from .plot import Plot
         from .dimensionality import DimensionalityReduction
+        from .cluster import Cluster
 
         if not isinstance(samplesheet, SampleSheet):
             samplesheet = SampleSheet.from_sheetname(samplesheet)
@@ -41,6 +42,7 @@ class Dataset():
         self.correlation = Correlation(self)
         self.plot = Plot(self)
         self.dimensionality = DimensionalityReduction(self)
+        self.cluster = Cluster(self)
 
     def __str__(self):
         return '{:} with {:} samples and {:} features'.format(

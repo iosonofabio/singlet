@@ -38,17 +38,20 @@ def run(script, where=None, **kwargs):
 # Script
 if __name__ == '__main__':
 
-    # Init
-    run('test/dataset/initialize.py')
+    ## Init
+    #run('test/dataset/initialize.py')
 
-    # Queries
-    run('test/dataset/query.py')
+    ## Queries
+    #run('test/dataset/query.py')
 
-    # Correlations
-    run('test/dataset/correlation.py')
+    ## Correlations
+    #run('test/dataset/correlation.py')
+
+    ## Dimensionality reduction
+    #run('test/dataset/dimensionality.py')
 
     # Dimensionality reduction
-    run('test/dataset/dimensionality.py')
+    run('test/dataset/cluster.py')
 
     # Plot
     # TODO: one could set up PNG comparisons like Matplotlib itself does
