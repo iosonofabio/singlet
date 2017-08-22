@@ -20,7 +20,8 @@ class Cluster():
         '''
         self.dataset = dataset
 
-    @method_caches
+    # NOTE: caching this one is tricky because it has non-kwargs AND it would
+    # need a double cache, one for cells and one for features/phenotypes
     def hierarchical(
             self,
             axis,
