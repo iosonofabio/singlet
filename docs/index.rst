@@ -4,7 +4,7 @@
    contain the root `toctree` directive.
 
 .. image:: _static/logo.png
-   :width: 200
+   :width: 150
    :alt: t-SNE example
 
 singlet
@@ -58,7 +58,7 @@ You can have a look inside the `test` folder for examples. To start using the ex
 This will calculate a t-SNE embedding of the first 200 features and then show your samples in the reduced space. It should look like this:
 
 .. image:: _static/example_tsne.png
-   :width: 400
+   :width: 600
    :alt: t-SNE example
 
 
@@ -72,7 +72,7 @@ API reference
 
 
 Indices and tables
-==================
+------------------
 
 * :ref:`genindex`
 * :ref:`modindex`
