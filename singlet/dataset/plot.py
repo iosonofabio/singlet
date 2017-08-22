@@ -560,8 +560,7 @@ class Plot():
                 y=vectors_reduced.columns[1],
                 kind='scatter',
                 ax=ax,
-                **kwargs,
-                )
+                **kwargs)
 
         ax.grid(True)
 

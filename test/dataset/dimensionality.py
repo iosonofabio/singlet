@@ -25,6 +25,7 @@ if __name__ == '__main__':
             n_dims=2,
             transform='log10',
             robust=False)
+    print(tuple(d['lambdas'].astype(int)))
     assert(tuple(d['lambdas'].astype(int)) == (5, 3))
     print('Done!')
 
