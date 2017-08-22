@@ -6,5 +6,5 @@ xarray
 scikit-learn
 matplotlib
 seaborn
-Cython
-bhtsne
+#Cython
+#bhtsne
