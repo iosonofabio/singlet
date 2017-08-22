@@ -18,6 +18,7 @@ pip install numpy
 pip install scipy
 pip install pandas
 pip install matplotlib
+pip install seaborn
 # NOTE: one day they shall fix this (sigh!)
 pip install bhtsne
 # Google API tests are only local anyway

@@ -6,7 +6,8 @@
 Single cell RNA-Seq analysis.
 
 ## Requirements
-- Python 3.4+
+Python 3.4+ is required. Moreover, you will need:
+- pyyaml
 - numpy
 - scipy
 - matplotlib
@@ -14,7 +15,7 @@ Single cell RNA-Seq analysis.
 - pandas
 - bhtsne (for t-SNE dimensionality reduction)
 
-Get those from pip.
+Get those from pip or conda.
 
 ## Install
 TODO: upload on pypi.
@@ -45,4 +46,7 @@ ax = ds.plot.scatter_reduced_samples(
 plt.show()
 ```
 
-This will calculate a t-SNE embedding of the first 200 features and then show your samples in the reduced space.
+This will calculate a t-SNE embedding of the first 200 features and then show your samples in the reduced space. It should look like this:
+
+![t-SNE example](example_data/example_tsne.png)
+
