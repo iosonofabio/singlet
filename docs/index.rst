@@ -41,8 +41,9 @@ You can have a look inside the `test` folder for examples. To start using the ex
 - Open a Python/IPython shell and type::
 
   from singlet.dataset import Dataset
-  ds = Dataset(samplesheet='example_sheet_tsv', counts_table='example_table_tsv')
-  
+  ds = Dataset(
+          samplesheet='example_sheet_tsv',
+          counts_table='example_table_tsv')
   ds.counts = ds.counts.iloc[:200]
   vs = ds.dimensionality.tsne(
           n_dims=2,
