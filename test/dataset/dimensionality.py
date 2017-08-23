@@ -26,6 +26,7 @@ if __name__ == '__main__':
             transform='log10',
             robust=False,
             random_state=0)
+    print(d)
     assert(np.allclose(d['eigenvalues'], [250.63398104, 154.97900214]))
     print('Done!')
 
@@ -54,7 +55,7 @@ if __name__ == '__main__':
             transform='log10',
             theta=0.5,
             perplexity=0.8)
-    assert(tuple(vs.values[0].astype(int)) == (512, 42))
+    assert(np.allclose(vs.values[0], [43.83527909, 1426.60556519]))
     print('Done!')
 
     print('Test cache for t-SNE')
