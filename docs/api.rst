@@ -18,13 +18,6 @@ Supporting modules are useful for particular purposes or internal use only:
 - `utils`
 - `io`
 
-singlet\.dataset module
----------------------------
-.. automodule:: singlet.dataset
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
 singlet\.counts\_table module
 -----------------------------
 
@@ -37,6 +30,51 @@ singlet\.samplesheet module
 ---------------------------
 
 .. automodule:: singlet.samplesheet
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+singlet\.dataset module
+---------------------------
+.. automodule:: singlet.dataset
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+`Dataset` action properties
+---------------------------
+
+singlet\.dataset\.correlations module
+-------------------------------------
+
+.. automodule:: singlet.dataset.correlations
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+
+singlet\.dataset\.dimensionality module
+-------------------------------------
+
+.. automodule:: singlet.dataset.dimensionality
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+
+singlet\.dataset\.cluster module
+-------------------------------------
+
+.. automodule:: singlet.dataset.cluster
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+
+singlet\.dataset\.plot module
+-------------------------------------
+
+.. automodule:: singlet.dataset.plot
     :members:
     :undoc-members:
     :show-inheritance:

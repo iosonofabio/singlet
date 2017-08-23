@@ -22,12 +22,13 @@ if __name__ == '__main__':
     print('Test Dataset PCA')
     ds.counts = ds.counts.iloc[:20]
     d = ds.dimensionality.pca(
-            n_dims=2,
+            n_dims=4,
             transform='log10',
             robust=False,
             random_state=0)
-    print(tuple(d['lambdas'].astype(int)))
-    assert(tuple(d['lambdas'].astype(int)) == (5, 3))
+    print(d)
+    print(d['eigenvalues'])
+    assert(tuple(d['eigenvalues'].astype(int)) == (5, 3))
     print('Done!')
 
     print('Test cache for PCA')
@@ -45,7 +46,7 @@ if __name__ == '__main__':
             n_dims=2,
             transform='log10',
             robust=True)
-    assert(tuple(d['lambdas'].astype(int)) == (11, 1))
+    assert(tuple(d['eigenvalues'].astype(int)) == (11, 1))
     print('Done!')
 
     print('Test Dataset t-SNE')
