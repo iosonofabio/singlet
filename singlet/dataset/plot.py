@@ -5,9 +5,15 @@
 # Modules
 import numpy as np
 import matplotlib as mpl
-import matplotlib.pyplot as plt
 from matplotlib import cm
 import seaborn as sns
+
+try:
+    import matplotlib.pyplot as plt
+except ImportError:
+    import warnings
+    warnings.warn('Unable to import matplotlib.pyplot: plotting will not work')
+    plt = None
 
 
 # Classes / functions
