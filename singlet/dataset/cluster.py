@@ -83,7 +83,7 @@ class Cluster():
         # Some metrics (e.g. correlation) give nan whenever the matrix has no
         # variation, default this to zero distance (e.g. two features that are
         # both total dropouts.
-        Y = np.nan_to_num(Y, copy=False)
+        Y = np.nan_to_num(Y)
 
         Z = linkage(Y, method=method)
 
