@@ -26,8 +26,7 @@ if __name__ == '__main__':
             transform='log10',
             robust=False,
             random_state=0)
-    print(d)
-    assert(np.allclose(d['eigenvalues'], [250.63398104, 154.97900214]))
+    assert(np.allclose(d['vs'].values[0], [-2.677194, -5.129792]))
     print('Done!')
 
     print('Test cache for PCA')
@@ -45,7 +44,7 @@ if __name__ == '__main__':
             n_dims=2,
             transform='log10',
             robust=True)
-    assert(np.allclose(d['eigenvalues'][:1], [408.0]))
+    assert(np.allclose(d['vs'].values[0, :1], [-4.38351382]))
     print('Done!')
 
     print('Test Dataset t-SNE')
