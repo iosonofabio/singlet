@@ -18,6 +18,10 @@ class Dataset():
             counts_table (string): Name of the counts table (to load from a \
                     config file) or instance of CountsTable
 
+        NOTE: All samples in the counts_table must also be in the \
+                samplesheet, but the latter can have additional samples. If \
+                that is the case, the samplesheet is sliced down to the \
+                samples present in the counts_table.
         '''
         from ..samplesheet import SampleSheet
         from ..counts_table import CountsTable
@@ -34,9 +38,8 @@ class Dataset():
             counts_table = CountsTable.from_tablename(counts_table)
         self._counts = counts_table
 
-        # Allow sorting of the counts columns
-        assert(set(self._samplesheet.index) == set(self._counts.columns))
-        self._counts = self._counts.loc[:, self._samplesheet.index]
+        assert(self._counts.columns.isin(self._samplesheet.index).all())
+        self._samplesheet = self._samplesheet.loc[self._counts.columns]
 
         # Plugins
         self.correlation = Correlation(self)
