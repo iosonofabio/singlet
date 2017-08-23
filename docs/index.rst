@@ -37,6 +37,7 @@ For the time being, you can clone the git repo and then call::
 Usage example
 -------------
 You can have a look inside the `test` folder for examples. To start using the example dataset:
+
 - Set the environment variable `SINGLET_CONFIG_FILENAME` to the location of the example YAML file
 - Open a Python/IPython shell and type::
 
@@ -62,13 +63,13 @@ This will calculate a t-SNE embedding of the first 200 features and then show yo
    :alt: t-SNE example
 
 
-API reference
+Contents
 -------------
 .. toctree::
-   :maxdepth: 4
-   :caption: Contents:
+   :maxdepth: 2
 
-   singlet
+   api
+   examples
 
 
 Indices and tables
