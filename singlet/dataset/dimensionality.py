@@ -52,8 +52,7 @@ class DimensionalityReduction():
         elif transform == 'log':
             X = np.log(X + pco)
 
-        # FIXME
-        whiten = lambda x: ((x.T - X.mean(axis=1)) / X.std(axis=1, ddof=1)).T
+        whiten = lambda x: ((x.T - X.mean(axis=1)) / X.std(axis=1, ddof=0)).T
         Xnorm = whiten(X)
         # NaN (e.g. features that do not vary i.e. dropout)
         Xnorm[np.isnan(Xnorm)] = 0
@@ -74,7 +73,6 @@ class DimensionalityReduction():
             #      'reduced rank:', matrix_rank(L),
             #      'sparse rank:', matrix_rank(S))
 
-        # FIXME
         pca = PCA(n_components=n_dims, random_state=random_state)
         vs = pd.DataFrame(
                 pca.fit_transform(Xnorm.values.T),
@@ -85,10 +83,7 @@ class DimensionalityReduction():
                 index=vs.columns,
                 columns=X.index).T
 
-        # FIXME: return whole Dataset object??
         return {
-                'pca': pca,
-                'Xnorm': Xnorm,
                 'vs': vs,
                 'us': us,
                 'eigenvalues': pca.explained_variance_ * Xnorm.shape[1],

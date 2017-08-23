@@ -20,15 +20,13 @@ if __name__ == '__main__':
 
     # FIXME: these test assertions need to be checked!
     print('Test Dataset PCA')
-    ds.counts = ds.counts.iloc[:20]
+    ds.counts = ds.counts.iloc[:200]
     d = ds.dimensionality.pca(
-            n_dims=4,
+            n_dims=2,
             transform='log10',
             robust=False,
             random_state=0)
-    print(d)
-    print(d['eigenvalues'])
-    assert(tuple(d['eigenvalues'].astype(int)) == (5, 3))
+    assert(np.allclose(d['eigenvalues'], [250.63398104, 154.97900214]))
     print('Done!')
 
     print('Test cache for PCA')
@@ -46,7 +44,7 @@ if __name__ == '__main__':
             n_dims=2,
             transform='log10',
             robust=True)
-    assert(tuple(d['eigenvalues'].astype(int)) == (11, 1))
+    assert(np.allclose(d['eigenvalues'][:1], [408.0]))
     print('Done!')
 
     print('Test Dataset t-SNE')
