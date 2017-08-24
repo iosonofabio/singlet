@@ -152,6 +152,111 @@ class Plot():
 
         return ax
 
+    def scatter_statistics(
+            self,
+            features='mapped',
+            x='mean',
+            y='cv',
+            ax=None,
+            tight_layout=True,
+            legend=False,
+            grid=None,
+            **kwargs):
+        '''Scatter plot statistics of features.
+
+        Args:
+            features (list or string): List of features to plot. The string \
+                    'mapped' means everything excluding spikeins and other, \
+                    'all' means everything including spikeins and other.
+            x (string): Statistics to plot on the x axis.
+            y (string): Statistics to plot on the y axis.
+            ax (matplotlib.axes.Axes): The axes to plot into. If None \
+                    (default), a new figure with one axes is created. ax must \
+                    not strictly be a matplotlib class, but it must have \
+                    common methods such as 'plot' and 'set'.
+            tight_layout (bool or dict): Whether to call \
+                    matplotlib.pyplot.tight_layout at the end of the \
+                    plotting. If it is a dict, pass it unpacked to that \
+                    function.
+            legend (bool or dict): If True, call ax.legend(). If a dict, \
+                    pass as **kwargs to ax.legend.
+            grid (bool or None): Whether to add a grid to the plot. None \
+                    defaults to your existing settings.
+            **kwargs: named arguments passed to the plot function.
+
+        Returns:
+            matplotlib.axes.Axes with the axes contaiing the plot.
+        '''
+        if ax is None:
+            new_axes = True
+            fig, ax = plt.subplots(nrows=1, ncols=1, figsize=(13, 8))
+        else:
+            new_axes = False
+
+        defaults = {
+                's': 10,
+                'color': 'darkgrey',
+                }
+        Plot._update_properties(kwargs, defaults)
+
+        counts = self.dataset.counts
+        if features == 'total':
+            if not counts._otherfeatures.isin(counts.index).all():
+                raise ValueError('Other features not found in counts')
+            if not counts._spikeins.isin(counts.index).all():
+                raise ValueError('Spike-ins not found in counts')
+            pass
+        elif features == 'mapped':
+            counts = counts.exclude_features(
+                    spikeins=True, other=True,
+                    errors='ignore')
+        else:
+            counts = counts.loc[features]
+
+        stats = counts.get_statistics(metrics=(x, y))
+        ax_props = {'xlabel': x, 'ylabel': y}
+        x = stats.loc[:, x]
+        y = stats.loc[:, y]
+
+        ax.scatter(x, y, **kwargs)
+
+        if ax_props['xlabel'] == 'mean':
+            xmin = 0.5
+            xmax = 1.05 * x.max()
+            ax_props['xlim'] = (xmin, xmax)
+            ax_props['xscale'] = 'log'
+        elif ax_props['ylabel'] == 'mean':
+            ymin = 0.5
+            ymax = 1.05 * y.max()
+            ax_props['ylim'] = (ymin, ymax)
+            ax_props['yscale'] = 'log'
+
+        if ax_props['xlabel'] == 'cv':
+            xmin = 0
+            xmax = 1.05 * x.max()
+            ax_props['xlim'] = (xmin, xmax)
+        elif ax_props['ylabel'] == 'cv':
+            ymin = 0
+            ymax = 1.05 * y.max()
+            ax_props['ylim'] = (ymin, ymax)
+
+        if grid is not None:
+            ax.grid(grid)
+
+        ax.set(**ax_props)
+
+        if legend:
+            if np.isscalar(legend):
+                ax.legend()
+            else:
+                ax.legend(**legend)
+
+        if tight_layout:
+            if isinstance(tight_layout, dict):
+                plt.tight_layout(**tight_layout)
+            else:
+                plt.tight_layout()
+
     def gate_features_from_statistics(
             self,
             features='mapped',
