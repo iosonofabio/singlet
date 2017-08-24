@@ -3,15 +3,20 @@
 # date:       16/08/17
 # content:    Dataset functions to plot gene expression and phenotypes
 # Modules
+import warnings
 import numpy as np
 import matplotlib as mpl
 from matplotlib import cm
-import seaborn as sns
+
+try:
+    import seaborn as sns
+except ImportError:
+    warnings.warn('Unable to import seaborn: plotting will not work')
+    sns = None
 
 try:
     import matplotlib.pyplot as plt
 except ImportError:
-    import warnings
     warnings.warn('Unable to import matplotlib.pyplot: plotting will not work')
     plt = None
 
@@ -583,3 +588,112 @@ class Plot():
                 plt.tight_layout()
 
         return ax
+
+    def clustermap(
+            self,
+            cluster_samples=False,
+            cluster_features=False,
+            phenotypes_cluster_samples=(),
+            phenotypes_cluster_features=(),
+            subtract_mean=False,
+            divide_std=False,
+            orientation='horizontal',
+            legend=False,
+            **kwargs):
+        '''Samples versus features / phenotypes.
+
+        Args:
+            cluster_samples (bool or linkage): Whether to cluster samples and \
+                    show the dendrogram. Can be either, False, True, or a \
+                    linkage from scipy.cluster.hierarchy.linkage.
+            cluster_features (bool or linkage): Whether to cluster features \
+                    and show the dendrogram. Can be either, False, True, or a \
+                    linkage from scipy.cluster.hierarchy.linkage.
+            phenotypes_cluster_samples (iterable of strings): Phenotypes to \
+                    add to the features for joint clustering of the samples. \
+                    If the clustering has been \
+                    precomputed including phenotypes and the linkage matrix \
+                    is explicitely set as cluster_samples, the *same* \
+                    phenotypes must be specified here, in the same order.
+            phenotypes_cluster_features (iterable of strings): Phenotypes to \
+                    add to the features for joint clustering of the features \
+                    and phenotypes. If the clustering has been \
+                    precomputed including phenotypes and the linkage matrix \
+                    is explicitely set as cluster_features, the *same* \
+                    phenotypes must be specified here, in the same order.
+            orientation (string): Whether the samples are on the abscissa \
+                    ('horizontal') or on the ordinate ('vertical').
+            tight_layout (bool or dict): Whether to call \
+                    matplotlib.pyplot.tight_layout at the end of the \
+                    plotting. If it is a dict, pass it unpacked to that \
+                    function.
+            legend (bool or dict): If True, call ax.legend(). If a dict, \
+                    pass as **kwargs to ax.legend.
+            **kwargs: named arguments passed to the plot function.
+
+        Returns:
+            A seaborn ClusterGrid instance.
+        '''
+
+        if cluster_samples is True:
+            cluster_samples = self.dataset.cluster.hierarchical(
+                    axis='samples',
+                    phenotypes=phenotypes_cluster_samples,
+                    )['linkage']
+        elif cluster_samples is False:
+            cluster_samples = None
+
+        if cluster_features is True:
+            cluster_features = self.dataset.cluster.hierarchical(
+                    axis='features',
+                    phenotypes=phenotypes_cluster_features,
+                    )['linkage']
+        elif cluster_features is False:
+            cluster_features = None
+
+        data = self.dataset.counts.copy()
+        # FIXME: add phenotypes
+
+        #if subtract_mean:
+        #    data -= data.mean(axis=1)
+
+        #    if divide_std:
+        #        data /= (1e-10 + data.std(axis=1))
+
+        if orientation == 'horizontal':
+            row_linkage = cluster_features
+            col_linkage = cluster_samples
+        elif orientation == 'vertical':
+            data = data.T
+            row_linkage = cluster_samples
+            col_linkage = cluster_features
+        else:
+            raise ValueError('Orientation must be "horizontal" or "vertical".')
+
+        defaults = {
+                'yticklabels': True,
+                'xticklabels': True,
+                'row_linkage': row_linkage,
+                'col_linkage': col_linkage,
+                }
+        Plot._update_properties(kwargs, defaults)
+
+        g = sns.clustermap(
+                data=data,
+                **kwargs)
+
+        ax = g.ax_heatmap
+        for label in ax.get_xmajorticklabels():
+            label.set_rotation(90)
+            label.set_horizontalalignment("center")
+        for label in ax.get_ymajorticklabels():
+            label.set_rotation(0)
+            label.set_verticalalignment("center")
+
+        if legend:
+            # TODO
+            pass
+
+        # TODO: reimplement some heuristic tight_layout
+
+        return g
