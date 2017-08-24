@@ -1,3 +1,3 @@
 Examples
 ========
-- Quality control: :doc:`quality_control`
+- Quality control: :doc:`examples/quality_control`
