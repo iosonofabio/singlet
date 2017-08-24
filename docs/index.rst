@@ -66,6 +66,15 @@ This will calculate a t-SNE embedding of the first 200 features and then show yo
    :alt: t-SNE example
 
 
+Contents
+-------------
+.. toctree::
+   :maxdepth: 2
+
+   api
+   examples
+
+
 Indices and tables
 ------------------
 
