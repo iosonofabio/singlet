@@ -48,12 +48,16 @@ class CountsTable(pd.DataFrame):
 
         return self
 
-    def exclude_features(self, spikeins=True, other=True, inplace=False):
+    def exclude_features(self, spikeins=True, other=True, inplace=False,
+                         errors='raise'):
         '''Get a slice that excludes secondary features.
 
         Args:
-            spikeins (bool): whether to exclude spike-ins
-            other (bool): whether to exclude other features, e.g. unmapped reads
+            spikeins (bool): Whether to exclude spike-ins
+            other (bool): Whether to exclude other features, e.g. unmapped reads
+            inplace (bool): Whether to drop those features in place.
+            errors (string): Whether to raise an exception if the features \
+                    to be excluded are already not present.
 
         Returns:
             CountsTable: a slice of self without those features.
@@ -63,7 +67,7 @@ class CountsTable(pd.DataFrame):
             drop.extend(self._spikeins)
         if other:
             drop.extend(self._otherfeatures)
-        return self.drop(drop, axis=0, inplace=inplace)
+        return self.drop(drop, axis=0, inplace=inplace, errors=errors)
 
     def get_spikeins(self):
         '''Get spike-in features

@@ -187,9 +187,15 @@ class Plot():
 
         counts = self.dataset.counts
         if features == 'total':
+            if not counts._otherfeatures.isin(counts.index).all():
+                raise ValueError('Other features not found in counts')
+            if not counts._spikeins.isin(counts.index).all():
+                raise ValueError('Spike-ins not found in counts')
             pass
         elif features == 'mapped':
-            counts = counts.exclude_features(spikeins=True, other=True)
+            counts = counts.exclude_features(
+                    spikeins=True, other=True,
+                    errors='ignore')
         else:
             counts = counts.loc[features]
 
@@ -358,6 +364,8 @@ class Plot():
             legend=False,
             orientation='vertical',
             sort=False,
+            bottom=0,
+            grid=None,
             **kwargs):
         '''Plot distribution of spike-in controls
 
@@ -378,6 +386,13 @@ class Plot():
             orientation (string): 'horizontal' or 'vertical'.
             sort (bool or string): True or 'ascending' sorts the features by \
                     median, 'descending' uses the reverse order.
+            bottom (float or string): The value of zero-count features. If \
+                    you are using a log axis, you may want to set this to \
+                    0.1 or any other small positive number. If a string, it \
+                    must be 'pseudocount', then the CountsTable.pseudocount \
+                    will be used.
+            grid (bool or None): Whether to add a grid to the plot. None \
+                    defaults to your existing settings.
             **kwargs: named arguments passed to the plot function.
 
         Return:
@@ -399,6 +414,10 @@ class Plot():
             asc = sort != 'descending'
             ind = counts.median(axis=1).sort_values(ascending=asc).index
             counts = counts.loc[ind]
+
+        if bottom == 'pseudocount':
+            bottom = counts.pseudocount
+        counts = np.maximum(counts, bottom)
 
         ax_props = {}
         if kind == 'violin':
@@ -432,7 +451,7 @@ class Plot():
             raise ValueError('Plot kind not understood')
 
         if orientation == 'vertical':
-            ax_props['ylim'] = (0, 1.1 * counts.values.max())
+            ax_props['ylim'] = (0.9 * bottom, 1.1 * counts.values.max())
             if not counts._normalized:
                 ax_props['ylabel'] = 'Number of reads'
             elif counts._normalized != 'custom':
@@ -442,7 +461,7 @@ class Plot():
                 label.set_horizontalalignment("center")
             ax.grid(True, 'y')
         elif orientation == 'horizontal':
-            ax_props['xlim'] = (0, 1.1 * counts.values.max())
+            ax_props['xlim'] = (0.9 * bottom, 1.1 * counts.values.max())
             if not counts._normalized:
                 ax_props['xlabel'] = 'Number of reads'
             elif counts._normalized != 'custom':
@@ -450,6 +469,9 @@ class Plot():
             ax.grid(True, axis='x')
 
         ax.set(**ax_props)
+
+        if grid is not None:
+            ax.grid(grid)
 
         if legend:
             if np.isscalar(legend):
