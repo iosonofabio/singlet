@@ -492,7 +492,7 @@ class Plot():
             vectors_reduced,
             color_by=None,
             color_log=None,
-            cmap='Greys',
+            cmap='viridis',
             ax=None,
             tight_layout=True,
             legend=False,
@@ -534,7 +534,7 @@ class Plot():
             new_axes = False
 
         defaults = {
-                's': 30,
+                's': 90,
                 }
         Plot._update_properties(kwargs, defaults)
 
