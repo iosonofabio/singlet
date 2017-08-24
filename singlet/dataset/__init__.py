@@ -3,6 +3,7 @@
 # date:       14/08/17
 # content:    Dataset that combines feature counts with metadata.
 # Modules
+import numpy as np
 
 
 # Classes / functions
@@ -69,6 +70,88 @@ class Dataset():
 
     def __ne__(self, other):
         return not self == other
+
+    def __add__(self, other):
+        '''Merge two Datasets.
+
+        For samples with the same names, counts will be added and metadata of \
+                one of the Datasets used. For new samples, the new counts and \
+                metadata will be used.
+
+        NOTE: metadata and gene names must be aligned for this operation to \
+                succeed. If one of the two Datasets has more metadata or \
+                features than the other, they cannot be added.
+        '''
+        selfcopy = self.copy()
+        selfcopy += other
+        return selfcopy
+
+    def __iadd__(self, other):
+        '''Merge two Datasets.
+
+        For samples with the same names, counts will be added and metadata of \
+                one of the Datasets used. For new samples, the new counts and \
+                metadata will be used.
+
+        NOTE: metadata and gene names must be aligned for this operation to \
+                succeed. If one of the two Datasets has more metadata or \
+                features than the other, they cannot be added.
+        '''
+        if set(self.metadatanames) != set(other.metadatanames):
+            raise IndexError('The Datasets have different metadata')
+        if set(self.featurenames) != set(other.featurenames):
+            raise IndexError('The Datasets have different features')
+
+        snames = self.samplenames
+        for samplename, meta in other.samplesheet.iterrows():
+            if samplename not in snames:
+                self.samplesheet.loc[samplename] = meta
+                self.counts.loc[:, samplename] = other.counts.loc[:, samplename]
+            else:
+                self.counts.loc[:, samplename] += other.counts.loc[:, samplename]
+
+    def split(self, phenotypes, copy=True):
+        '''Split Dataset based on one or more categorical phenotypes
+
+        Args:
+            phenotypes (string or list of strings): one or more phenotypes to \
+                    use for the split. Unique values of combinations of these \
+                    determine the split Datasets.
+
+        Returns:
+            dict of Datasets: the keys are either unique values of the \
+                    phenotype chosen or, if more than one, tuples of unique \
+                    combinations.
+        '''
+        from itertools import product
+
+        if isinstance(phenotypes, str):
+            phenotypes = [phenotypes]
+
+        phenos_uniques = [tuple(set(self.samplesheet.loc[:, p])) for p in phenotypes]
+        dss = {}
+        for comb in product(*phenos_uniques):
+            ind = np.ones(self.n_samples, bool)
+            for p, val in zip(phenotypes, comb):
+                ind &= self.samplesheet.loc[:, p] == val
+            if ind.sum():
+                samplesheet = self.samplesheet.loc[ind]
+                counts = self.counts.loc[:, ind]
+
+                if copy:
+                    samplesheet = samplesheet.copy()
+                    counts = counts.copy()
+
+                if len(phenotypes) == 1:
+                    label = comb[0]
+                else:
+                    label = comb
+
+                dss[label] = self.__class__(
+                        samplesheet=samplesheet,
+                        counts_table=counts,
+                        )
+        return dss
 
     @property
     def n_samples(self):
