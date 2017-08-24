@@ -10,7 +10,7 @@ from matplotlib import cm
 
 try:
     import seaborn as sns
-except ImportError:
+except (ImportError, RuntimeError):
     warnings.warn('Unable to import seaborn: plotting will not work')
     sns = None
 
