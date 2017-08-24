@@ -54,7 +54,7 @@ singlet\.dataset\.correlations module
 
 
 singlet\.dataset\.dimensionality module
--------------------------------------
+---------------------------------------
 
 .. automodule:: singlet.dataset.dimensionality
     :members:
