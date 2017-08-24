@@ -36,14 +36,14 @@ A typical task right off the bat in single-cell sequencing projects is to look a
 
 You should get figures similar to the following ones:
 
-.. image:: _static/example_qc_coverage.png
+.. image:: ../_static/example_qc_coverage.png
    :width: 600
    :alt: coverage
 
-.. image:: _static/example_qc_spikeins.png
+.. image:: ../_static/example_qc_spikeins.png
    :width: 600
    :alt: spike-in distributions
 
-.. image:: _static/example_qc_housekeeping.png
+.. image:: ../_static/example_qc_housekeeping.png
    :width: 600
    :alt: houswkeeping gene distributions
