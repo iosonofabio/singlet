@@ -73,7 +73,7 @@ setup(name='singlet',
       **Documentation**: http://singlet.readthedocs.io""",
       license='GPL3',
       classifiers=[
-         'Development Status :: 1 - Pre-Alpha',
+         'Development Status :: 3 - Alpha',
          'Topic :: Scientific/Engineering :: Bio-Informatics',
          'Intended Audience :: Developers',
          'Intended Audience :: Science/Research',
