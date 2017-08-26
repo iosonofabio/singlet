@@ -16,4 +16,3 @@ with open(config_filename) as stream:
 
 # Warnings that should be seen only once
 config['_once_warnings'] = []
-config.reset_once_warings = lambda: config['_once_warnings'] = []
