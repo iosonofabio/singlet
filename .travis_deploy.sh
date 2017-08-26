@@ -48,7 +48,6 @@ echo "TWINE_PASSWORD=$TWINE_PASSWORD"
 pip --version
 pip install twine
 
-
 # Build source
 python setup.py sdist --dist-dir dist/
 
