@@ -16,7 +16,7 @@ except (ImportError, RuntimeError):
 
 try:
     import matplotlib.pyplot as plt
-except ImportError:
+except (ImportError, RuntimeError):
     warnings.warn('Unable to import matplotlib.pyplot: plotting will not work')
     plt = None
 
