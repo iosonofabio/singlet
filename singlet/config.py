@@ -13,3 +13,7 @@ config_filename = os.getenv(
         os.getenv('HOME') + '/.singlet/config.yml')
 with open(config_filename) as stream:
     config = yaml.load(stream)
+
+# Warnings that should be seen only once
+config['_once_warnings'] = []
+config.reset_once_warings = lambda: config['_once_warnings'] = []

@@ -54,6 +54,7 @@ if __name__ == '__main__':
             transform='log10',
             theta=0.5,
             perplexity=0.8)
+    print(vs)
     assert(np.allclose(vs.values[0], [43.83527909, 1426.60556519]))
     print('Done!')
 

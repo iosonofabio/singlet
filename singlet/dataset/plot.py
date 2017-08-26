@@ -7,17 +7,23 @@ import warnings
 import numpy as np
 import matplotlib as mpl
 from matplotlib import cm
+from ..config import config
+
 
 try:
     import seaborn as sns
 except (ImportError, RuntimeError):
-    warnings.warn('Unable to import seaborn: plotting will not work')
+    if 'seaborn_import' not in config['_once_warnings']:
+        warnings.warn('Unable to import seaborn: plotting will not work')
+        config['_once_warnings'].append('seaborn_import')
     sns = None
 
 try:
     import matplotlib.pyplot as plt
 except (ImportError, RuntimeError):
-    warnings.warn('Unable to import matplotlib.pyplot: plotting will not work')
+    if 'pyplot_import' not in config['_once_warnings']:
+        warnings.warn('Unable to import matplotlib.pyplot: plotting will not work')
+        config['_once_warnings'].append('pyplot_import')
     plt = None
 
 
