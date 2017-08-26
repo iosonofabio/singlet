@@ -68,9 +68,9 @@ setup(name='singlet',
       long_description="""
       Single cell RNA Seq analysis.
 
-      Development: https://github.com/iosonofabio/singlet
+      **Development**: https://github.com/iosonofabio/singlet
 
-      Documentation: http://singlet.readthedocs.io""",
+      **Documentation**: http://singlet.readthedocs.io""",
       license='GPL3',
       classifiers=[
          'Development Status :: 1 - Pre-Alpha',
