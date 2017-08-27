@@ -262,3 +262,86 @@ class Correlation():
                     dtype=float)
         else:
             return r[0, 0]
+
+    def mutual_information(
+            self,
+            xs,
+            ys):
+        '''Mutual information between feature counts and/or phenotypes
+
+        Args:
+            xs (list or string): Features and/or phenotypes to use as \
+                    abscissa (independent variable). The string \
+                    'total' means all features including spikeins and other, \
+                    'mapped' means all features excluding spikeins and other, \
+                    'spikeins' means only spikeins, and 'other' means only \
+                    'other' features.
+            ys (list or string): Features and/or phenotypes to use as \
+                    ordinate (dependent variable). The string \
+                    'total' means all features including spikeins and other, \
+                    'mapped' means all features excluding spikeins and other, \
+                    'spikeins' means only spikeins, and 'other' means only \
+                    'other' features.
+
+        NOTE: Mutual information is defined only for discrete or categorical \
+                variables and require a decent coverage of all bins or \
+                categories because it has p(x)p(y) in the denominator. \
+                Feature counts and quantitative phenotypes require binning \
+                prior to calculating Mutual information. See CountsTable.bin \
+                and SampleSheet.bin for options. This function uses \
+                all unique values in the counts and phenotyes as separate \
+                bins.
+        '''
+        datad = {'x': {'names': xs, 'data': []},
+                 'y': {'names': ys, 'data': []}}
+
+        counts = self.dataset.counts
+        sheet = self.dataset.samplesheet.T
+
+        for key, dic in datad.items():
+            args = dic['names']
+            if args == 'total':
+                counts_k = counts
+            elif args == 'mapped':
+                counts_k = counts.exclude_features(
+                        spikeins=True, other=True)
+            elif args == 'spikeins':
+                counts_k = counts.get_spikeins()
+            elif args == 'other':
+                counts_k = counts.get_other_features()
+            else:
+                counts_k = counts.loc[counts.index.isin(args)]
+
+            pheno_k = sheet.loc[sheet.index.isin(args)]
+
+            if len(counts_k):
+                dic['data'].append(counts_k)
+            if len(pheno_k):
+                dic['data'].append(pheno_k)
+
+            if len(dic['data']) == 0:
+                raise ValueError('Data for {:} are empty!'.format(key))
+            elif len(dic['data']) == 1:
+                dic['data'] = dic['data'][0]
+            else:
+                dic['data'] = pd.concat(dic['data'], axis=0)
+
+        # Prepare output structure
+        n_x = datad['x']['data'].shape[0]
+        n_y = datad['y']['data'].shape[0]
+        coords_x = datad['x']['data'].index
+        coords_y = datad['y']['data'].index
+        res = pd.DataFrame(
+                data=np.zeros((n_x, n_y)),
+                index=coords_x,
+                columns=coords_y)
+
+        for key_x, data_x in datad['x']['data'].iterrows():
+            for key_y, data_y in datad['y']['data'].iterrows():
+                px = data_x.value_counts(normalize=True, sort=False)
+                py = data_y.value_counts(normalize=True, sort=False)
+
+                data_xy = pd.concat([data_x, data_y], axis=0)
+
+                # FIXME: finish this
+                import ipdb; ipdb.set_trace() 

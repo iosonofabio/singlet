@@ -199,3 +199,68 @@ class CountsTable(pd.DataFrame):
         df = pd.concat([st[m] for m in metrics], axis=1)
         df.columns = pd.Index(list(metrics), name='metrics')
         return df
+
+    def bin(self, bins=5, result='index', inplace=False):
+        '''Bin feature counts.
+
+        Args:
+            bins (int, array, or list of arrays): If an int, number \
+                    equal-width bins between pseudocounts and the max of \
+                    the counts matrix. If an array of indices of the same \
+                    length as the number of feature, use a different number \
+                    of equal-width bins for each feature. If an array of any \
+                    other length, use these bin edges (including rightmost \
+                    edge) for all features. If a list of arrays, it has to be \
+                    as long as the number of features, and every array in the \
+                    list determines the bin edges (including rightmost edge) \
+                    for that feature, in order.
+            result (string): Has to be one of 'index' (default), 'left', \
+                    'centr', 'right'. 'index' assign to the feature the \
+                    index (starting at 0) of that bin, 'left' assign the left \
+                    bin edge, 'center' the bin center, 'right' the right \
+                    edge.
+            inplace (bool): Whether to perform the operation in place.
+
+        Returns:
+            If inplace is False, a CountsTable with the binned counts.
+        '''
+        if result == 'index':
+            out_dtype = int
+        else:
+            out_dtype = float
+
+        out = np.zeros_like(self.values, dtype=out_dtype)
+
+        nf = self.shape[0]
+        if np.isscalar(bins):
+            bins = np.repeat(bins, nf).reshape((len(bins), nf)).T
+        elif len(bins) == nf:
+            bins_new = []
+            for (key, c), nbin in zip(self.iterrows(), bins):
+                bins_new.append(np.linspace(self.pseudocount, c.max(), nbin))
+            bins = bins_new
+
+        for i, (bini, (fea, count)) in enumerate(zip(bins, self.iterrows())):
+            if result == 'index':
+                labels = None
+            elif result == 'left':
+                labels = bini[:-1]
+            elif result == 'right':
+                labels = bini[1:]
+            elif labels == 'center':
+                labels = 0.5 * (bini[1:] + bini[:-1])
+            else:
+                raise ValueError('result parameter not understood')
+
+            cbin = pd.cut(
+                    count, bini,
+                    labels=labels,
+                    right=True, include_lowest=True)
+            out[i] = cbin.values
+
+        if inplace:
+            self.loc[:] = out
+        else:
+            counts = self.copy()
+            counts.loc[:] = out
+            return out
