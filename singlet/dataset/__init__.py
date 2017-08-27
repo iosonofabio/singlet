@@ -4,6 +4,7 @@
 # content:    Dataset that combines feature counts with metadata.
 # Modules
 import numpy as np
+import pandas as pd
 
 
 # Classes / functions
@@ -259,3 +260,119 @@ class Dataset():
             return self.__class__(
                     samplesheet=samplesheet,
                     counts_table=counts_table)
+
+    def compare(
+            self,
+            other,
+            features='mapped',
+            phenotypes=(),
+            method='kolmogorov-smirnov'):
+        '''Statistically compare with another Dataset.
+
+        Args:
+            other (Dataset): The Dataset to compare with.
+            features (list, string, or None): Features to compare. The string \
+                    'total' means all features including spikeins and other, \
+                    'mapped' means all features excluding spikeins and other, \
+                    'spikeins' means only spikeins, and 'other' means only \
+                    'other' features. If empty list or None, do not compare \
+                    features (useful for phenotypic comparison).
+            phenotypes (list of strings): Phenotypes to compare.
+            method (string or function): Statistical test to use for the \
+                    comparison. If a string it must be one of \
+                    'kolmogorov-smirnov' or 'mann-whitney'. If a function, it \
+                    must accept two arrays as arguments (one for each \
+                    dataset, running over the samples) and return a P-value \
+                    for the comparison.
+        Return:
+            A pandas.DataFrame containing the P-values of the comparisons for \
+                    all features and phenotypes.
+        '''
+
+        pvalues = []
+        if features:
+            counts = self.counts
+            counts_other = other.counts
+            if features == 'total':
+                pass
+            elif features == 'mapped':
+                counts = counts.exclude_features(
+                        spikeins=True, other=True)
+                counts_other = counts_other.exclude_features(
+                        spikeins=True, other=True)
+            elif features == 'spikeins':
+                counts = counts.get_spikeins()
+                counts_other = counts_other.get_spikeins()
+            elif features == 'other':
+                counts = counts.get_other_features()
+                counts_other = counts_other.get_other_features()
+            else:
+                counts = counts.loc[features]
+                counts_other = counts_other.loc[features]
+
+            if method == 'kolmogorov-smirnov':
+                from scipy.stats import ks_2samp
+                for (fea, co1), (_, co2) in zip(
+                        counts.iterrows(),
+                        counts_other.iterrows()):
+                    pvalues.append([fea, ks_2samp(co1.values, co2.values)[1]])
+
+            elif method == 'mann-whitney':
+                from scipy.stats import mannwhitneyu
+                for (fea, co1), (_, co2) in zip(
+                        counts.iterrows(),
+                        counts_other.iterrows()):
+                    # Mann-Whitney U has issues with ties
+                    is_degenerate = False
+                    if ((len(np.unique(co1.values)) == 1) or
+                       (len(np.unique(co2.values)) == 1)):
+                        is_degenerate = True
+                    elif ((len(co1) == len(co2)) and
+                          (np.sort(co1.values) == np.sort(co2.values)).all()):
+                        is_degenerate = True
+                    if is_degenerate:
+                        pvalues.append([fea, 1])
+                        continue
+                    pvalues.append([fea, mannwhitneyu(
+                        co1.values, co2.values,
+                        alternative='two-sided')[1]])
+            else:
+                for (fea, co1) in counts.iterrows():
+                    co2 = counts_other.loc[fea]
+                    pvalues.append([fea, method(co1.values, co2.values)])
+
+        if phenotypes:
+            pheno = self.samplesheet.loc[:, phenotypes].T
+            pheno_other = other.samplesheet.loc[:, phenotypes].T
+
+            if method == 'kolmogorov-smirnov':
+                from scipy.stats import ks_2samp
+                for phe, val1 in pheno.iterrows():
+                    val2 = pheno_other.loc[phe]
+                    pvalues.append([phe, ks_2samp(val1.values, val2.values)[1]])
+            elif method == 'mann-whitney':
+                from scipy.stats import mannwhitneyu
+                for phe, val1 in pheno.iterrows():
+                    val2 = pheno_other.loc[phe]
+                    # Mann-Whitney U has issues with ties
+                    is_degenerate = False
+                    if ((len(np.unique(val1.values)) == 1) or
+                       (len(np.unique(val2.values)) == 1)):
+                        is_degenerate = True
+                    elif ((len(val1) == len(val2)) and
+                          (np.sort(val1.values) == np.sort(val2.values)).all()):
+                        is_degenerate = True
+                    if is_degenerate:
+                        pvalues.append([phe, 1])
+                        continue
+                    pvalues.append([phe, mannwhitneyu(
+                        val1.values, val2.values,
+                        alternative='two-sided')[1]])
+            else:
+                for phe, val1 in pheno.iterrows():
+                    val2 = pheno_other.loc[phe]
+                    pvalues.append([phe, method(val1.values, val2.values)])
+
+        df = pd.DataFrame(pvalues, columns=['name', 'P-value'])
+        df.set_index('name', drop=True, inplace=True)
+        return df

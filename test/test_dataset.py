@@ -44,13 +44,16 @@ if __name__ == '__main__':
     # Queries
     run('test/dataset/query.py')
 
+    # Comparison
+    run('test/dataset/comparison.py')
+
     # Correlations
     run('test/dataset/correlation.py')
 
     # Dimensionality reduction
     run('test/dataset/dimensionality.py')
 
-    # Dimensionality reduction
+    # Clustering
     run('test/dataset/cluster.py')
 
     # Plot
