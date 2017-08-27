@@ -11,6 +11,7 @@ Python 3.4+ is required. Moreover, you will need:
 - numpy
 - scipy
 - pandas
+- xarray
 - scikit-learn
 - matplotlib
 - seaborn
