@@ -31,6 +31,7 @@ class Dataset():
         from .plot import Plot
         from .dimensionality import DimensionalityReduction
         from .cluster import Cluster
+        from .fit import Fit
 
         if not isinstance(samplesheet, SampleSheet):
             samplesheet = SampleSheet.from_sheetname(samplesheet)
@@ -48,6 +49,7 @@ class Dataset():
         self.plot = Plot(self)
         self.dimensionality = DimensionalityReduction(self)
         self.cluster = Cluster(self)
+        self.fit = Fit(self)
 
     def __str__(self):
         return '{:} with {:} samples and {:} features'.format(

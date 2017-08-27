@@ -7,6 +7,7 @@ content:    Tests for the library.
 '''
 # Modules
 import os
+import sys
 import subprocess as sp
 
 
@@ -55,6 +56,9 @@ if __name__ == '__main__':
 
     # Clustering
     run('test/dataset/cluster.py')
+
+    # Fit
+    run('test/dataset/fit.py')
 
     # Plot
     # TODO: one could set up PNG comparisons like Matplotlib itself does

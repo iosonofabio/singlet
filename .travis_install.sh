@@ -17,6 +17,7 @@ pip install pyyaml
 pip install numpy
 pip install scipy
 pip install pandas
+pip install xarray
 pip install scikit-learn
 pip install matplotlib
 pip install seaborn
