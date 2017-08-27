@@ -85,6 +85,40 @@ class CountsTable(pd.DataFrame):
         '''
         return self.loc[self._otherfeatures]
 
+    def log(self, base=10, inplace=False):
+        '''Take the pseudocounted log of the counts.
+
+        Args:
+            base (float): Base of the log transform
+            inplace (bool): Whether to do the operation in place or return \
+                    a new CountsTable
+
+        Returns:
+            If inplace is False, a transformed CountsTable.
+        '''
+        clog = np.log10(self.pseudocount + self) / np.log10(base)
+        if inplace:
+            self[:] = clog.values
+        else:
+            return clog
+
+    def unlog(self, base=10, inplace=False):
+        '''Reverse the pseudocounted log of the counts.
+
+        Args:
+            base (float): Base of the log transform
+            inplace (bool): Whether to do the operation in place or return \
+                    a new CountsTable
+
+        Returns:
+            If inplace is False, a transformed CountsTable.
+        '''
+        cunlog = base**self - self.pseudocount
+        if inplace:
+            self[:] = cunlog.values
+        else:
+            return cunlog
+
     def normalize(self, method='counts_per_million', include_spikeins=False, inplace=False, **kwargs):
         '''Normalize counts and return new CountsTable.
 
