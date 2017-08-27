@@ -29,9 +29,11 @@ Get those from pip or conda.
 
 Install
 -------
-TODO: upload on pypi.
+To get the latest **stable** version, use pip::
 
-For the time being, you can clone the git repo and then call::
+  pip install singlet
+
+To get the latest **development** version, clone the git repo and then call::
 
   python3 setup.py install
 
