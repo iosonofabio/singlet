@@ -71,6 +71,15 @@ singlet\.dataset\.cluster module
     :show-inheritance:
 
 
+singlet\.dataset\.fit module
+-------------------------------------
+
+.. automodule:: singlet.dataset.fit
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+
 singlet\.dataset\.plot module
 -------------------------------------
 
