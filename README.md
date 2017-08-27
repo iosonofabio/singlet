@@ -3,7 +3,7 @@
 
 ![Logo](docs/_static/logo.png)
 # Singlet
-Single cell RNA-Seq analysis.
+Single cell RNA-Seq analysis with phenotypes.
 
 ## Requirements
 Python 3.4+ is required. Moreover, you will need:
