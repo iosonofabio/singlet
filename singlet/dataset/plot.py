@@ -728,8 +728,6 @@ class Plot():
             cluster_features=False,
             phenotypes_cluster_samples=(),
             phenotypes_cluster_features=(),
-            subtract_mean=False,
-            divide_std=False,
             orientation='horizontal',
             legend=False,
             **kwargs):
@@ -772,43 +770,52 @@ class Plot():
             cluster_samples = self.dataset.cluster.hierarchical(
                     axis='samples',
                     phenotypes=phenotypes_cluster_samples,
-                    )['linkage']
+                    )
+            linkage_samples = cluster_samples['linkage']
         elif cluster_samples is False:
-            cluster_samples = None
+            linkage_samples = None
 
         if cluster_features is True:
             cluster_features = self.dataset.cluster.hierarchical(
                     axis='features',
                     phenotypes=phenotypes_cluster_features,
-                    )['linkage']
+                    )
+            linkage_features = cluster_features['linkage']
         elif cluster_features is False:
-            cluster_features = None
+            linkage_features = None
 
         data = self.dataset.counts.copy()
-        # FIXME: add phenotypes
-
-        #if subtract_mean:
-        #    data -= data.mean(axis=1)
-
-        #    if divide_std:
-        #        data /= (1e-10 + data.std(axis=1))
+        for pheno in phenotypes_cluster_features:
+            data.loc[pheno] = self.dataset.samplesheet.loc[:, pheno]
 
         if orientation == 'horizontal':
-            row_linkage = cluster_features
-            col_linkage = cluster_samples
+            row_linkage = linkage_features
+            col_linkage = linkage_samples
         elif orientation == 'vertical':
             data = data.T
-            row_linkage = cluster_samples
-            col_linkage = cluster_features
+            row_linkage = linkage_samples
+            col_linkage = linkage_features
         else:
             raise ValueError('Orientation must be "horizontal" or "vertical".')
 
         defaults = {
                 'yticklabels': True,
-                'xticklabels': True,
-                'row_linkage': row_linkage,
-                'col_linkage': col_linkage,
-                }
+                'xticklabels': True}
+
+        if row_linkage is not None:
+            defaults.update({
+                'row_cluster': True,
+                'row_linkage': row_linkage})
+        else:
+            defaults.update({'row_cluster': False})
+
+        if col_linkage is not None:
+            defaults.update({
+                'col_cluster': True,
+                'col_linkage': col_linkage})
+        else:
+            defaults.update({'col_cluster': False})
+
         Plot._update_properties(kwargs, defaults)
 
         g = sns.clustermap(
