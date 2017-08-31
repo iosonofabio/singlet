@@ -43,3 +43,6 @@ if __name__ == '__main__':
 
     # Statistics
     run('test/counts_table/statistics.py')
+
+    # Bin
+    run('test/counts_table/bin.py')

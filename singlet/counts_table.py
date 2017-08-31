@@ -215,10 +215,12 @@ class CountsTable(pd.DataFrame):
                     list determines the bin edges (including rightmost edge) \
                     for that feature, in order.
             result (string): Has to be one of 'index' (default), 'left', \
-                    'centr', 'right'. 'index' assign to the feature the \
+                    'center', 'right'. 'index' assign to the feature the \
                     index (starting at 0) of that bin, 'left' assign the left \
                     bin edge, 'center' the bin center, 'right' the right \
-                    edge.
+                    edge. If result is 'index', out-of-bounds values will be \
+                    assigned the value -1, which means Not A Number in ths \
+                    context.
             inplace (bool): Whether to perform the operation in place.
 
         Returns:
@@ -233,29 +235,35 @@ class CountsTable(pd.DataFrame):
 
         nf = self.shape[0]
         if np.isscalar(bins):
+            bins = np.linspace(self.pseudocount, self.values.max(), bins + 1)
             bins = np.repeat(bins, nf).reshape((len(bins), nf)).T
         elif len(bins) == nf:
             bins_new = []
             for (key, c), nbin in zip(self.iterrows(), bins):
-                bins_new.append(np.linspace(self.pseudocount, c.max(), nbin))
+                bins_new.append(np.linspace(self.pseudocount, c.max(), nbin + 1))
             bins = bins_new
 
         for i, (bini, (fea, count)) in enumerate(zip(bins, self.iterrows())):
             if result == 'index':
-                labels = None
+                labels = False
             elif result == 'left':
                 labels = bini[:-1]
             elif result == 'right':
                 labels = bini[1:]
-            elif labels == 'center':
+            elif result == 'center':
                 labels = 0.5 * (bini[1:] + bini[:-1])
             else:
                 raise ValueError('result parameter not understood')
 
             cbin = pd.cut(
-                    count, bini,
+                    np.maximum(self.pseudocount, count), bini,
                     labels=labels,
-                    right=True, include_lowest=True)
+                    right=True,
+                    include_lowest=True)
+
+            if result == 'index':
+                cbin[np.isnan(cbin)] = -1
+
             out[i] = cbin.values
 
         if inplace:
