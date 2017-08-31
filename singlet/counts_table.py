@@ -119,6 +119,98 @@ class CountsTable(pd.DataFrame):
         else:
             return cunlog
 
+    def center(self, axis='samples', inplace=False):
+        '''Center the counts table (subtract mean).
+
+        Args:
+            axis (string): The axis to average over, has to be 'samples' \
+                    or 'features'.
+            inplace (bool): Whether to do the operation in place or return \
+                    a new CountsTable
+
+        Returns:
+            If inplace is False, a transformed CountsTable.
+        '''
+        if inplace:
+            out = self
+        else:
+            out = self.copy()
+
+        if axis == 'samples':
+            out.loc[:] = (self.values.T - self.values.mean(axis=1)).T
+        elif axis == 'features':
+            out.loc[:] = self.values - self.values.mean(axis=0)
+        else:
+            raise ValueError('Axis not found')
+
+        if not inplace:
+            return out
+
+    def z_score(self, axis='samples', inplace=False, add_to_den=0):
+        '''Calculate the z scores of the counts table.
+
+        In other words, subtract the mean and divide by the standard \
+                deviation.
+
+        Args:
+            axis (string): The axis to average over, has to be 'samples' \
+                    or 'features'.
+            inplace (bool): Whether to do the operation in place or return \
+                    a new CountsTable
+            add_to_den (float): Whether to add a (small) value to the \
+                    denominator to avoid NaNs. 1e-5 or so should be fine.
+
+        Returns:
+            If inplace is False, a transformed CountsTable.
+        '''
+        if inplace:
+            out = self
+        else:
+            out = self.copy()
+
+        if axis == 'samples':
+            out.loc[:] = ((self.values.T - self.values.mean(axis=1)) / (add_to_den + self.values.std(axis=1))).T
+        elif axis == 'features':
+            out.loc[:] = (self.values - self.values.mean(axis=0)) / (add_to_den + self.values.std(axis=0))
+        else:
+            raise ValueError('Axis not found')
+
+        if not inplace:
+            return out
+
+    def standard_scale(self, axis='samples', inplace=False, add_to_den=0):
+        '''Subtract minimum and divide by (maximum - minimum).
+
+        Args:
+            axis (string): The axis to average over, has to be 'samples' \
+                    or 'features'.
+            inplace (bool): Whether to do the operation in place or return \
+                    a new CountsTable
+            add_to_den (float): Whether to add a (small) value to the \
+                    denominator to avoid NaNs. 1e-5 or so should be fine.
+
+        Returns:
+            If inplace is False, a transformed CountsTable.
+        '''
+        if inplace:
+            out = self
+        else:
+            out = self.copy()
+
+        if axis == 'samples':
+            mi = self.values.min(axis=1)
+            ma = self.values.max(axis=1)
+            out.loc[:] = ((self.values.T - mi) / (add_to_den + ma - mi)).T
+        elif axis == 'features':
+            mi = self.values.min(axis=0)
+            ma = self.values.max(axis=0)
+            out.loc[:] = (self.values - mi) / (add_to_den + ma - mi)
+        else:
+            raise ValueError('Axis not found')
+
+        if not inplace:
+            return out
+
     def normalize(self, method='counts_per_million', include_spikeins=False, inplace=False, **kwargs):
         '''Normalize counts and return new CountsTable.
 
