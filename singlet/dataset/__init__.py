@@ -11,7 +11,7 @@ import pandas as pd
 class Dataset():
     '''Collection of cells, with feature counts and metadata'''
 
-    def __init__(self, samplesheet, counts_table):
+    def __init__(self, samplesheet, counts_table, featuresheet=None):
         '''Collection of cells, with feature counts and metadata
 
         Args:
@@ -27,6 +27,7 @@ class Dataset():
         '''
         from ..samplesheet import SampleSheet
         from ..counts_table import CountsTable
+        from ..featuresheet import FeatureSheet
         from .correlations import Correlation
         from .plot import Plot
         from .dimensionality import DimensionalityReduction
@@ -43,6 +44,13 @@ class Dataset():
 
         assert(self._counts.columns.isin(self._samplesheet.index).all())
         self._samplesheet = self._samplesheet.loc[self._counts.columns]
+
+        if featuresheet is None:
+            self._featuresheet = None
+        elif not isinstance(counts_table, CountsTable):
+            self._featuresheet = CountsTable.from_tablename(counts_table)
+        else:
+            self._featuresheet = counts_table
 
         # Plugins
         self.correlation = Correlation(self)
@@ -153,6 +161,7 @@ class Dataset():
                 dss[label] = self.__class__(
                         samplesheet=samplesheet,
                         counts_table=counts,
+                        featuresheet=self.featuresheet,
                         )
         return dss
 
@@ -177,13 +186,20 @@ class Dataset():
         return self._counts.index.copy()
 
     @property
-    def metadatanames(self):
-        '''pandas.Index of metadata column names'''
+    def samplemetadatanames(self):
+        '''pandas.Index of sample metadata column names'''
         return self._samplesheet.columns.copy()
 
     @property
+    def featuremetadatanames(self):
+        '''pandas.Index of feature metadata column names'''
+        if self._featuresheet is None:
+            raise AttributeError('No feature sheet found.')
+        return self._featuresheet.columns.copy()
+
+    @property
     def samplesheet(self):
-        '''Matrix of metadata.
+        '''Matrix of sample metadata.
 
         Rows are samples, columns are metadata (e.g. phenotypes).
         '''
@@ -206,12 +222,32 @@ class Dataset():
     def counts(self, value):
         self._samplesheet = self._samplesheet.loc[value.columns]
         self._counts = value
+        if self._featuresheet is not None:
+            self._featuresheet = self._featuresheet.loc[value.index]
+
+    @property
+    def featuresheet(self):
+        '''Matrix of feature metadata.
+
+        Rows are features, columns are metadata (e.g. Gene Ontologies).
+        '''
+        return self._featuresheet
+
+    @featuresheet.setter
+    def featuresheet(self, value):
+        self._counts = self._counts.loc[value.index, :]
+        self._featuresheet = value
 
     def copy(self):
         '''Copy of the Dataset including a new SampleSheet and CountsTable'''
+        if self.featuresheet is None:
+            featuresheet = None
+        else:
+            featuresheet = self.featuresheet.copy()
         return self.__class__(
-                self._samplesheet.copy(),
-                self._counts.copy())
+                samplesheet=self._samplesheet.copy(),
+                counts_table=self._counts.copy(),
+                featuresheet=featuresheet)
 
     def query_samples_by_counts(self, expression, inplace=False):
         '''Select samples based on gene expression.
@@ -244,7 +280,7 @@ class Dataset():
                     samplesheet=samplesheet,
                     counts_table=counts_table)
 
-    def query_features(self, expression, inplace=False):
+    def query_features_by_counts(self, expression, inplace=False):
         '''Select features based on their expression.
 
         Args:

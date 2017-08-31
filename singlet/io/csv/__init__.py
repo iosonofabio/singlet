@@ -14,6 +14,11 @@ for sheetname, sheet in config['io']['samplesheets'].items():
     if ('format' not in sheet) and ('path' in sheet):
         path = sheet['path']
         config['io']['samplesheets'][sheetname]['format'] = path.split('.')[-1].lower()
+if 'featuresheets' in config['io']:
+    for sheetname, sheet in config['io']['featuresheets'].items():
+        if ('format' not in sheet) and ('path' in sheet):
+            path = sheet['path']
+            config['io']['featuresheets'][sheetname]['format'] = path.split('.')[-1].lower()
 for tablename, sheet in config['io']['count_tables'].items():
     if ('format' not in sheet) and ('path' in sheet):
         path = sheet['path']
@@ -41,6 +46,30 @@ def parse_samplesheet(sheetname):
     table = pd.read_csv(sheet['path'], sep=sep, index_col='name')
 
     if ('cells' in sheet) and (sheet['cells'] != 'rows'):
+        table = table.T
+
+    return table
+
+
+def parse_featuresheet(sheetname):
+    import pandas as pd
+
+    if 'featuresheets' not in config['io']:
+        raise ValueError('Config file has no featuresheets section')
+
+    sheet = config['io']['featuresheets'][sheetname]
+    fmt = sheet['format']
+
+    if fmt == 'tsv':
+        sep = '\t'
+    elif fmt == 'csv':
+        sep = ','
+    else:
+        raise ValueError('Format not understood')
+
+    table = pd.read_csv(sheet['path'], sep=sep, index_col='name')
+
+    if ('features' in sheet) and (sheet['features'] != 'rows'):
         table = table.T
 
     return table

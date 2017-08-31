@@ -29,6 +29,6 @@ if __name__ == '__main__':
     print('Done!')
 
     print('Query features')
-    ds_tmp = ds.query_features('first_sample > 1000000', inplace=False)
+    ds_tmp = ds.query_features_by_counts('first_sample > 1000000', inplace=False)
     assert(tuple(ds_tmp.featurenames) == ('__alignment_not_unique',))
     print('Done!')
