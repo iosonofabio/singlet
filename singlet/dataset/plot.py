@@ -5,6 +5,7 @@
 # Modules
 import warnings
 import numpy as np
+import pandas as pd
 import matplotlib as mpl
 from matplotlib import cm
 from ..config import config
@@ -728,6 +729,8 @@ class Plot():
             cluster_features=False,
             phenotypes_cluster_samples=(),
             phenotypes_cluster_features=(),
+            annotate_samples=False,
+            annotate_features=False,
             orientation='horizontal',
             legend=False,
             **kwargs):
@@ -752,6 +755,20 @@ class Plot():
                     precomputed including phenotypes and the linkage matrix \
                     is explicitely set as cluster_features, the *same* \
                     phenotypes must be specified here, in the same order.
+            annotate_samples (dict, or False): Whether and how to \
+                    annotate the samples with separate colorbars. The \
+                    dictionary must have phenotypes or features as keys. For \
+                    qualitative phenotypes, the values can be palette names \
+                    or palettes (with at least as many colors as there are \
+                    categories). For quantitative phenotypes and features, \
+                    they can be colormap names or colormaps.
+            annotate_features (dict, or False): Whether and how to \
+                    annotate the featues with separate colorbars. The \
+                    dictionary must have features metadata as keys. For \
+                    qualitative annotations, the values can be palette names \
+                    or palettes (with at least  as many colors as there are \
+                    categories). For quantitative annotatoins, the values \
+                    can be colormap names or colormaps.
             orientation (string): Whether the samples are on the abscissa \
                     ('horizontal') or on the ordinate ('vertical').
             tight_layout (bool or dict): Whether to call \
@@ -765,7 +782,11 @@ class Plot():
         Returns:
             A seaborn ClusterGrid instance.
         '''
+        data = self.dataset.counts.copy()
+        for pheno in phenotypes_cluster_features:
+            data.loc[pheno] = self.dataset.samplesheet.loc[:, pheno]
 
+        # FIXME: what to do with NaN?
         if cluster_samples is True:
             cluster_samples = self.dataset.cluster.hierarchical(
                     axis='samples',
@@ -784,23 +805,81 @@ class Plot():
         elif cluster_features is False:
             linkage_features = None
 
-        data = self.dataset.counts.copy()
-        for pheno in phenotypes_cluster_features:
-            data.loc[pheno] = self.dataset.samplesheet.loc[:, pheno]
+        if annotate_samples:
+            ann_samples = []
+            for key, val in annotate_samples.items():
+                if key in self.dataset.samplesheet.columns:
+                    color_data = self.dataset.samplesheet.loc[:, key]
+                    is_numeric = np.issubdtype(color_data.dtype, np.number)
+                    if (color_data.dtype.name == 'category') or (not is_numeric):
+                        cmap_type = 'qualitative'
+                    else:
+                        cmap_type = 'sequential'
+                else:
+                    color_data = self.dataset.counts.loc[key]
+                    cmap_type = 'sequential'
+
+                if isinstance(val, str):
+                    if cmap_type == 'qualitative':
+                        cd_unique = list(np.unique(color_data.values))
+                        n_colors = len(cd_unique)
+                        palette = sns.color_palette(val, n_colors=n_colors)
+                        c = [palette[cd_unique.index(x)] for x in color_data.values]
+                    else:
+                        cmap = cm.get_cmap(val)
+                        vmax = np.nanmax(color_data.values)
+                        vmin = np.nanmin(color_data.values)
+                        cval = (color_data.values - vmin) / (vmax - vmin)
+                        c = cmap(cval)
+                else:
+                    if cmap_type == 'qualitative':
+                        cd_unique = list(np.unique(color_data.values))
+                        n_colors = len(cd_unique)
+                        if len(palette) < n_colors:
+                            raise ValueError(
+                            'Palettes must have as many colors as there are categories')
+                        palette = val
+                        c = [palette[cd_unique.index(x)] for x in color_data.values]
+                    else:
+                        cmap = val
+                        vmax = np.nanmax(color_data.values)
+                        vmin = np.nanmin(color_data.values)
+                        cval = (color_data.values - vmin) / (vmax - vmin)
+                        c = cmap(cval)
+
+                ann_samples.append(c)
+
+            ann_samples = pd.DataFrame(
+                    data=[list(a) for a in ann_samples],
+                    columns=color_data.index,
+                    index=annotate_samples.keys()).T
+        else:
+            ann_samples = None
+
+        # FIXME: annotation of features
+        if annotate_features:
+            raise ValueError('Feature annotation not implemented')
+        ann_features = None
 
         if orientation == 'horizontal':
             row_linkage = linkage_features
             col_linkage = linkage_samples
+            row_colors = ann_features
+            col_colors = ann_samples
         elif orientation == 'vertical':
             data = data.T
             row_linkage = linkage_samples
             col_linkage = linkage_features
+            row_colors = ann_samples
+            col_colors = ann_features
         else:
             raise ValueError('Orientation must be "horizontal" or "vertical".')
 
         defaults = {
                 'yticklabels': True,
-                'xticklabels': True}
+                'xticklabels': True,
+                'row_colors': row_colors,
+                'col_colors': col_colors}
 
         if row_linkage is not None:
             defaults.update({
