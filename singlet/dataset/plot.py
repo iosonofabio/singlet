@@ -874,10 +874,71 @@ class Plot():
         else:
             col_samples = None
 
-        # FIXME: annotation of features
         if annotate_features:
-            raise ValueError('Feature annotation not implemented')
-        col_features = None
+            if self.dataset.featuresheet is None:
+                raise AttributeError('Dataset has no FeatureSheet.')
+            cbars_features = []
+            col_features = []
+            for key, val in annotate_features.items():
+                color_data = self.dataset.featuresheet.loc[:, key]
+                is_numeric = np.issubdtype(color_data.dtype, np.number)
+                if (color_data.dtype.name == 'category') or (not is_numeric):
+                    cmap_type = 'qualitative'
+                else:
+                    cmap_type = 'sequential'
+
+                if isinstance(val, str):
+                    if cmap_type == 'qualitative':
+                        cd_unique = list(np.unique(color_data.values))
+                        n_colors = len(cd_unique)
+                        palette = sns.color_palette(val, n_colors=n_colors)
+                        c = [palette[cd_unique.index(x)] for x in color_data.values]
+                        cbi = {'name': key, 'palette': palette,
+                               'ticklabels': cd_unique,
+                               'type': 'qualitative',
+                               'n_colors': n_colors}
+                    else:
+                        cmap = cm.get_cmap(val)
+                        vmax = np.nanmax(color_data.values)
+                        vmin = np.nanmin(color_data.values)
+                        cval = (color_data.values - vmin) / (vmax - vmin)
+                        c = cmap(cval)
+                        cbi = {'name': key, 'cmap': cmap,
+                               'vmin': vmin, 'vmax': vmax,
+                               'type': 'sequential'}
+                else:
+                    if cmap_type == 'qualitative':
+                        cd_unique = list(np.unique(color_data.values))
+                        n_colors = len(cd_unique)
+                        if len(palette) < n_colors:
+                            raise ValueError(
+                            'Palettes must have as many colors as there are categories')
+                        palette = val
+                        c = [palette[cd_unique.index(x)] for x in color_data.values]
+                        cbi = {'name': key, 'palette': palette[:n_colors],
+                               'ticks': cd_unique,
+                               'type': 'qualitative',
+                               'n_colors': n_colors}
+                    else:
+                        cmap = val
+                        vmax = np.nanmax(color_data.values)
+                        vmin = np.nanmin(color_data.values)
+                        cval = (color_data.values - vmin) / (vmax - vmin)
+                        c = cmap(cval)
+                        cbi = {'name': key, 'cmap': cmap,
+                               'vmin': vmin, 'vmax': vmax,
+                               'type': 'sequential'}
+
+                col_features.append(c)
+                cbars_features.append(cbi)
+
+            col_features = pd.DataFrame(
+                    data=[list(a) for a in col_features],
+                    columns=color_data.index,
+                    index=annotate_features.keys()).T
+
+        else:
+            col_features = None
 
         if orientation == 'horizontal':
             row_linkage = linkage_features
@@ -929,54 +990,119 @@ class Plot():
 
         if colorbars:
             # The colorbar for the heatmap is shown anyway
-            n_cbars = len(cbars_samples)
-            if orientation == 'horizontal':
-                wcb = min(0.3, 0.4 / n_cbars)
-                xcb = 0.98 - wcb * n_cbars - 0.05 * (n_cbars - 1)
-            else:
-                hcb = min(0.3, 0.4 / n_cbars)
-                ycb = 0.98 - hcb
-            for i, cbi in enumerate(cbars_samples):
+            if col_samples is not None:
+                n_cbars = len(cbars_samples)
+                caxs = []
                 if orientation == 'horizontal':
-                    cax = g.fig.add_axes((xcb, 0.955, wcb, 0.025))
+                    wcb = min(0.3, 0.4 / n_cbars)
+                    xcb = 0.98 - wcb * n_cbars - 0.05 * (n_cbars - 1)
                 else:
-                    cax = g.fig.add_axes((0.01, ycb, 0.02, hcb))
-
-                kw = {}
-                if cbi['type'] == 'sequential':
-                    kw['norm'] = mpl.colors.Normalize(
-                            vmin=cbi['vmin'], vmax=cbi['vmax'])
-                    cb = mpl.colorbar.ColorbarBase(
-                            cax,
-                            cmap=cbi['cmap'],
-                            orientation=orientation,
-                            **kw)
-                else:
-                    n_colors = cbi['n_colors']
-                    bounds = [1.0 * i / n_colors for i in range(n_colors + 1)]
-                    ticks = [(2.0 * i + 1) / (n_colors * 2) for i in range(n_colors)]
-                    kw['norm'] = mpl.colors.Normalize(vmin=0, vmax=1)
-                    cmap = mpl.colors.ListedColormap(cbi['palette'])
-                    cb = mpl.colorbar.ColorbarBase(
-                            cax,
-                            cmap=cmap,
-                            boundaries=bounds,
-                            ticks=ticks,
-                            orientation=orientation,
-                            **kw)
+                    hcb = min(0.3, 0.4 / n_cbars)
+                    ycb = 0.98 - hcb
+                for i, cbi in enumerate(cbars_samples):
                     if orientation == 'horizontal':
-                        cb.ax.set_xticklabels([str(x) for x in cbi['ticklabels']])
+                        cax = g.fig.add_axes((xcb, 0.955, wcb, 0.025))
                     else:
-                        cb.ax.set_yticklabels([str(x) for x in cbi['ticklabels']])
+                        cax = g.fig.add_axes((0.01, ycb, 0.02, hcb))
+                    caxs.append(cax)
 
-                cb.set_label(cbi['name'])
+                    kw = {}
+                    if cbi['type'] == 'sequential':
+                        kw['norm'] = mpl.colors.Normalize(
+                                vmin=cbi['vmin'], vmax=cbi['vmax'])
+                        cb = mpl.colorbar.ColorbarBase(
+                                cax,
+                                cmap=cbi['cmap'],
+                                orientation=orientation,
+                                **kw)
+                    else:
+                        n_colors = cbi['n_colors']
+                        bounds = [1.0 * i / n_colors for i in range(n_colors + 1)]
+                        ticks = [(2.0 * i + 1) / (n_colors * 2) for i in range(n_colors)]
+                        kw['norm'] = mpl.colors.Normalize(vmin=0, vmax=1)
+                        cmap = mpl.colors.ListedColormap(cbi['palette'])
+                        cb = mpl.colorbar.ColorbarBase(
+                                cax,
+                                cmap=cmap,
+                                boundaries=bounds,
+                                ticks=ticks,
+                                orientation=orientation,
+                                **kw)
+                        if orientation == 'horizontal':
+                            cb.ax.set_xticklabels([str(x) for x in cbi['ticklabels']])
+                        else:
+                            cb.ax.set_yticklabels([str(x) for x in cbi['ticklabels']])
+
+                    cb.set_label(cbi['name'])
+
+                    if orientation == 'horizontal':
+                        xcb += wcb + 0.05
+                    else:
+                        ycb -= hcb + 0.05
 
                 if orientation == 'horizontal':
-                    xcb += wcb + 0.05
+                    g.ax_cbars_columns = caxs
                 else:
-                    ycb -= hcb + 0.05
+                    g.ax_cbars_rows = caxs
 
-            # TODO: colorbars for features
+            if col_features is not None:
+                n_cbars = len(cbars_features)
+                caxs = []
+                if orientation == 'horizontal':
+                    orientation_cb = 'vertical'
+                else:
+                    orientation_cb = 'horizontal'
+                if orientation_cb == 'horizontal':
+                    wcb = min(0.3, 0.4 / n_cbars)
+                    xcb = 0.98 - wcb * n_cbars - 0.05 * (n_cbars - 1)
+                else:
+                    hcb = min(0.3, 0.4 / n_cbars)
+                    ycb = 0.98 - hcb
+                for i, cbi in enumerate(cbars_samples):
+                    if orientation_cb == 'horizontal':
+                        cax = g.fig.add_axes((xcb, 0.955, wcb, 0.025))
+                    else:
+                        cax = g.fig.add_axes((0.01, ycb, 0.02, hcb))
+                    caxs.append(cax)
+
+                    kw = {}
+                    if cbi['type'] == 'sequential':
+                        kw['norm'] = mpl.colors.Normalize(
+                                vmin=cbi['vmin'], vmax=cbi['vmax'])
+                        cb = mpl.colorbar.ColorbarBase(
+                                cax,
+                                cmap=cbi['cmap'],
+                                orientation=orientation,
+                                **kw)
+                    else:
+                        n_colors = cbi['n_colors']
+                        bounds = [1.0 * i / n_colors for i in range(n_colors + 1)]
+                        ticks = [(2.0 * i + 1) / (n_colors * 2) for i in range(n_colors)]
+                        kw['norm'] = mpl.colors.Normalize(vmin=0, vmax=1)
+                        cmap = mpl.colors.ListedColormap(cbi['palette'])
+                        cb = mpl.colorbar.ColorbarBase(
+                                cax,
+                                cmap=cmap,
+                                boundaries=bounds,
+                                ticks=ticks,
+                                orientation=orientation_cb,
+                                **kw)
+                        if orientation_cb == 'horizontal':
+                            cb.ax.set_xticklabels([str(x) for x in cbi['ticklabels']])
+                        else:
+                            cb.ax.set_yticklabels([str(x) for x in cbi['ticklabels']])
+
+                    cb.set_label(cbi['name'])
+
+                    if orientation_cb == 'horizontal':
+                        xcb += wcb + 0.05
+                    else:
+                        ycb -= hcb + 0.05
+
+                if orientation_cb == 'horizontal':
+                    g.ax_cbars_columns = caxs
+                else:
+                    g.ax_cbars_rows = caxs
 
         else:
             # Remove colorbar
