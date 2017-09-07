@@ -732,7 +732,7 @@ class Plot():
             annotate_samples=False,
             annotate_features=False,
             orientation='horizontal',
-            legend=False,
+            colorbars=False,
             **kwargs):
         '''Samples versus features / phenotypes.
 
@@ -775,9 +775,11 @@ class Plot():
                     matplotlib.pyplot.tight_layout at the end of the \
                     plotting. If it is a dict, pass it unpacked to that \
                     function.
-            legend (bool or dict): If True, call ax.legend(). If a dict, \
-                    pass as **kwargs to ax.legend.
-            **kwargs: named arguments passed to the plot function.
+            colorbars (bool): Whether to add colorbars. One colorbar refers \
+                    to the heatmap. Moreover, if annotations for samples or \
+                    features are shown, a colorbar for each of them will be \
+                    shown as well.
+            **kwargs: named arguments passed to seaborn.clustermap.
 
         Returns:
             A seaborn ClusterGrid instance.
@@ -806,7 +808,8 @@ class Plot():
             linkage_features = None
 
         if annotate_samples:
-            ann_samples = []
+            cbars_samples = []
+            col_samples = []
             for key, val in annotate_samples.items():
                 if key in self.dataset.samplesheet.columns:
                     color_data = self.dataset.samplesheet.loc[:, key]
@@ -825,12 +828,19 @@ class Plot():
                         n_colors = len(cd_unique)
                         palette = sns.color_palette(val, n_colors=n_colors)
                         c = [palette[cd_unique.index(x)] for x in color_data.values]
+                        cbi = {'name': key, 'palette': palette,
+                               'ticklabels': cd_unique,
+                               'type': 'qualitative',
+                               'n_colors': n_colors}
                     else:
                         cmap = cm.get_cmap(val)
                         vmax = np.nanmax(color_data.values)
                         vmin = np.nanmin(color_data.values)
                         cval = (color_data.values - vmin) / (vmax - vmin)
                         c = cmap(cval)
+                        cbi = {'name': key, 'cmap': cmap,
+                               'vmin': vmin, 'vmax': vmax,
+                               'type': 'sequential'}
                 else:
                     if cmap_type == 'qualitative':
                         cd_unique = list(np.unique(color_data.values))
@@ -840,38 +850,46 @@ class Plot():
                             'Palettes must have as many colors as there are categories')
                         palette = val
                         c = [palette[cd_unique.index(x)] for x in color_data.values]
+                        cbi = {'name': key, 'palette': palette[:n_colors],
+                               'ticks': cd_unique,
+                               'type': 'qualitative',
+                               'n_colors': n_colors}
                     else:
                         cmap = val
                         vmax = np.nanmax(color_data.values)
                         vmin = np.nanmin(color_data.values)
                         cval = (color_data.values - vmin) / (vmax - vmin)
                         c = cmap(cval)
+                        cbi = {'name': key, 'cmap': cmap,
+                               'vmin': vmin, 'vmax': vmax,
+                               'type': 'sequential'}
 
-                ann_samples.append(c)
+                col_samples.append(c)
+                cbars_samples.append(cbi)
 
-            ann_samples = pd.DataFrame(
-                    data=[list(a) for a in ann_samples],
+            col_samples = pd.DataFrame(
+                    data=[list(a) for a in col_samples],
                     columns=color_data.index,
                     index=annotate_samples.keys()).T
         else:
-            ann_samples = None
+            col_samples = None
 
         # FIXME: annotation of features
         if annotate_features:
             raise ValueError('Feature annotation not implemented')
-        ann_features = None
+        col_features = None
 
         if orientation == 'horizontal':
             row_linkage = linkage_features
             col_linkage = linkage_samples
-            row_colors = ann_features
-            col_colors = ann_samples
+            row_colors = col_features
+            col_colors = col_samples
         elif orientation == 'vertical':
             data = data.T
             row_linkage = linkage_samples
             col_linkage = linkage_features
-            row_colors = ann_samples
-            col_colors = ann_features
+            row_colors = col_samples
+            col_colors = col_features
         else:
             raise ValueError('Orientation must be "horizontal" or "vertical".')
 
@@ -909,9 +927,60 @@ class Plot():
             label.set_rotation(0)
             label.set_verticalalignment("center")
 
-        if legend:
-            # TODO
-            pass
+        if colorbars:
+            # The colorbar for the heatmap is shown anyway
+            n_cbars = len(cbars_samples)
+            if orientation == 'horizontal':
+                wcb = min(0.3, 0.4 / n_cbars)
+                xcb = 0.98 - wcb * n_cbars - 0.05 * (n_cbars - 1)
+            else:
+                hcb = min(0.3, 0.4 / n_cbars)
+                ycb = 0.98 - hcb
+            for i, cbi in enumerate(cbars_samples):
+                if orientation == 'horizontal':
+                    cax = g.fig.add_axes((xcb, 0.955, wcb, 0.025))
+                else:
+                    cax = g.fig.add_axes((0.01, ycb, 0.02, hcb))
+
+                kw = {}
+                if cbi['type'] == 'sequential':
+                    kw['norm'] = mpl.colors.Normalize(
+                            vmin=cbi['vmin'], vmax=cbi['vmax'])
+                    cb = mpl.colorbar.ColorbarBase(
+                            cax,
+                            cmap=cbi['cmap'],
+                            orientation=orientation,
+                            **kw)
+                else:
+                    n_colors = cbi['n_colors']
+                    bounds = [1.0 * i / n_colors for i in range(n_colors + 1)]
+                    ticks = [(2.0 * i + 1) / (n_colors * 2) for i in range(n_colors)]
+                    kw['norm'] = mpl.colors.Normalize(vmin=0, vmax=1)
+                    cmap = mpl.colors.ListedColormap(cbi['palette'])
+                    cb = mpl.colorbar.ColorbarBase(
+                            cax,
+                            cmap=cmap,
+                            boundaries=bounds,
+                            ticks=ticks,
+                            orientation=orientation,
+                            **kw)
+                    if orientation == 'horizontal':
+                        cb.ax.set_xticklabels([str(x) for x in cbi['ticklabels']])
+                    else:
+                        cb.ax.set_yticklabels([str(x) for x in cbi['ticklabels']])
+
+                cb.set_label(cbi['name'])
+
+                if orientation == 'horizontal':
+                    xcb += wcb + 0.05
+                else:
+                    ycb -= hcb + 0.05
+
+            # TODO: colorbars for features
+
+        else:
+            # Remove colorbar
+            g.fig.get_axes()[-1].remove()
 
         # TODO: reimplement some heuristic tight_layout
 
