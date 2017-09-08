@@ -11,14 +11,16 @@ import pandas as pd
 class Dataset():
     '''Collection of cells, with feature counts and metadata'''
 
-    def __init__(self, samplesheet, counts_table, featuresheet=None):
+    def __init__(self, counts_table, samplesheet=None, featuresheet=None):
         '''Collection of cells, with feature counts and metadata
 
         Args:
-            samplesheet (string): Name of the samplesheet (to load from a \
-                    config file) or instance of SampleSheet
             counts_table (string): Name of the counts table (to load from a \
                     config file) or instance of CountsTable
+            samplesheet (string or None): Name of the samplesheet (to load \
+                    from a config file) or instance of SampleSheet
+            featuresheet (string or None): Name of the samplesheet (to load \
+                    from a config file) or instance of FeatureSheet
 
         NOTE: All samples in the counts_table must also be in the \
                 samplesheet, but the latter can have additional samples. If \
@@ -34,23 +36,29 @@ class Dataset():
         from .cluster import Cluster
         from .fit import Fit
 
-        if not isinstance(samplesheet, SampleSheet):
-            samplesheet = SampleSheet.from_sheetname(samplesheet)
-        self._samplesheet = samplesheet
-
         if not isinstance(counts_table, CountsTable):
             counts_table = CountsTable.from_tablename(counts_table)
         self._counts = counts_table
 
-        assert(self._counts.columns.isin(self._samplesheet.index).all())
-        self._samplesheet = self._samplesheet.loc[self._counts.columns]
+        if samplesheet is None:
+            self._samplesheet = SampleSheet(data=[], index=self._counts.columns)
+        elif not isinstance(samplesheet, SampleSheet):
+            self._samplesheet = SampleSheet.from_sheetname(samplesheet)
+        else:
+            self._samplesheet = samplesheet
 
         if featuresheet is None:
-            self._featuresheet = None
-        elif not isinstance(counts_table, CountsTable):
-            self._featuresheet = CountsTable.from_tablename(counts_table)
+            self._featuresheet = FeatureSheet(data=[], index=self._counts.index)
+        elif not isinstance(featuresheet, FeatureSheet):
+            self._featuresheet = FeatureSheet.from_tablename(featuresheet)
         else:
-            self._featuresheet = counts_table
+            self._featuresheet = featuresheet
+
+        # Uniform axes across data and metadata
+        assert(self._counts.columns.isin(self._samplesheet.index).all())
+        self._samplesheet = self._samplesheet.loc[self._counts.columns]
+        assert(self._counts.index.isin(self._featuresheet.index).all())
+        self._featuresheet = self._featuresheet.loc[self._counts.index]
 
         # Plugins
         self.correlation = Correlation(self)
@@ -66,18 +74,21 @@ class Dataset():
                 self.n_features)
 
     def __repr__(self):
-        return '{:}("{:}", "{:}")'.format(
+        return '{:}("{:}", "{:}", "{:}")'.format(
                 self.__class__.__name__,
+                self._counts.name,
                 self._samplesheet.sheetname,
-                self._counts.name)
+                self._featuresheet.sheetname,
+                )
 
     def __eq__(self, other):
         if type(other) is not type(self):
             return False
         # FIXME: fillna(0) is sloppy but not so bad
         ss = (self._samplesheet.fillna(0) == other._samplesheet.fillna(0)).values.all()
+        fs = (self._featuresheet.fillna(0) == other._featuresheet.fillna(0)).values.all()
         ct = (self._counts == other._counts).values.all()
-        return ss and ct
+        return ss and fs and ct
 
     def __ne__(self, other):
         return not self == other
@@ -193,8 +204,6 @@ class Dataset():
     @property
     def featuremetadatanames(self):
         '''pandas.Index of feature metadata column names'''
-        if self._featuresheet is None:
-            raise AttributeError('No feature sheet found.')
         return self._featuresheet.columns.copy()
 
     @property
@@ -222,8 +231,7 @@ class Dataset():
     def counts(self, value):
         self._samplesheet = self._samplesheet.loc[value.columns]
         self._counts = value
-        if self._featuresheet is not None:
-            self._featuresheet = self._featuresheet.loc[value.index]
+        self._featuresheet = self._featuresheet.loc[value.index]
 
     @property
     def featuresheet(self):
@@ -240,14 +248,10 @@ class Dataset():
 
     def copy(self):
         '''Copy of the Dataset including a new SampleSheet and CountsTable'''
-        if self.featuresheet is None:
-            featuresheet = None
-        else:
-            featuresheet = self.featuresheet.copy()
         return self.__class__(
-                samplesheet=self._samplesheet.copy(),
                 counts_table=self._counts.copy(),
-                featuresheet=featuresheet)
+                samplesheet=self._samplesheet.copy(),
+                featuresheet=self.featuresheet.copy())
 
     def query_samples_by_counts(self, expression, inplace=False):
         '''Select samples based on gene expression.
