@@ -42,6 +42,7 @@ class Dataset():
 
         if samplesheet is None:
             self._samplesheet = SampleSheet(data=[], index=self._counts.columns)
+            self._samplesheet.sheetname = None
         elif not isinstance(samplesheet, SampleSheet):
             self._samplesheet = SampleSheet.from_sheetname(samplesheet)
         else:
@@ -49,6 +50,7 @@ class Dataset():
 
         if featuresheet is None:
             self._featuresheet = FeatureSheet(data=[], index=self._counts.index)
+            self._featuresheet.sheetname = None
         elif not isinstance(featuresheet, FeatureSheet):
             self._featuresheet = FeatureSheet.from_tablename(featuresheet)
         else:
@@ -57,8 +59,11 @@ class Dataset():
         # Uniform axes across data and metadata
         assert(self._counts.columns.isin(self._samplesheet.index).all())
         self._samplesheet = self._samplesheet.loc[self._counts.columns]
-        assert(self._counts.index.isin(self._featuresheet.index).all())
-        self._featuresheet = self._featuresheet.loc[self._counts.index]
+        # FIXME: this is very slow
+        #assert(self._counts.index.isin(self._featuresheet.index).all())
+        #self._featuresheet = self._featuresheet.loc[self._counts.index]
+
+        print('ciao')
 
         # Plugins
         self.correlation = Correlation(self)
@@ -74,11 +79,21 @@ class Dataset():
                 self.n_features)
 
     def __repr__(self):
-        return '{:}("{:}", "{:}", "{:}")'.format(
+        if self._samplesheet.sheetname is None:
+            ssn = 'None'
+        else:
+            ssn = '"{:}"'.format(self._samplesheet.sheetname)
+
+        if self._featuresheet.sheetname is None:
+            fsn = 'None'
+        else:
+            fsn = '"{:}"'.format(self._featuresheet.sheetname)
+
+        return '{:}("{:}", {:}, {:})'.format(
                 self.__class__.__name__,
                 self._counts.name,
-                self._samplesheet.sheetname,
-                self._featuresheet.sheetname,
+                ssn,
+                fsn,
                 )
 
     def __eq__(self, other):

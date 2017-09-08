@@ -3,30 +3,7 @@
 # date:       02/08/17
 # content:    Support module for filenames related to CSV/TSV files.
 # Modules
-import os
-import yaml
-
 from singlet.config import config
-
-
-# Process config
-for sheetname, sheet in config['io']['samplesheets'].items():
-    if ('format' not in sheet) and ('path' in sheet):
-        path = sheet['path']
-        config['io']['samplesheets'][sheetname]['format'] = path.split('.')[-1].lower()
-if 'featuresheets' in config['io']:
-    for sheetname, sheet in config['io']['featuresheets'].items():
-        if ('format' not in sheet) and ('path' in sheet):
-            path = sheet['path']
-            config['io']['featuresheets'][sheetname]['format'] = path.split('.')[-1].lower()
-for tablename, sheet in config['io']['count_tables'].items():
-    if ('format' not in sheet) and ('path' in sheet):
-        path = sheet['path']
-        if isinstance(path, str):
-            fmt = path.split('.')[-1].lower()
-        else:
-            fmt = [p.split('.')[-1].lower() for p in path]
-        config['io']['count_tables'][tablename]['format'] = fmt
 
 
 # Parser
@@ -75,34 +52,16 @@ def parse_featuresheet(sheetname):
     return table
 
 
-def parse_counts_table(tablename):
+def parse_counts_table(path, fmt):
     import pandas as pd
 
-    sheet = config['io']['count_tables'][tablename]
-    paths = sheet['path']
-    fmts = sheet['format']
-    if isinstance(paths, str):
-        paths = [paths]
-        fmts = [fmts]
-
-    tables = []
-    for path, fmt in zip(paths, fmts):
-        if fmt == 'tsv':
-            sep = '\t'
-        elif fmt == 'csv':
-            sep = ','
-        else:
-            raise ValueError('Format not understood')
-
-        table = pd.read_csv(path, sep=sep, index_col=0)
-
-        if ('cells' in sheet) and (sheet['cells'] != 'columns'):
-            table = table.T
-
-        tables.append(table)
-
-    if len(tables) == 1:
-        table = tables[0]
+    if fmt == 'tsv':
+        sep = '\t'
+    elif fmt == 'csv':
+        sep = ','
     else:
-        table = pd.concat(tables, axis=1)
+        raise ValueError('Format not understood')
+
+    table = pd.read_csv(path, sep=sep, index_col=0)
+
     return table

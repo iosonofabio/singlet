@@ -38,7 +38,7 @@ class CountsTable(pd.DataFrame):
             CountsTable: the counts table.
         '''
         from .config import config
-        from .io.csv import parse_counts_table
+        from .io import parse_counts_table
 
         self = cls(parse_counts_table(tablename))
         self.name = tablename

@@ -16,3 +16,26 @@ with open(config_filename) as stream:
 
 # Warnings that should be seen only once
 config['_once_warnings'] = []
+
+
+# Process config
+for tablename, sheet in config['io']['count_tables'].items():
+    if ('format' not in sheet) and ('path' in sheet):
+        path = sheet['path']
+        if isinstance(path, str):
+            fmt = path.split('.')[-1].lower()
+        else:
+            fmt = [p.split('.')[-1].lower() for p in path]
+        config['io']['count_tables'][tablename]['format'] = fmt
+
+if 'samplesheets' in config['io']:
+    for sheetname, sheet in config['io']['samplesheets'].items():
+        if ('format' not in sheet) and ('path' in sheet):
+            path = sheet['path']
+            config['io']['samplesheets'][sheetname]['format'] = path.split('.')[-1].lower()
+
+if 'featuresheets' in config['io']:
+    for sheetname, sheet in config['io']['featuresheets'].items():
+        if ('format' not in sheet) and ('path' in sheet):
+            path = sheet['path']
+            config['io']['featuresheets'][sheetname]['format'] = path.split('.')[-1].lower()
