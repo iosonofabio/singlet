@@ -21,9 +21,15 @@ class GoogleAPI:
     application_name = 'Google Sheet API to singlet'
     MAX_COLUMN = 'AZ'
 
-    def __init__(self, spreadsheetId, spreadsheetname, client_id_filename):
+    def __init__(
+            self,
+            spreadsheetId,
+            spreadsheetname,
+            client_id_filename,
+            client_secret_filename):
         self.spreadsheetname = spreadsheetname
         self.client_id_filename = client_id_filename
+        self.client_secret_filename = client_secret_filename
         self.spreadsheetId = spreadsheetId
         self.set_service()
 
@@ -41,25 +47,19 @@ class GoogleAPI:
         from oauth2client.file import Storage
 
         # Cached credentials
-        client_secret_filename = ''.join([
-            os.getenv('HOME'),
-            '/.credentials/sheets.googleapis.com-singlet-',
-            self.spreadsheetname,
-            '.json'
-            ])
-        credential_dir = os.path.dirname(client_secret_filename)
+        credential_dir = os.path.dirname(self.client_secret_filename)
         if not os.path.exists(credential_dir):
             os.makedirs(credential_dir)
 
-        store = Storage(client_secret_filename)
+        store = Storage(self.client_secret_filename)
         credentials = store.get()
         if not credentials or credentials.invalid:
             flow = client.flow_from_clientsecrets(self.client_id_filename,
                                                   self.scopes)
             flow.user_agent = self.application_name
-            print('Storing credentials to '+client_secret_filename)
+            print('Storing credentials to '+self.client_secret_filename)
             credentials = tools.run_flow(flow, store)
-            print('Stored credentials into:', client_secret_filename)
+            print('Stored credentials into:', self.client_secret_filename)
         return credentials
 
     def set_service(self):

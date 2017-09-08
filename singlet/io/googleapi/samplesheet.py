@@ -22,7 +22,12 @@ class SampleSheet(GoogleAPI):
 
         sheetid = sheet['google_id']
         client_id_filename = sheet['client_id_filename']
-        super().__init__(sheetid, spreadsheetname, client_id_filename)
+        client_secret_filename = sheet['client_secret_filename']
+        super().__init__(
+                sheetid,
+                spreadsheetname,
+                client_id_filename,
+                client_secret_filename)
 
     def get_number_virus_reads(self, virus, icols=None):
         '''Get the number of virus reads from the spreadsheet'''

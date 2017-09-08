@@ -34,6 +34,10 @@ if 'samplesheets' in config['io']:
             path = sheet['path']
             config['io']['samplesheets'][sheetname]['format'] = path.split('.')[-1].lower()
 
+        elif ('google_id' not in sheet) and ('url' in sheet):
+            url = sheet['url']
+            config['io']['samplesheets'][sheetname]['google_id'] = url.split('/')[-1]
+
 if 'featuresheets' in config['io']:
     for sheetname, sheet in config['io']['featuresheets'].items():
         if ('format' not in sheet) and ('path' in sheet):

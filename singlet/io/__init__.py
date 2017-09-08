@@ -14,9 +14,17 @@ def parse_samplesheet(sheetname):
 
     sheet = config['io']['samplesheets'][sheetname]
     if 'path' in sheet:
-        return parse_csv(sheetname)
+        table = parse_csv(sheetname)
     elif 'url' in sheet:
-        return parse_googleapi(sheetname)
+        table = parse_googleapi(sheetname)
+
+    if ('cells' in sheet) and (sheet['cells'] != 'rows'):
+        table = table.T
+
+    table.set_index('name', inplace=True, drop=True)
+
+    return table
+
 
 
 def parse_counts_table(tablename):

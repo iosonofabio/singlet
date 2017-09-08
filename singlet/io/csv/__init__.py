@@ -20,10 +20,7 @@ def parse_samplesheet(sheetname):
     else:
         raise ValueError('Format not understood')
 
-    table = pd.read_csv(sheet['path'], sep=sep, index_col='name')
-
-    if ('cells' in sheet) and (sheet['cells'] != 'rows'):
-        table = table.T
+    table = pd.read_csv(sheet['path'], sep=sep, index_col=False)
 
     return table
 
