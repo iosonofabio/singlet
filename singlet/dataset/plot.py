@@ -768,7 +768,10 @@ class Plot():
                     qualitative annotations, the values can be palette names \
                     or palettes (with at least  as many colors as there are \
                     categories). For quantitative annotatoins, the values \
-                    can be colormap names or colormaps.
+                    can be colormap names or colormaps. Keys must be columns \
+                    of the Dataset.featuresheet, except for the key 'mean \
+                    expression' which is interpreted to mean the average of \
+                    the counts for that feature.
             orientation (string): Whether the samples are on the abscissa \
                     ('horizontal') or on the ordinate ('vertical').
             tight_layout (bool or dict): Whether to call \
@@ -875,12 +878,13 @@ class Plot():
             col_samples = None
 
         if annotate_features:
-            if self.dataset.featuresheet is None:
-                raise AttributeError('Dataset has no FeatureSheet.')
             cbars_features = []
             col_features = []
             for key, val in annotate_features.items():
-                color_data = self.dataset.featuresheet.loc[:, key]
+                if key == 'mean expression':
+                    color_data = self.dataset.counts.mean(axis=1)
+                else:
+                    color_data = self.dataset.featuresheet.loc[:, key]
                 is_numeric = np.issubdtype(color_data.dtype, np.number)
                 if (color_data.dtype.name == 'category') or (not is_numeric):
                     cmap_type = 'qualitative'
@@ -1058,7 +1062,7 @@ class Plot():
                 else:
                     hcb = min(0.3, 0.4 / n_cbars)
                     ycb = 0.98 - hcb
-                for i, cbi in enumerate(cbars_samples):
+                for i, cbi in enumerate(cbars_features):
                     if orientation_cb == 'horizontal':
                         cax = g.fig.add_axes((xcb, 0.955, wcb, 0.025))
                     else:
@@ -1072,7 +1076,7 @@ class Plot():
                         cb = mpl.colorbar.ColorbarBase(
                                 cax,
                                 cmap=cbi['cmap'],
-                                orientation=orientation,
+                                orientation=orientation_cb,
                                 **kw)
                     else:
                         n_colors = cbi['n_colors']
