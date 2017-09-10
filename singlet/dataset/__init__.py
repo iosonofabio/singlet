@@ -52,7 +52,7 @@ class Dataset():
             self._featuresheet = FeatureSheet(data=[], index=self._counts.index)
             self._featuresheet.sheetname = None
         elif not isinstance(featuresheet, FeatureSheet):
-            self._featuresheet = FeatureSheet.from_tablename(featuresheet)
+            self._featuresheet = FeatureSheet.from_sheetname(featuresheet)
         else:
             self._featuresheet = featuresheet
 
@@ -62,8 +62,6 @@ class Dataset():
         # FIXME: this is very slow
         #assert(self._counts.index.isin(self._featuresheet.index).all())
         #self._featuresheet = self._featuresheet.loc[self._counts.index]
-
-        print('ciao')
 
         # Plugins
         self.correlation = Correlation(self)

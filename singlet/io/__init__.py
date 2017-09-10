@@ -14,17 +14,40 @@ def parse_samplesheet(sheetname):
 
     sheet = config['io']['samplesheets'][sheetname]
     if 'path' in sheet:
-        table = parse_csv(sheetname)
+        table = parse_csv(sheet['path'], sheet['format'])
     elif 'url' in sheet:
         table = parse_googleapi(sheetname)
 
     if ('cells' in sheet) and (sheet['cells'] != 'rows'):
         table = table.T
 
-    table.set_index('name', inplace=True, drop=True)
+    if 'index_column' in sheet:
+        index_col = sheet['index_column']
+    else:
+        index_col = 'name'
+
+    table.set_index(index_col, inplace=True, drop=True)
 
     return table
 
+
+def parse_featuresheet(sheetname):
+    from .csv import parse_featuresheet as parse_csv
+
+    sheet = config['io']['featuresheets'][sheetname]
+    table = parse_csv(sheet['path'], sheet['format'])
+
+    if ('features' in sheet) and (sheet['features'] != 'rows'):
+        table = table.T
+
+    if 'index_column' in sheet:
+        index_col = sheet['index_column']
+    else:
+        index_col = 'name'
+
+    table.set_index(index_col, inplace=True, drop=True)
+
+    return table
 
 
 def parse_counts_table(tablename):

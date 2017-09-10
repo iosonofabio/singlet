@@ -7,11 +7,8 @@ from singlet.config import config
 
 
 # Parser
-def parse_samplesheet(sheetname):
+def parse_samplesheet(path, fmt):
     import pandas as pd
-
-    sheet = config['io']['samplesheets'][sheetname]
-    fmt = sheet['format']
 
     if fmt == 'tsv':
         sep = '\t'
@@ -20,19 +17,13 @@ def parse_samplesheet(sheetname):
     else:
         raise ValueError('Format not understood')
 
-    table = pd.read_csv(sheet['path'], sep=sep, index_col=False)
+    table = pd.read_csv(path, sep=sep, index_col=False)
 
     return table
 
 
-def parse_featuresheet(sheetname):
+def parse_featuresheet(path, fmt):
     import pandas as pd
-
-    if 'featuresheets' not in config['io']:
-        raise ValueError('Config file has no featuresheets section')
-
-    sheet = config['io']['featuresheets'][sheetname]
-    fmt = sheet['format']
 
     if fmt == 'tsv':
         sep = '\t'
@@ -41,10 +32,7 @@ def parse_featuresheet(sheetname):
     else:
         raise ValueError('Format not understood')
 
-    table = pd.read_csv(sheet['path'], sep=sep, index_col='name')
-
-    if ('features' in sheet) and (sheet['features'] != 'rows'):
-        table = table.T
+    table = pd.read_csv(path, sep=sep, index_col=False)
 
     return table
 
