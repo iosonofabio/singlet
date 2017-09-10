@@ -59,8 +59,7 @@ class Correlation():
                     'spearman'.
             fillna (dict, int, or None): a dictionary with phenotypes as keys \
                     and numbers to fill for NaNs as values. None will do \
-                    nothing, potentially yielding NaN as correlation \
-                    coefficients.
+                    nothing.
 
         Returns:
             pandas.DataFrame with the correlation coefficients. If either \
@@ -75,6 +74,8 @@ class Correlation():
                 exp = exp.loc[[features]]
             else:
                 exp = exp.loc[features]
+        else:
+            features = exp.index.tolist()
 
         phe = self.dataset.samplesheet
         if isinstance(phenotypes, str):
@@ -105,11 +106,13 @@ class Correlation():
             return pd.Series(
                     data=r[0],
                     index=phe.columns,
+                    name='correlation',
                     dtype=float)
         elif (not isinstance(features, str)) and isinstance(phenotypes, str):
             return pd.Series(
                     data=r[:, 0],
                     index=exp.index,
+                    name='correlation',
                     dtype=float)
         else:
             return r[0, 0]
@@ -170,11 +173,13 @@ class Correlation():
             return pd.Series(
                     data=r[0],
                     index=exp2.index,
+                    name='correlation',
                     dtype=float)
         elif (not isinstance(features, str)) and isinstance(features2, str):
             return pd.Series(
                     data=r[:, 0],
                     index=exp.index,
+                    name='correlation',
                     dtype=float)
         else:
             return r[0, 0]
@@ -254,11 +259,13 @@ class Correlation():
             return pd.Series(
                     data=r[0],
                     index=phe2.columns,
+                    name='correlation',
                     dtype=float)
         elif (not isinstance(phenotypes, str)) and isinstance(phenotypes2, str):
             return pd.Series(
                     data=r[:, 0],
                     index=phe.columns,
+                    name='correlation',
                     dtype=float)
         else:
             return r[0, 0]
