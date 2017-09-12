@@ -10,12 +10,10 @@ if __name__ == '__main__':
 
     # NOTE: an env variable for the config file needs to be set when
     # calling this script
-    from singlet.io.csv import parse_samplesheet
+    from singlet.io import parse_samplesheet
 
     print('Parsing example TSV sample sheet')
-    table = parse_samplesheet(
-            'example_data/example_sample_table - sequenced.tsv',
-            'tsv')
+    table = parse_samplesheet('example_sheet_tsv')
 
     #TODO: check it's correct
     print('Done!')

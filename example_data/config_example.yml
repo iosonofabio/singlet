@@ -4,6 +4,7 @@
       'description': 'Example Google Spreadsheet for cell metadata'
       'url': 'https://docs.google.com/spreadsheets/d/15OKOC48WZYFUQvYl9E7qEsR6AjqE4_BW7qcCsjJAD6w'
       'client_id_filename': 'example_data/example_google_client_id.json'
+      'client_secret_filename': 'example_data/example_google_client_secret.json'
       'sheet': 'cells'
       'cells': 'rows'
     'example_sheet_tsv':
