@@ -13,7 +13,9 @@ if __name__ == '__main__':
     from singlet.io.csv import parse_samplesheet
 
     print('Parsing example TSV sample sheet')
-    table = parse_samplesheet('example_sheet_tsv')
+    table = parse_samplesheet(
+            'example_data/example_sample_table - sequenced.tsv',
+            'tsv')
 
     #TODO: check it's correct
     print('Done!')
