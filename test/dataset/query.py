@@ -11,7 +11,16 @@ if __name__ == '__main__':
     # NOTE: an env variable for the config file needs to be set when
     # calling this script
     from singlet.dataset import Dataset
-    ds = Dataset(samplesheet='example_sheet_tsv', counts_table='example_table_tsv')
+    ds = Dataset(
+            samplesheet='example_sheet_tsv',
+            counts_table='example_table_tsv')
+
+    print('Query samples by metadata')
+    ds_tmp = ds.query_samples_by_metadata(
+            'experiment == "test_pipeline"',
+            inplace=False)
+    assert(tuple(ds_tmp.samplenames) == ('test_pipeline',))
+    print('Done!')
 
     print('Query sample by counts in one gene')
     ds_tmp = ds.query_samples_by_counts('KRIT1 > 100', inplace=False)
@@ -28,7 +37,9 @@ if __name__ == '__main__':
     assert(tuple(ds_tmp.samplenames) == ('second_sample',))
     print('Done!')
 
-    print('Query features')
-    ds_tmp = ds.query_features_by_counts('first_sample > 1000000', inplace=False)
+    print('Query features by counts')
+    ds_tmp = ds.query_features_by_counts(
+            'first_sample > 1000000',
+            inplace=False)
     assert(tuple(ds_tmp.featurenames) == ('__alignment_not_unique',))
     print('Done!')
