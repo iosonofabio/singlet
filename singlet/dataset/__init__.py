@@ -295,7 +295,7 @@ class Dataset():
         '''
         if inplace:
             self._samplesheet.query(expression, inplace=True)
-            self._counts = self._counts.loc[self._samplesheet.index]
+            self._counts = self._counts.loc[:, self._samplesheet.index]
         else:
             samplesheet = self._samplesheet.query(expression, inplace=False)
             counts_table = self._counts.loc[:, samplesheet.index].copy()
