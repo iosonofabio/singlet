@@ -11,7 +11,7 @@ import pandas as pd
 class Dataset():
     '''Collection of cells, with feature counts and metadata'''
 
-    def __init__(self, counts_table, samplesheet=None, featuresheet=None):
+    def __init__(self, counts_table=None, samplesheet=None, featuresheet=None):
         '''Collection of cells, with feature counts and metadata
 
         Args:
@@ -36,17 +36,29 @@ class Dataset():
         from .cluster import Cluster
         from .fit import Fit
 
-        if not isinstance(counts_table, CountsTable):
-            counts_table = CountsTable.from_tablename(counts_table)
-        self._counts = counts_table
-
-        if samplesheet is None:
-            self._samplesheet = SampleSheet(data=[], index=self._counts.columns)
-            self._samplesheet.sheetname = None
-        elif not isinstance(samplesheet, SampleSheet):
-            self._samplesheet = SampleSheet.from_sheetname(samplesheet)
+        # In general this class should be used for gene counts and phenotypes,
+        # but we have to cover the corner cases that no counts or no phenotypes
+        # are provided
+        if counts_table is None:
+            if samplesheet is None:
+                raise ValueError('At least samplesheet or counts_table must be present')
+            elif not isinstance(samplesheet, SampleSheet):
+                self._samplesheet = SampleSheet.from_sheetname(samplesheet)
+            else:
+                self._samplesheet = samplesheet
+            self._counts = CountsTable(data=[], index=[], columns=self._samplesheet.index)
         else:
-            self._samplesheet = samplesheet
+            if not isinstance(counts_table, CountsTable):
+                counts_table = CountsTable.from_tablename(counts_table)
+            self._counts = counts_table
+
+            if samplesheet is None:
+                self._samplesheet = SampleSheet(data=[], index=self._counts.columns)
+                self._samplesheet.sheetname = None
+            elif not isinstance(samplesheet, SampleSheet):
+                self._samplesheet = SampleSheet.from_sheetname(samplesheet)
+            else:
+                self._samplesheet = samplesheet
 
         if featuresheet is None:
             self._featuresheet = FeatureSheet(data=[], index=self._counts.index)
@@ -77,6 +89,11 @@ class Dataset():
                 self.n_features)
 
     def __repr__(self):
+        if not hasattr(self._counts, 'name'):
+            ctn = 'None'
+        else:
+            ctn = '"{:}"'.format(self._counts.name)
+
         if self._samplesheet.sheetname is None:
             ssn = 'None'
         else:
@@ -87,9 +104,9 @@ class Dataset():
         else:
             fsn = '"{:}"'.format(self._featuresheet.sheetname)
 
-        return '{:}("{:}", {:}, {:})'.format(
+        return '{:}({:}, {:}, {:})'.format(
                 self.__class__.__name__,
-                self._counts.name,
+                ctn,
                 ssn,
                 fsn,
                 )
