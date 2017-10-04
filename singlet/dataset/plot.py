@@ -791,6 +791,8 @@ class Plot():
             linkage_samples = cluster_samples['linkage']
         elif cluster_samples is False:
             linkage_samples = None
+        else:
+            linkage_samples = cluster_samples
 
         if cluster_features is True:
             cluster_features = self.dataset.cluster.hierarchical(
@@ -800,6 +802,8 @@ class Plot():
             linkage_features = cluster_features['linkage']
         elif cluster_features is False:
             linkage_features = None
+        else:
+            linkage_features = cluster_features
 
         if annotate_samples:
             cbars_samples = []
