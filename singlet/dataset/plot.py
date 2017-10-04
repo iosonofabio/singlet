@@ -607,7 +607,6 @@ class Plot():
             cmap='viridis',
             ax=None,
             tight_layout=True,
-            legend=False,
             **kwargs):
         '''Scatter samples after dimensionality reduction.
 
@@ -631,8 +630,6 @@ class Plot():
                     matplotlib.pyplot.tight_layout at the end of the \
                     plotting. If it is a dict, pass it unpacked to that \
                     function.
-            legend (bool or dict): If True, call ax.legend(). If a dict, \
-                    pass as **kwargs to ax.legend.
             **kwargs: named arguments passed to the plot function.
 
         Returns:
@@ -665,13 +662,13 @@ class Plot():
                 color_by_phenotype = False
             else:
                 raise ValueError(
-                'The label '+color_by+' is neither a phenotype nor a feature')
+                    'The label '+color_by+' is neither a phenotype nor a feature')
 
             # Categorical columns get just a list of colors
             if (color_data.dtype.name == 'category') or (not is_numeric):
                 cd_unique = list(np.unique(color_data.values))
                 c_unique = cmap(np.linspace(0, 1, len(cd_unique)))
-                c = c_unique[(cd_unique.index(x) for x in color_data.values)]
+                c = c_unique[[cd_unique.index(x) for x in color_data.values]]
 
             # Non-categorical numeric types are more tricky: check for NaNs
             else:
@@ -708,12 +705,6 @@ class Plot():
                 **kwargs)
 
         ax.grid(True)
-
-        if legend:
-            if np.isscalar(legend):
-                ax.legend()
-            else:
-                ax.legend(**legend)
 
         if tight_layout:
             if isinstance(tight_layout, dict):
