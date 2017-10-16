@@ -1,15 +1,18 @@
 API reference
 =============
-Singlet analysis is centered around the `Dataset` class, which describes a set of samples (usually single cells). Each `Dataset` has two main properties:
+Singlet analysis is centered around the `Dataset` class, which describes a set of samples (usually single cells). Each `Dataset` has three main properties:
 
-- a `CountsTable` with the counts of genomic features, typically transcripts
-- a `SampleSheet` with the metdata and phenotypic information.
+- a :doc:`CountsTable <api/counts_table>` with the counts of genomic features, typically transcripts
+- a :doc:`SampleSheet <api/samplesheet>` with the sample metdata and phenotypic information.
+- a :doc:`FeatureSheet <api/featuresheet>` with the feature metdata, for instance alternative names and Gene Ontology terms.
 
-Moreover, a `Dataset` has a number of "action properties" that perform operations on the data:
+At least one of the three properties must be present. In fact, you are perfectly free to set only the feature counts or even, although may be not so useful, only the sample metadata. Moreover, a `Dataset` has a number of "action properties" that perform operations on the data:
 
 - `Dataset.correlations`: correlate feature expressions and phenotypes
+- `Dataset.feature_selection`: select features based on expression patterns
 - `Dataset.dimensionality`: reduce dimensionality of the data including phenotypes
 - `Dataset.cluster`: cluster samples, features, and phenotypes
+- `Dataset.fit`: fit (regress on) feature expression and metadata
 - `Dataset.plot`: plot the results of various analyses
 
 Supporting modules are useful for particular purposes or internal use only:
@@ -18,21 +21,6 @@ Supporting modules are useful for particular purposes or internal use only:
 - `utils`
 - `io`
 
-singlet\.counts\_table module
------------------------------
-
-.. automodule:: singlet.counts_table
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-singlet\.samplesheet module
----------------------------
-
-.. automodule:: singlet.samplesheet
-    :members:
-    :undoc-members:
-    :show-inheritance:
 
 singlet\.dataset module
 ---------------------------
