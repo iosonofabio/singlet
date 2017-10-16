@@ -107,6 +107,7 @@ html_theme_options = {
         'travis_button': True,
         'page_width': '1300px',
         'sidebar_width': '350px',
+        'fixed_sidebar': True,
 }
 
 # Add any paths that contain custom static files (such as style sheets) here,
