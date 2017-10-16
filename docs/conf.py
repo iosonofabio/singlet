@@ -101,7 +101,8 @@ html_theme = 'alabaster'
 # documentation.
 #
 html_theme_options = {
-        'page_width': '1400px',
+        'page_width': '1300px',
+        'sidebar_width': '350px',
 }
 
 # Add any paths that contain custom static files (such as style sheets) here,
