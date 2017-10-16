@@ -35,6 +35,7 @@ class Dataset():
         from .dimensionality import DimensionalityReduction
         from .cluster import Cluster
         from .fit import Fit
+        from .feature_selection import FeatureSelection
 
         # In general this class should be used for gene counts and phenotypes,
         # but we have to cover the corner cases that no counts or no phenotypes
@@ -81,6 +82,7 @@ class Dataset():
         self.dimensionality = DimensionalityReduction(self)
         self.cluster = Cluster(self)
         self.fit = Fit(self)
+        self.feature_selection = FeatureSelection(self)
 
     def __str__(self):
         return '{:} with {:} samples and {:} features'.format(

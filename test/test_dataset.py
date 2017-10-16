@@ -48,6 +48,9 @@ if __name__ == '__main__':
     # Comparison
     run('test/dataset/comparison.py')
 
+    # Feature selection
+    run('test/dataset/feature_selection.py')
+
     # Correlations
     run('test/dataset/correlation.py')
 
