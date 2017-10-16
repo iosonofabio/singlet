@@ -101,6 +101,10 @@ html_theme = 'alabaster'
 # documentation.
 #
 html_theme_options = {
+        'github_user': 'iosonofabio',
+        'github_repo': 'singlet',
+        'github_banner': True,
+        'travis_button': True,
         'page_width': '1300px',
         'sidebar_width': '350px',
 }
