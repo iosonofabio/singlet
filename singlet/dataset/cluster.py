@@ -20,6 +20,54 @@ class Cluster():
         '''
         self.dataset = dataset
 
+    def kmeans(
+            self,
+            n_clusters,
+            axis,
+            phenotypes=(),
+            log_features=True,
+            random_state=0,
+            ):
+        '''K-Means clustering.
+
+        Args:
+            n_clusters (int): The number of clusters you want.
+            axis (string): It must be 'samples' or 'features'. \
+                    The Dataset.counts matrix is used and \
+                    either samples or features are clustered.
+            phenotypes (iterable of strings): Phenotypes to add to the \
+                    features for joint clustering.
+            log_features (bool): Whether to add pseudocounts and take a log \
+                    of the feature counts before calculating distances.
+            random_state (int): Set to the same int for deterministic results.
+
+        Returns:
+            pd.Series with the labels of the clusters.
+        '''
+        from sklearn.cluster import KMeans
+
+        data = self.dataset.counts
+
+        if log_features:
+            data = np.log10(self.dataset.counts.pseudocount + data)
+
+        if phenotypes is not None:
+            data = data.copy()
+            for pheno in phenotypes:
+                data.loc[pheno] = self.dataset.samplesheet.loc[:, pheno]
+
+        if axis == 'samples':
+            data = data.T
+        elif axis == 'features':
+            pass
+        else:
+            raise ValueError('axis must be "samples" or "features"')
+
+        kmeans = (KMeans(n_clusters=n_clusters, random_state=random_state)
+                  .fit(data.values))
+        labels = pd.Series(kmeans.labels_, index=data.index)
+        return labels
+
     # NOTE: caching this one is tricky because it has non-kwargs AND it would
     # need a double cache, one for cells and one for features/phenotypes
     def hierarchical(
@@ -29,8 +77,7 @@ class Cluster():
             metric='correlation',
             method='average',
             log_features=True,
-            optimal_ordering=False,
-            **kwargs):
+            optimal_ordering=False):
         '''Hierarchical clustering.
 
         Args:
@@ -48,7 +95,7 @@ class Cluster():
             optimal_ordering (bool): Whether to resort the linkage so that \
                     nearest neighbours have shortest distance. This may take \
                     longer than the clustering itself.
-        Return:
+        Returns:
             dict with the linkage, distance matrix, and ordering.
         '''
         from scipy.spatial.distance import pdist
