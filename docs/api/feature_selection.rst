@@ -1,4 +1,4 @@
-singlet\.dataset\.feature_selection module
+singlet\.dataset\.feature_selection
 ---------------------------------------
 
 .. automodule:: singlet.dataset.feature_selection

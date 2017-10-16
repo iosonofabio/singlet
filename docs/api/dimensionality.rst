@@ -1,4 +1,4 @@
-singlet\.dataset\.dimensionality module
+singlet\.dataset\.dimensionality
 ---------------------------------------
 
 .. automodule:: singlet.dataset.dimensionality

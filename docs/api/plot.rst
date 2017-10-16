@@ -1,4 +1,4 @@
-singlet\.dataset\.plot module
+singlet\.dataset\.plot
 -------------------------------------
 
 .. automodule:: singlet.dataset.plot

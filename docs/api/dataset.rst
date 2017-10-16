@@ -1,4 +1,4 @@
-singlet\.dataset module
+singlet\.dataset
 ---------------------------
 .. automodule:: singlet.dataset
     :members:

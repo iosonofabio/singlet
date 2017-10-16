@@ -1,4 +1,4 @@
-singlet\.dataset\.correlations module
+singlet\.dataset\.correlations
 -------------------------------------
 
 .. automodule:: singlet.dataset.correlations

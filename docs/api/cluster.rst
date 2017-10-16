@@ -1,4 +1,4 @@
-singlet\.dataset\.cluster module
+singlet\.dataset\.cluster
 -------------------------------------
 
 .. automodule:: singlet.dataset.cluster

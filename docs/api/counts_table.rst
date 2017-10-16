@@ -1,4 +1,4 @@
-singlet\.counts\_table module
+singlet\.counts\_table
 -----------------------------
 
 .. automodule:: singlet.counts_table

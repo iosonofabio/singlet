@@ -1,4 +1,4 @@
-singlet\.samplesheet module
+singlet\.samplesheet
 ---------------------------
 
 .. automodule:: singlet.samplesheet

@@ -1,4 +1,4 @@
-singlet\.dataset\.fit module
+singlet\.dataset\.fit
 -------------------------------------
 
 .. automodule:: singlet.dataset.fit
