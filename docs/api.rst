@@ -1,6 +1,6 @@
 API reference
 =============
-Singlet analysis is centered around the :ref:`Dataset <dataset>` class, which describes a set of samples (usually single cells). Each `Dataset` has three main properties:
+Singlet analysis is centered around the :doc:`Dataset <api/dataset>` class, which describes a set of samples (usually single cells). Each `Dataset` has three main properties:
 
 - a :doc:`CountsTable <api/counts_table>` with the counts of genomic features, typically transcripts
 - a :doc:`SampleSheet <api/samplesheet>` with the sample metdata and phenotypic information.
@@ -20,13 +20,3 @@ Supporting modules are useful for particular purposes or internal use only:
 - `config`
 - `utils`
 - `io`
-
-
-.. _dataset:
-
-singlet\.dataset module
----------------------------
-.. automodule:: singlet.dataset
-    :members:
-    :undoc-members:
-    :show-inheritance:
