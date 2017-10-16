@@ -95,7 +95,6 @@ class DimensionalityReduction():
     def tsne(
             self,
             n_dims=2,
-            transform='log10',
             perplexity=30,
             theta=0.5,
             rand_seed=0,
@@ -119,13 +118,6 @@ class DimensionalityReduction():
             raise ValueError('Perplexity too high, reduce to <= {:}'.format((n - 1.)/3))
 
         X = self.dataset.counts.copy()
-        pco = self.dataset.counts.pseudocount
-        if transform == 'log10':
-            X = np.log10(X + pco)
-        elif transform == 'log2':
-            X = np.log2(X + pco)
-        elif transform == 'log':
-            X = np.log(X + pco)
 
         # this version does not require pre-whitening
         Y = tsne(

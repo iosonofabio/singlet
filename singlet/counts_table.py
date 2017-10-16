@@ -57,7 +57,8 @@ class CountsTable(pd.DataFrame):
             other (bool): Whether to exclude other features, e.g. unmapped reads
             inplace (bool): Whether to drop those features in place.
             errors (string): Whether to raise an exception if the features \
-                    to be excluded are already not present.
+                    to be excluded are already not present. Must be 'ignore' \
+                    or 'raise'.
 
         Returns:
             CountsTable: a slice of self without those features.

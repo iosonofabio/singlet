@@ -417,9 +417,9 @@ class Dataset():
                 pass
             elif features == 'mapped':
                 counts = counts.exclude_features(
-                        spikeins=True, other=True)
+                        spikeins=True, other=True, errors='ignore')
                 counts_other = counts_other.exclude_features(
-                        spikeins=True, other=True)
+                        spikeins=True, other=True, errors='ignore')
             elif features == 'spikeins':
                 counts = counts.get_spikeins()
                 counts_other = counts_other.get_spikeins()

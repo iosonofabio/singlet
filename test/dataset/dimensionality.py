@@ -50,9 +50,9 @@ if __name__ == '__main__':
 
     print('Test Dataset t-SNE')
     ds.counts = ds.counts.iloc[:200]
+    ds.counts.log(inplace=True)
     vs = ds.dimensionality.tsne(
             n_dims=2,
-            transform='log10',
             theta=0.5,
             perplexity=0.8)
     # t-SNE seems to give different results based on platform, but consistent.
@@ -67,7 +67,6 @@ if __name__ == '__main__':
     ds.dimensionality._tsne_cache['func_kwargs']['n_dims'] = 'none'
     vs = ds.dimensionality.tsne(
             n_dims='none',
-            transform='log10',
             theta=0.5,
             perplexity=0.8)
     print('Done!')
