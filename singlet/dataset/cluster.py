@@ -26,8 +26,7 @@ class Cluster():
             axis,
             phenotypes=(),
             log_features=True,
-            random_state=0,
-            ):
+            random_state=0):
         '''K-Means clustering.
 
         Args:
@@ -73,8 +72,7 @@ class Cluster():
             axis,
             phenotypes=(),
             log_features=True,
-            **kwargs,
-            ):
+            **kwargs):
         '''Density-Based Spatial Clustering of Applications with Noise.
 
         Args:
