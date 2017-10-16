@@ -68,14 +68,18 @@ This will calculate a t-SNE embedding of the first 200 features and then show yo
    :width: 600
    :alt: t-SNE example
 
+.. note::
+   The figure looks different on OSX, but no worries, if you got there chances are all is working correctly!
 
 Contents
 -------------
 .. toctree::
    :maxdepth: 2
+   :glob:
 
-   api
    examples
+   api
+   api/*
 
 
 Indices and tables
