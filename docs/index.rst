@@ -78,11 +78,6 @@ Contents
 
    examples
    api
-   api/dataset
-   api/counts_table
-   api/samplesheet
-   api/featuresheet
-   api/*
 
 
 Indices and tables

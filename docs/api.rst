@@ -20,3 +20,15 @@ Supporting modules are useful for particular purposes or internal use only:
 - `config`
 - `utils`
 - `io`
+
+Table of contents
+-----------------
+.. toctree::
+   :maxdepth: 2
+   :glob:
+
+   api/dataset
+   api/counts_table
+   api/samplesheet
+   api/featuresheet
+   api/*
