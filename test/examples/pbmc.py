@@ -53,4 +53,12 @@ if __name__ == '__main__':
 
     plt.tight_layout()
 
+    ds.samplesheet['cluster'] = dsr.samplesheet['kmeans']
+    ds_dict = ds.split(phenotypes=['cluster'])
+
+    genes_by_cluster = {}
+    for key, dsi in ds_dict.items():
+        dso = ds.query_samples_by_metadata('cluster!=@key', local_dict=locals())
+        genes_by_cluster[key] = dsi.compare(dso)['P-value'].nsmallest(10).index
+
     plt.show()

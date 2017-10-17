@@ -298,21 +298,33 @@ class Dataset():
                 samplesheet=self._samplesheet.copy(),
                 featuresheet=self.featuresheet.copy())
 
-    def query_samples_by_metadata(self, expression, inplace=False):
+    def query_samples_by_metadata(
+            self,
+            expression,
+            inplace=False,
+            local_dict=None):
         '''Select samples based on metadata.
 
         Args:
             expression (string): An expression compatible with pandas.DataFrame.query.
             inplace (bool): Whether to change the Dataset in place or return a new one.
+            local_dict (dict): A dictionary of local variables, useful if you \
+                    are using @var assignments in your expression. By far the \
+                    most common usage of this argument is to set \
+                    local_dict=locals().
 
         Returns:
             If `inplace` is True, None. Else, a Dataset.
         '''
         if inplace:
-            self._samplesheet.query(expression, inplace=True)
+            self._samplesheet.query(
+                    expression, inplace=True,
+                    local_dict=local_dict)
             self._counts = self._counts.loc[:, self._samplesheet.index]
         else:
-            samplesheet = self._samplesheet.query(expression, inplace=False)
+            samplesheet = self._samplesheet.query(
+                    expression, inplace=False,
+                    local_dict=local_dict)
             counts_table = self._counts.loc[:, samplesheet.index].copy()
             return self.__class__(
                     samplesheet=samplesheet,
@@ -320,21 +332,32 @@ class Dataset():
                     featuresheet=self._featuresheet.copy(),
                     )
 
-    def query_features_by_metadata(self, expression, inplace=False):
+    def query_features_by_metadata(
+            self,
+            expression,
+            inplace=False,
+            local_dict=None):
         '''Select features based on metadata.
 
         Args:
             expression (string): An expression compatible with pandas.DataFrame.query.
             inplace (bool): Whether to change the Dataset in place or return a new one.
-
+            local_dict (dict): A dictionary of local variables, useful if you \
+                    are using @var assignments in your expression. By far the \
+                    most common usage of this argument is to set \
+                    local_dict=locals().
         Returns:
             If `inplace` is True, None. Else, a Dataset.
         '''
         if inplace:
-            self._featuresheet.query(expression, inplace=True)
+            self._featuresheet.query(
+                    expression, inplace=True,
+                    local_dict=local_dict)
             self._counts = self._counts.loc[self._featuresheet.index]
         else:
-            featuresheet = self._featuresheet.query(expression, inplace=False)
+            featuresheet = self._featuresheet.query(
+                    expression, inplace=False,
+                    local_dict=local_dict)
             counts_table = self._counts.loc[featuresheet.index].copy()
             samplesheet = self._samplesheet.copy()
             return self.__class__(
@@ -342,13 +365,18 @@ class Dataset():
                     counts_table=counts_table,
                     featuresheet=featuresheet)
 
-    def query_samples_by_counts(self, expression, inplace=False):
+    def query_samples_by_counts(
+            self, expression, inplace=False,
+            local_dict=None):
         '''Select samples based on gene expression.
 
         Args:
             expression (string): An expression compatible with pandas.DataFrame.query.
             inplace (bool): Whether to change the Dataset in place or return a new one.
-
+            local_dict (dict): A dictionary of local variables, useful if you \
+                    are using @var assignments in your expression. By far the \
+                    most common usage of this argument is to set \
+                    local_dict=locals().
         Returns:
             If `inplace` is True, None. Else, a Dataset.
         '''
@@ -361,7 +389,9 @@ class Dataset():
             counts.loc['mapped'] = counts.exclude_features(spikeins=True, other=True).sum(axis=0)
             drop.append('mapped')
 
-        counts_table = counts.T.query(expression, inplace=False).T
+        counts_table = counts.T.query(
+                expression, inplace=False,
+                local_dict=local_dict).T
         if drop:
             counts_table.drop(drop, axis=0, inplace=True)
 
@@ -374,21 +404,30 @@ class Dataset():
                     counts_table=counts_table,
                     featuresheet=self.featuresheet.copy())
 
-    def query_features_by_counts(self, expression, inplace=False):
+    def query_features_by_counts(
+            self, expression, inplace=False,
+            local_dict=None):
         '''Select features based on their expression.
 
         Args:
             expression (string): An expression compatible with pandas.DataFrame.query.
             inplace (bool): Whether to change the Dataset in place or return a new one.
-
+            local_dict (dict): A dictionary of local variables, useful if you \
+                    are using @var assignments in your expression. By far the \
+                    most common usage of this argument is to set \
+                    local_dict=locals().
         Returns:
             If `inplace` is True, None. Else, a Dataset.
         '''
         if inplace:
-            self._counts.query(expression, inplace=True)
+            self._counts.query(
+                    expression, inplace=True,
+                    local_dict=local_dict)
             self._featuresheet = self._featuresheet.loc[self._counts.index]
         else:
-            counts_table = self._counts.query(expression, inplace=False)
+            counts_table = self._counts.query(
+                    expression, inplace=False,
+                    local_dict=local_dict)
             samplesheet = self._samplesheet.copy()
             featuresheet = self._featuresheet.loc[counts_table.index].copy()
             return self.__class__(
