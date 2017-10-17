@@ -73,7 +73,7 @@ This will calculate a t-SNE embedding of the first 200 features and then show yo
 Contents
 -------------
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 1
    :glob:
 
    examples

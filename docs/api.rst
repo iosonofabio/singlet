@@ -1,4 +1,4 @@
-API reference
+API
 =============
 Singlet analysis is centered around the :doc:`Dataset <api/dataset>` class, which describes a set of samples (usually single cells). Each `Dataset` has three main properties:
 
@@ -21,7 +21,7 @@ Supporting modules are useful for particular purposes or internal use only:
 - `utils`
 - `io`
 
-Table of contents
+API reference
 -----------------
 .. toctree::
    :maxdepth: 2
