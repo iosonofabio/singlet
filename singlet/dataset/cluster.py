@@ -25,7 +25,6 @@ class Cluster():
             n_clusters,
             axis,
             phenotypes=(),
-            log_features=True,
             random_state=0):
         '''K-Means clustering.
 
@@ -47,9 +46,6 @@ class Cluster():
 
         data = self.dataset.counts
 
-        if log_features:
-            data = np.log10(self.dataset.counts.pseudocount + data)
-
         if phenotypes is not None:
             data = data.copy()
             for pheno in phenotypes:
@@ -64,14 +60,13 @@ class Cluster():
 
         kmeans = (KMeans(n_clusters=n_clusters, random_state=random_state)
                   .fit(data.values))
-        labels = pd.Series(kmeans.labels_, index=data.index)
+        labels = pd.Series(kmeans.labels_, index=data.index, dtype='category')
         return labels
 
     def dbscan(
             self,
             axis,
             phenotypes=(),
-            log_features=True,
             **kwargs):
         '''Density-Based Spatial Clustering of Applications with Noise.
 
@@ -92,9 +87,6 @@ class Cluster():
 
         data = self.dataset.counts
 
-        if log_features:
-            data = np.log10(self.dataset.counts.pseudocount + data)
-
         if phenotypes is not None:
             data = data.copy()
             for pheno in phenotypes:
@@ -109,7 +101,7 @@ class Cluster():
 
         kmeans = (DBSCAN(**kwargs)
                   .fit(data.values))
-        labels = pd.Series(kmeans.labels_, index=data.index)
+        labels = pd.Series(kmeans.labels_, index=data.index, dtype='category')
         return labels
 
     # NOTE: caching this one is tricky because it has non-kwargs AND it would

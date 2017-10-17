@@ -654,7 +654,10 @@ class Plot():
                 cmap = cm.get_cmap(cmap)
             if color_by in self.dataset.samplesheet.columns:
                 color_data = self.dataset.samplesheet.loc[:, color_by]
-                is_numeric = np.issubdtype(color_data.dtype, np.number)
+                if hasattr(color_data, 'cat'):
+                    is_numeric = False
+                else:
+                    is_numeric = np.issubdtype(color_data.dtype, np.number)
                 color_by_phenotype = True
             elif color_by in self.dataset.counts.index:
                 color_data = self.dataset.counts.loc[color_by]
@@ -665,7 +668,7 @@ class Plot():
                     'The label '+color_by+' is neither a phenotype nor a feature')
 
             # Categorical columns get just a list of colors
-            if (color_data.dtype.name == 'category') or (not is_numeric):
+            if (hasattr(color_data, 'cat')) or (not is_numeric):
                 cd_unique = list(np.unique(color_data.values))
                 c_unique = cmap(np.linspace(0, 1, len(cd_unique)))
                 c = c_unique[[cd_unique.index(x) for x in color_data.values]]

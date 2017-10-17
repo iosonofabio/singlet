@@ -6,6 +6,10 @@
 import numpy as np
 import pandas as pd
 
+from ..samplesheet import SampleSheet
+from ..counts_table import CountsTable
+from ..featuresheet import FeatureSheet
+
 
 # Classes / functions
 class Dataset():
@@ -27,9 +31,6 @@ class Dataset():
                 that is the case, the samplesheet is sliced down to the \
                 samples present in the counts_table.
         '''
-        from ..samplesheet import SampleSheet
-        from ..counts_table import CountsTable
-        from ..featuresheet import FeatureSheet
         from .correlations import Correlation
         from .plot import Plot
         from .dimensionality import DimensionalityReduction
@@ -256,14 +257,26 @@ class Dataset():
         '''Matrix of gene expression counts.
 
         Rows are features, columns are samples.
+
+        Notice: If you reset this matrix with features that are not in the \
+                featuresheet or samples that are not in the samplesheet, \
+                those tables will be reset to empty.
         '''
         return self._counts
 
     @counts.setter
     def counts(self, value):
-        self._samplesheet = self._samplesheet.loc[value.columns]
+        try:
+            self._samplesheet = self._samplesheet.loc[value.columns]
+        except KeyError:
+            self._samplesheet = SampleSheet(data=[], index=value.columns)
+
+        try:
+            self._featuresheet = self._featuresheet.loc[value.index]
+        except KeyError:
+            self._featuresheet = FeatureSheet(data=[], index=value.index)
+
         self._counts = value
-        self._featuresheet = self._featuresheet.loc[value.index]
 
     @property
     def featuresheet(self):
