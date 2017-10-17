@@ -60,5 +60,7 @@ if __name__ == '__main__':
     for key, dsi in ds_dict.items():
         dso = ds.query_samples_by_metadata('cluster!=@key', local_dict=locals())
         genes_by_cluster[key] = dsi.compare(dso)['P-value'].nsmallest(10).index
+    assert(
+        genes_by_cluster[1][:3].tolist() == ['ENSG00000138085', 'ENSG00000184076', 'ENSG00000116459'])
 
     plt.show()
