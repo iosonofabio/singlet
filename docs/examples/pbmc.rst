@@ -6,6 +6,7 @@ A typical application of scRNA-Seq is classification of cell populations in a he
 
     import matplotlib.pyplot as plt
     from singlet.dataset import Dataset
+
     ds = Dataset(counts_table='example_PBMC')
 
     # Normalize
