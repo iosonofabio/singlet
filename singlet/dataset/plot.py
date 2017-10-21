@@ -725,6 +725,8 @@ class Plot():
             phenotypes_cluster_features=(),
             annotate_samples=False,
             annotate_features=False,
+            labels_samples=True,
+            labels_features=True,
             orientation='horizontal',
             colorbars=False,
             **kwargs):
@@ -766,6 +768,12 @@ class Plot():
                     of the Dataset.featuresheet, except for the key 'mean \
                     expression' which is interpreted to mean the average of \
                     the counts for that feature.
+            labels_samples (bool): Whether to show the sample labels. If you \
+                    have hundreds or more samples, you may want to turn this \
+                    off to make the plot tidier.
+            labels_features (bool): Whether to show the feature labels. If you \
+                    have hundreds or more features, you may want to turn this \
+                    off to make the plot tidier.
             orientation (string): Whether the samples are on the abscissa \
                     ('horizontal') or on the ordinate ('vertical').
             tight_layout (bool or dict): Whether to call \
@@ -947,18 +955,30 @@ class Plot():
             col_linkage = linkage_samples
             row_colors = col_features
             col_colors = col_samples
+            row_labels = labels_features
+            col_labels = labels_samples
+            if not row_labels:
+                ylabel = 'features'
+            if not col_labels:
+                xlabel = 'samples'
         elif orientation == 'vertical':
             data = data.T
             row_linkage = linkage_samples
             col_linkage = linkage_features
             row_colors = col_samples
             col_colors = col_features
+            row_labels = labels_samples
+            col_labels = labels_features
+            if not row_labels:
+                ylabel = 'samples'
+            if not col_labels:
+                xlabel = 'features'
         else:
             raise ValueError('Orientation must be "horizontal" or "vertical".')
 
         defaults = {
-                'yticklabels': True,
-                'xticklabels': True,
+                'yticklabels': row_labels,
+                'xticklabels': col_labels,
                 'row_colors': row_colors,
                 'col_colors': col_colors}
 
@@ -989,6 +1009,11 @@ class Plot():
         for label in ax.get_ymajorticklabels():
             label.set_rotation(0)
             label.set_verticalalignment("center")
+
+        if not row_labels:
+            ax.set_ylabel(ylabel)
+        if not col_labels:
+            ax.set_xlabel(xlabel)
 
         if colorbars:
             # The colorbar for the heatmap is shown anyway
