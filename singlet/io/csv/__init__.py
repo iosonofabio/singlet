@@ -3,6 +3,7 @@
 # date:       02/08/17
 # content:    Support module for filenames related to CSV/TSV files.
 # Modules
+import numpy as np
 from singlet.config import config
 
 
@@ -47,6 +48,6 @@ def parse_counts_table(path, fmt):
     else:
         raise ValueError('Format not understood')
 
-    table = pd.read_csv(path, sep=sep, index_col=0)
+    table = pd.read_csv(path, sep=sep, index_col=0).astype(float)
 
     return table

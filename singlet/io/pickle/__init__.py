@@ -8,4 +8,6 @@
 # Parser
 def parse_counts_table(path, fmt):
     import pandas as pd
-    return pd.read_pickle(path)
+    table = pd.read_pickle(path).astype(float)
+
+    return table

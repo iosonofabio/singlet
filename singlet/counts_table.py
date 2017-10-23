@@ -17,10 +17,15 @@ class CountsTable(pd.DataFrame):
 
     _metadata = [
             'name',
-            '_spikeins', '_otherfeatures',
-            '_normalized', 'pseudocount',
+            '_spikeins',
+            '_otherfeatures',
+            '_normalized',
+            'pseudocount',
             ]
 
+    _spikeins = ()
+    _otherfeatures = ()
+    _normalized = False
     pseudocount = 0.1
 
     @property
@@ -212,7 +217,12 @@ class CountsTable(pd.DataFrame):
         if not inplace:
             return out
 
-    def normalize(self, method='counts_per_million', include_spikeins=False, inplace=False, **kwargs):
+    def normalize(
+            self,
+            method='counts_per_million',
+            include_spikeins=False,
+            inplace=False,
+            **kwargs):
         '''Normalize counts and return new CountsTable.
 
         Args:
@@ -220,8 +230,13 @@ class CountsTable(pd.DataFrame):
                     One of 'counts_per_million', \
                     'counts_per_thousand_spikeins', \
                     'counts_per_thousand_features'. If this argument is a \
-                    function, it must take the CountsTable as input and \
-                    return the normalized one as output.
+                    function, its signature depends on the inplace argument. \
+                    If inplace=False, it must take the CountsTable as input \
+                    and return the normalized one as output. If inplace=True, \
+                    it must take the CountsTable as input and modify it in \
+                    place. Notice that if inplace=True and you do non-inplace \
+                    operations you might lose the _metadata properties. You \
+                    can end your function by self[:] = <normalized counts>.
             include_spikeins (bool): Whether to include spike-ins in the \
                     normalization and result.
             inplace (bool): Whether to modify the CountsTable in place or \
@@ -230,35 +245,66 @@ class CountsTable(pd.DataFrame):
         Returns:
             If `inplace` is False, a new, normalized CountsTable.
         '''
+        import copy
+
         if self._normalized:
             raise ValueError('CountsTable is already normalized')
 
-        if method == 'counts_per_million':
-            counts = self.exclude_features(spikeins=(not include_spikeins), other=True)
-            counts_norm = 1e6 * counts / counts.sum(axis=0)
-        elif method == 'counts_per_thousand_spikeins':
-            counts = self.exclude_features(spikeins=(not include_spikeins), other=True)
-            norm = self.get_spikeins().sum(axis=0)
-            counts_norm = 1e3 * counts / norm
-        elif method == 'counts_per_thousand_features':
-            if 'features' not in kwargs:
-                raise ValueError('Set features=<list of normalization features>')
-            counts = self.exclude_features(spikeins=(not include_spikeins), other=True)
-            norm = self.loc[kwargs['features']].sum(axis=0)
-            counts_norm = 1e3 * counts / norm
-        elif callable(method):
-            counts_norm = method(self)
-            method = 'custom'
-        else:
-            raise ValueError('Method not understood')
-
         if inplace:
-            # The new CountsTable lacks other features and maybe spikeins
-            drop = np.setdiff1d(self.index, counts_norm.index)
-            self.drop(drop, inplace=True)
-            self.loc[:, :] = counts_norm
+            if method == 'counts_per_million':
+                self.exclude_features(
+                        spikeins=(not include_spikeins),
+                        other=True,
+                        inplace=True)
+                self[:] *= 1e6 / self.sum(axis=0)
+            elif method == 'counts_per_thousand_spikeins':
+                spikeins = self.get_spikeins().sum(axis=0)
+                self.exclude_features(
+                        spikeins=(not include_spikeins),
+                        other=True,
+                        inplace=True)
+                self[:] *= 1e3 / spikeins
+            elif method == 'counts_per_thousand_features':
+                if 'features' not in kwargs:
+                    raise ValueError('Set features=<list of normalization features>')
+                features = self.loc[kwargs['features']].sum(axis=0)
+                self.exclude_features(
+                        spikeins=(not include_spikeins),
+                        other=True,
+                        inplace=True)
+                self[:] *= 1e3 / features
+            elif callable(method):
+                method(self)
+                method = 'custom'
+            else:
+                raise ValueError('Method not understood')
+
             self._normalized = method
+
         else:
+            if method == 'counts_per_million':
+                counts = self.exclude_features(spikeins=(not include_spikeins), other=True)
+                norm = counts.sum(axis=0)
+                counts_norm = 1e6 * counts / norm
+            elif method == 'counts_per_thousand_spikeins':
+                counts = self.exclude_features(spikeins=(not include_spikeins), other=True)
+                norm = self.get_spikeins().sum(axis=0)
+                counts_norm = 1e3 * counts / norm
+            elif method == 'counts_per_thousand_features':
+                if 'features' not in kwargs:
+                    raise ValueError('Set features=<list of normalization features>')
+                counts = self.exclude_features(spikeins=(not include_spikeins), other=True)
+                norm = self.loc[kwargs['features']].sum(axis=0)
+                counts_norm = 1e3 * counts / norm
+            elif callable(method):
+                counts_norm = method(self)
+                method = 'custom'
+            else:
+                raise ValueError('Method not understood')
+
+            # Shallow copy of metadata
+            for prop in self._metadata:
+                setattr(counts_norm, prop, copy.copy(getattr(self, prop)))
             counts_norm._normalized = method
             return counts_norm
 
