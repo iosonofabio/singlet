@@ -9,5 +9,4 @@
 def parse_counts_table(path, fmt):
     import pandas as pd
     table = pd.read_pickle(path).astype(float)
-
     return table

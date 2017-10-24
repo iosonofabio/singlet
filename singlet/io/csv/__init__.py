@@ -19,7 +19,6 @@ def parse_samplesheet(path, fmt):
         raise ValueError('Format not understood')
 
     table = pd.read_csv(path, sep=sep, index_col=False)
-
     return table
 
 
@@ -34,7 +33,6 @@ def parse_featuresheet(path, fmt):
         raise ValueError('Format not understood')
 
     table = pd.read_csv(path, sep=sep, index_col=False)
-
     return table
 
 
@@ -49,5 +47,4 @@ def parse_counts_table(path, fmt):
         raise ValueError('Format not understood')
 
     table = pd.read_csv(path, sep=sep, index_col=0).astype(float)
-
     return table
