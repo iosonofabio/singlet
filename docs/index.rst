@@ -78,6 +78,7 @@ Contents
 
    examples
    api
+   config
 
 
 Indices and tables
