@@ -15,7 +15,12 @@ from ..featuresheet import FeatureSheet
 class Dataset():
     '''Collection of cells, with feature counts and metadata'''
 
-    def __init__(self, counts_table=None, samplesheet=None, featuresheet=None):
+    def __init__(
+            self,
+            counts_table=None,
+            samplesheet=None,
+            featuresheet=None,
+            plugins=None):
         '''Collection of cells, with feature counts and metadata
 
         Args:
@@ -25,6 +30,9 @@ class Dataset():
                     from a config file) or instance of SampleSheet
             featuresheet (string or None): Name of the samplesheet (to load \
                     from a config file) or instance of FeatureSheet
+            plugins (dict): Dictionary of classes that take the Dataset \
+                    instance as only argument for __init__, to expand the \
+                    possibilities of Dataset operations.
 
         NOTE: All samples in the counts_table must also be in the \
                 samplesheet, but the latter can have additional samples. If \
@@ -84,6 +92,10 @@ class Dataset():
         self.cluster = Cluster(self)
         self.fit = Fit(self)
         self.feature_selection = FeatureSelection(self)
+        if plugins is not None:
+            self._plugins = dict(plugins)
+            for key, val in plugins:
+                setattr(self, key, val(self))
 
     def __str__(self):
         return '{:} with {:} samples and {:} features'.format(
@@ -92,27 +104,10 @@ class Dataset():
                 self.n_features)
 
     def __repr__(self):
-        if not hasattr(self._counts, 'name'):
-            ctn = 'None'
-        else:
-            ctn = '"{:}"'.format(self._counts.name)
-
-        if self._samplesheet.sheetname is None:
-            ssn = 'None'
-        else:
-            ssn = '"{:}"'.format(self._samplesheet.sheetname)
-
-        if self._featuresheet.sheetname is None:
-            fsn = 'None'
-        else:
-            fsn = '"{:}"'.format(self._featuresheet.sheetname)
-
-        return '{:}({:}, {:}, {:})'.format(
+        return '<{:}: {:} samples, {:} features>'.format(
                 self.__class__.__name__,
-                ctn,
-                ssn,
-                fsn,
-                )
+                self.n_samples,
+                self.n_features)
 
     def __eq__(self, other):
         if type(other) is not type(self):
@@ -212,12 +207,20 @@ class Dataset():
     @property
     def n_samples(self):
         '''Number of samples'''
-        return self._samplesheet.shape[0]
+        if self._samplesheet is not None:
+            return self._samplesheet.shape[0]
+        elif self._counts is not None:
+            return self._counts.shape[1]
+        else:
+            return 0
 
     @property
     def n_features(self):
         '''Number of features'''
-        return self._counts.shape[0]
+        if self._counts is not None:
+            return self._counts.shape[0]
+        else:
+            return 0
 
     @property
     def samplenames(self):
@@ -292,11 +295,12 @@ class Dataset():
         self._featuresheet = value
 
     def copy(self):
-        '''Copy of the Dataset including a new SampleSheet and CountsTable'''
+        '''Copy of the Dataset'''
         return self.__class__(
                 counts_table=self._counts.copy(),
                 samplesheet=self._samplesheet.copy(),
-                featuresheet=self.featuresheet.copy())
+                featuresheet=self.featuresheet.copy(),
+                plugins=self._plugins)
 
     def query_samples_by_metadata(
             self,
