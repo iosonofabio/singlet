@@ -30,7 +30,7 @@ if __name__ == '__main__':
     d = ds.cluster.hierarchical(
             'features',
             optimal_ordering=True)
-    assert(tuple(d['leaves'])[:3] == ('PNPLA4', 'RHBDF1', 'HOXA11'))
+    assert(tuple(d['leaves'])[:3] == ('PNPLA4', 'ITGAL', 'HOXA11'))
     print('Done!')
 
     print('Hierarchical clustering of features and phenotypes')

@@ -20,7 +20,7 @@ if __name__ == '__main__':
     print('Done!')
 
     print('Testing Dataset.__repr__')
-    assert(ds.__repr__() == 'Dataset("example_table_tsv", "example_sheet_tsv", None)')
+    assert(ds.__repr__() == '<Dataset: 4 samples, 60721 features>')
     print('Done!')
 
     print('Testing Dataset.copy')

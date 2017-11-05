@@ -96,6 +96,8 @@ class Dataset():
             self._plugins = dict(plugins)
             for key, val in plugins:
                 setattr(self, key, val(self))
+        else:
+            self._plugins = {}
 
     def __str__(self):
         return '{:} with {:} samples and {:} features'.format(

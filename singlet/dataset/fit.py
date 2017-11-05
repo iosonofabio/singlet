@@ -145,10 +145,9 @@ class Fit():
                     return i + s * x
             elif model == 'threshold-linear':
                 def fun(x, b, i, s):
-                    y = x.copy()
+                    y = i + s * x
                     t = (b - i) / s
                     y[x <= t] = b
-                    y[x > t] = i + s * x
                     return y
             elif model == 'logistic':
                 def fun(x, i, f, mp, s):

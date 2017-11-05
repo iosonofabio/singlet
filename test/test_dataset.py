@@ -8,6 +8,7 @@ content:    Tests for the library.
 # Modules
 import os
 import sys
+import argparse
 import subprocess as sp
 
 
@@ -39,30 +40,20 @@ def run(script, where=None, **kwargs):
 # Script
 if __name__ == '__main__':
 
-    # Init
-    run('test/dataset/initialize.py')
+    parser = argparse.ArgumentParser(description='Test dataset.')
+    parser.add_argument('--tests', nargs='+', default=None,
+                        help='Only perform these tests')
+    args = parser.parse_args()
+    tests = args.tests
+    if tests is None:
+        tests = [fn.split('.')[0] for fn in os.listdir('test/dataset')]
 
-    # Queries
-    run('test/dataset/query.py')
+    for te in tests:
+        te_fn = 'test/dataset/{:}.py'.format(te)
 
-    # Comparison
-    run('test/dataset/comparison.py')
+        # TODO: one could set up PNG comparisons like Matplotlib itself does
+        kwargs = {}
+        if te in ('plot',):
+            kwargs['where'] = 'local'
 
-    # Feature selection
-    run('test/dataset/feature_selection.py')
-
-    # Correlations
-    run('test/dataset/correlation.py')
-
-    # Dimensionality reduction
-    run('test/dataset/dimensionality.py')
-
-    # Clustering
-    run('test/dataset/cluster.py')
-
-    # Fit
-    run('test/dataset/fit.py')
-
-    # Plot
-    # TODO: one could set up PNG comparisons like Matplotlib itself does
-    run('test/dataset/plot.py', where='local')
+        run(te_fn, **kwargs)
