@@ -6,3 +6,10 @@ Examples
 - :doc:`examples/feature_selection`
 - :doc:`examples/split_and_compare`
 - :doc:`examples/pbmc`
+
+.. toctree::
+   :hidden:
+   :maxdepth: 2
+   :glob:
+
+   examples/*

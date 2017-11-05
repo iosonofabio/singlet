@@ -21,7 +21,7 @@ so the software will look there. An example configuration file is `online <https
 
 Before going into the specifics, here's a schematic example of the configuration file:
 
-.. code block:: yaml
+.. code-block:: yaml
 
   io:
     samplesheets:

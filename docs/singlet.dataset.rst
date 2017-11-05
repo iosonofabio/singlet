@@ -31,7 +31,7 @@ singlet\.dataset\.plot module
 
 
 singlet\.dataset\.dimensionality module
--------------------------------------
+----------------------------------------
 
 .. automodule:: singlet.dataset.dimensionality
     :members:
