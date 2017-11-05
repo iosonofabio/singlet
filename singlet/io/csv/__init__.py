@@ -46,5 +46,5 @@ def parse_counts_table(path, fmt):
     else:
         raise ValueError('Format not understood')
 
-    table = pd.read_csv(path, sep=sep, index_col=0).astype(float)
+    table = pd.read_csv(path, sep=sep, index_col=False)
     return table

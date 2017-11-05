@@ -35,8 +35,8 @@ The ``io`` section has the following key value pairs:
 
 samplesheets
 _______________
-The ``samplesheets`` section contains an arbitrary number of key value pairs and no lists. Each entry has the following format:
- - the key determines the id of a samplesheet: this id is used in the contstructor of ``Dataset``.
+The ``samplesheets`` section contains an arbitrary number of key value pairs and no lists. Each entry describes a samplesheet and has the following format:
+ - the key determines the id of the samplesheet: this id is used in the contstructor of ``Dataset``.
  - the value is a series of key value pairs, no lists.
 
 Singlet can source samplesheets either from a local file or from an online Google Sheet. If you want to use a local file, use the following key value pairs:
@@ -51,12 +51,37 @@ If you prefer to source an online Google Sheet, use the following key value pair
 
 Whichever way you are using to source the data, the following key value pairs are available:
  - ``description``: a description of the sample sheet (optional).
- - ``cells``: one of ``rows`` or ``columns``. If each row in the samplesheet is a sample, use ``rows``, else use ``columns``.
+ - ``cells``: one of ``rows`` or ``columns``. If each row in the samplesheet is a sample, use ``rows``, else use ``columns``. Notice that singlet samplesheets have samples as **rows**.
+ -  ``index``: the name of the column/row of the samplesheet containing the sample names. This defaults to ``name`` (optional).
 
 count_tables
 _____________________
+The ``count_tables`` section contains an arbitrary number of key value pairs and no lists. Each entry describes a counts table and has the following format:
+ - the key determines the id of the counts table: this id is used in the contstructor of ``Dataset``.
+ - the value is a series of key value pairs, no lists.
 
+The following key value pairs are available:
+ - ``description``: a description of the counts table (optional).
+ - ``path``: a filename on disk containing the counts table, usually in CSV/TSV format.
+ - ``format``: a file format of the counts table (optional). If missing, it is inferred from the ``path`` filename.
+ - ``cells``: one of ``rows`` or ``columns``. If each row in the counts table is a sample, use ``rows``, else use ``columns``.
+ - ``normalized``: either ``yes`` or ``no``. If data is not notmalized, you can normalize it with singlet by using the ``CountsTable.normalize`` method.
+ - ``spikeins``: a YAML list of features that appear in the counts table and represent spike-in controls as opposed to real features. Spikeins can be excluded from the counts table using ``CountsTable.exclude_features``.
+ - ``other``: a YAML list of features that are neither biological features nor spike-in controls. This list typically includes ambiguous alignments, multiple-aligned reads, reads outside features, etc. Other features can be excluded from the counts table using ``CountsTable.exclude_features``.
+
+ The first column/row of the counts table must be the list of samples.
 
 
 featuresheets
 ________________
+The ``featuresheets`` section contains an arbitrary number of key value pairs and no lists. Each entry describes a featuresheet, i.e. a table with metadata for the features. A typical usage of featuresheets is to connect feature ids (e.g. ``EnsemblGeneID``) with human-readable names, Gene Ontology terms, species information, pathways, cellular localization, etc.Each entry has the following format:
+ - the key is the id of the featuresheet: this id is used in the constructor of ``Dataset``.
+ - the value is a series of key value pairs, no lists.
+
+The following key value pairs are available:
+ - ``description``: a description of the featuresheet (optional).
+ - ``path``: a filename on disk containing the featuresheet, usually in CSV/TSV format.
+ - ``format``: a file format of the featuresheet (optional). If missing, it is inferred from the ``path`` filename.
+ - ``features``: one of ``rows`` or ``columns``. If each feature in the featuresheet is a feature, use ``rows``, otherwise use ``columns``.
+ -  ``index``: the name of the column/row of the featuresheet containing the feature names. This defaults to ``name`` (optional).
+

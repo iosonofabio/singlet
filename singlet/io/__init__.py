@@ -76,6 +76,13 @@ def parse_counts_table(tablename):
         if ('cells' in sheet) and (sheet['cells'] != 'columns'):
             table = table.T
 
+        if 'index_column' in sheet:
+            table.set_index(sheet['index_column'], inplace=True, drop=True)
+        else:
+            table.set_index(table.columns[0], inplace=True, drop=True)
+
+        table = table.astype(float)
+
         tables.append(table)
 
     if len(tables) == 1:
