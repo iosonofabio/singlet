@@ -19,7 +19,31 @@ Singlet loads a configuration file in `YAML <http://www.yaml.org/start.html>`_ f
 
 so the software will look there. An example configuration file is `online <https://github.com/iosonofabio/singlet/blob/master/example_data/config_example.yml>`_. If you are not familiar with YAML syntax, it is a bit like Python dictionaries without brackets... or like JSON.
 
-The root key value pairs are:
+Before going into the specifics, here's a schematic example of the configuration file:
+
+.. code block:: yaml
+
+  io:
+    samplesheets:
+      ss1:
+        path: xxx.csv
+        index: samplename
+    featuresheets:
+      fs1:
+        path: yyy.csv
+        index: EnsemblGeneID
+    count_tables:
+      ct1:
+        path: zzz.csv
+        normalized: no
+        spikeins:
+          - ERCC-00002
+          - ERCC-00003
+        other
+          - __alignment_not_unique
+          - __not_aligned
+
+Now for the full specification, the root key value pairs are:
 
  - ``io``: for input/output specifications. At the moment this key is the only master key and is required.
 
