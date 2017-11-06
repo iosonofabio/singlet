@@ -22,7 +22,7 @@ def parse_samplesheet(sheetname):
         table = table.T
 
     if 'index_column' in sheet:
-        index_col = sheet['index_column']
+        index_col = sheet['index']
     else:
         index_col = 'name'
 
@@ -40,8 +40,8 @@ def parse_featuresheet(sheetname):
     if ('features' in sheet) and (sheet['features'] != 'rows'):
         table = table.T
 
-    if 'index_column' in sheet:
-        index_col = sheet['index_column']
+    if 'index' in sheet:
+        index_col = sheet['index']
     else:
         index_col = 'name'
 
@@ -76,8 +76,8 @@ def parse_counts_table(tablename):
         if ('cells' in sheet) and (sheet['cells'] != 'columns'):
             table = table.T
 
-        if 'index_column' in sheet:
-            table.set_index(sheet['index_column'], inplace=True, drop=True)
+        if 'index' in sheet:
+            table.set_index(sheet['index'], inplace=True, drop=True)
         else:
             table.set_index(table.columns[0], inplace=True, drop=True)
 

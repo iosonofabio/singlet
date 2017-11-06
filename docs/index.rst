@@ -77,8 +77,8 @@ Contents
    :glob:
 
    examples
-   api
    config
+   api
 
 
 Indices and tables
