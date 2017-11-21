@@ -149,10 +149,12 @@ class Dataset():
                 succeed. If one of the two Datasets has more metadata or \
                 features than the other, they cannot be added.
         '''
-        if set(self.metadatanames) != set(other.metadatanames):
-            raise IndexError('The Datasets have different metadata')
+        if set(self.samplemetadatanames) != set(other.samplemetadatanames):
+            raise IndexError('The Datasets have different sample metadata')
         if set(self.featurenames) != set(other.featurenames):
             raise IndexError('The Datasets have different features')
+        if set(self.featuremetadatanames) != set(other.featuremetadatanames):
+            raise IndexError('The Datasets have different feature metadata')
 
         snames = self.samplenames
         for samplename, meta in other.samplesheet.iterrows():
