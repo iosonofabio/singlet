@@ -21,7 +21,7 @@ def parse_samplesheet(sheetname):
     if ('cells' in sheet) and (sheet['cells'] != 'rows'):
         table = table.T
 
-    if 'index_column' in sheet:
+    if 'index' in sheet:
         index_col = sheet['index']
     else:
         index_col = 'name'
@@ -78,7 +78,7 @@ def parse_counts_table(tablename):
 
         if 'index' in sheet:
             table.set_index(sheet['index'], inplace=True, drop=True)
-        else:
+        elif not table.index.name:
             table.set_index(table.columns[0], inplace=True, drop=True)
 
         table = table.astype(float)
