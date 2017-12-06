@@ -504,11 +504,19 @@ class Dataset():
                 for (fea, co1), (_, co2) in zip(
                         counts.iterrows(),
                         counts_other.iterrows()):
-                    # Mann-Whitney U has issues with ties
+                    # Mann-Whitney U has issues with ties, so we handle a few
+                    # corner cases separately
                     is_degenerate = False
-                    if ((len(np.unique(co1.values)) == 1) or
-                       (len(np.unique(co2.values)) == 1)):
+                    # 1. no samples
+                    if (len(co1.values) == 0) or (len(co2.values) == 0):
                         is_degenerate = True
+                    # 2. if there is only one value over the board
+                    tmp1 = np.unique(co1.values)
+                    tmp2 = np.unique(co2.values)
+                    if ((len(tmp1) == 1) and (len(tmp2) == 1) and
+                       (tmp1[0] == tmp2[0])):
+                        is_degenerate = True
+                    # 3. if the arrays are the exact same
                     elif ((len(co1) == len(co2)) and
                           (np.sort(co1.values) == np.sort(co2.values)).all()):
                         is_degenerate = True
