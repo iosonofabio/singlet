@@ -9,7 +9,7 @@
 
 singlet
 =======
-Single cell RNA-Seq analysis with phenotypes.
+Single cell RNA-Seq analysis with quantitative phenotypes.
 
 Requirements
 ------------
