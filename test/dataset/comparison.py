@@ -25,7 +25,7 @@ if __name__ == '__main__':
     pvals = ds.compare(
             ds2,
             method='mann-whitney')
-    assert(np.isclose(pvals.values.min(), 0.245278))
+    assert(np.isclose(pvals.values.min(), 0.193931))
     print('Done!')
 
     print('Test feature comparison (Kolmogorov-Smirnov)')
