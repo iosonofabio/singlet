@@ -92,7 +92,7 @@ class Dataset():
         self.cluster = Cluster(self)
         self.fit = Fit(self)
         self.feature_selection = FeatureSelection(self)
-        if plugins is not None:
+        if (plugins is not None) and len(plugins):
             self._plugins = dict(plugins)
             for key, val in plugins:
                 setattr(self, key, val(self))
@@ -566,3 +566,40 @@ class Dataset():
         df = pd.DataFrame(pvalues, columns=['name', 'P-value'])
         df.set_index('name', drop=True, inplace=True)
         return df
+
+    def bootstrap(self):
+        '''Resample with replacement, aka bootstrap dataset
+
+            Returns:
+                A Dataset with the resampled samples.
+        '''
+        n = self.n_samples
+        ind = np.random.randint(n, size=n)
+        snames = self.samplenames
+        from collections import Counter
+        tmp = Counter()
+        index = []
+        for i in ind:
+            tmp[i] += 1
+            index.append(snames[i]+'--sampling_'+str(tmp[i]))
+        index = pd.Index(index, name=self.samplenames.name)
+
+        ss = self.samplesheet.__class__(
+            self.samplesheet.values[ind],
+            index=index,
+            columns=self.samplesheet.columns,
+            )
+        ct = self.counts.__class__(
+            self.counts.values[:, ind],
+            index=self.counts.index,
+            columns=index,
+            )
+        fs = self.featuresheet.copy()
+        plugins = {key: val.__class__ for key, val in self._plugins}
+
+        return self.__class__(
+            counts_table=ct,
+            samplesheet=ss,
+            featuresheet=fs,
+            plugins=plugins,
+            )
