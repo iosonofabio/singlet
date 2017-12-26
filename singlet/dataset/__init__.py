@@ -443,6 +443,38 @@ class Dataset():
                     counts_table=counts_table,
                     featuresheet=featuresheet)
 
+    def rename(
+            self,
+            axis,
+            column,
+            inplace=False):
+        '''Rename samples or features
+
+        Args:
+            axis (string): Must be 'samples' or 'features'.
+            column (string): Must be a column of the samplesheet (for
+            axis='samples') or of the featuresheet (for axis='features') with
+            unique names of samples or features.
+            inplace (bool): Whether to change the Dataset in place or return a new one.
+        '''
+        if axis not in ('samples', 'features'):
+            raise ValueError('axis must be "samples" or "features"')
+
+        if inplace:
+            if axis == 'samples':
+                self._samplesheet.index = self._samplesheet.loc[:, column]
+                self._counts.columns = self._samplesheet.loc[:, column]
+            else:
+                self._featuresheet.index = self._featuresheet.loc[:, column]
+                self._counts.index = self._featuresheet.loc[:, column]
+        else:
+            other = self.copy()
+            other.rename(
+                    axis=axis,
+                    column=column,
+                    inplace=True)
+            return other
+
     def compare(
             self,
             other,
