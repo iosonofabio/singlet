@@ -10,7 +10,7 @@ import xarray as xr
 
 # Classes / functions
 class Fit():
-    '''Plot gene expression and phenotype in single cells'''
+    '''Fit gene expression and phenotype in single cells'''
     def __init__(self, dataset):
         '''Fit gene expression and phenotype in single cells
 
