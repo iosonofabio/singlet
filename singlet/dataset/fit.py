@@ -77,17 +77,21 @@ class Fit():
             args = dic['names']
             if args == 'total':
                 counts_k = counts
+                pheno_k = []
             elif args == 'mapped':
                 counts_k = counts.exclude_features(
-                        spikeins=True, other=True)
+                        spikeins=True, other=True,
+                        errors='ignore')
+                pheno_k = []
             elif args == 'spikeins':
                 counts_k = counts.get_spikeins()
+                pheno_k = []
             elif args == 'other':
                 counts_k = counts.get_other_features()
+                pheno_k = []
             else:
                 counts_k = counts.loc[counts.index.isin(args)]
-
-            pheno_k = sheet.loc[sheet.index.isin(args)]
+                pheno_k = sheet.loc[sheet.index.isin(args)]
 
             if len(counts_k):
                 dic['data'].append(counts_k)
@@ -158,7 +162,7 @@ class Fit():
             # Fit
             for key_x, data_x in datad['x']['data'].iterrows():
                 for key_y, data_y in datad['y']['data'].iterrows():
-                    x = data_x.values
+                    x = data_x.values.astype(float)
                     y = data_y.values.astype(float)
 
                     # Mask NaNs
