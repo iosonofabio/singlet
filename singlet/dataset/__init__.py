@@ -85,6 +85,9 @@ class Dataset():
         #assert(self._counts.index.isin(self._featuresheet.index).all())
         #self._featuresheet = self._featuresheet.loc[self._counts.index]
 
+        # Inject yourself into counts_table
+        self.counts.dataset = self
+
         # Plugins
         self.correlation = Correlation(self)
         self.plot = Plot(self)
@@ -284,6 +287,7 @@ class Dataset():
             self._featuresheet = FeatureSheet(data=[], index=value.index)
 
         self._counts = value
+        self._counts.dataset = self
 
     @property
     def featuresheet(self):

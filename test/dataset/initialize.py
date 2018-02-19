@@ -32,3 +32,9 @@ if __name__ == '__main__':
     dsp._counts.iloc[0, 0] = -5
     assert(dsp != ds)
     print('Done!')
+
+    print('Testing injection into counts table')
+    dsp = ds.copy()
+    dsp.counts.exclude_features(inplace=True)
+    assert(dsp.counts.shape[0] == dsp.featuresheet.shape[0])
+    print('Done!')

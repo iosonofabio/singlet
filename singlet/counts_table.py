@@ -21,12 +21,14 @@ class CountsTable(pd.DataFrame):
             '_otherfeatures',
             '_normalized',
             'pseudocount',
+            'dataset',
             ]
 
     _spikeins = ()
     _otherfeatures = ()
     _normalized = False
     pseudocount = 0.1
+    dataset = None
 
     @property
     def _constructor(self):
@@ -73,7 +75,10 @@ class CountsTable(pd.DataFrame):
             drop.extend(self._spikeins)
         if other:
             drop.extend(self._otherfeatures)
-        return self.drop(drop, axis=0, inplace=inplace, errors=errors)
+        out = self.drop(drop, axis=0, inplace=inplace, errors=errors)
+        if inplace and (self.dataset is not None):
+            self.dataset._featuresheet.drop(drop, inplace=True, errors=errors)
+        return out
 
     def get_spikeins(self):
         '''Get spike-in features
@@ -304,7 +309,11 @@ class CountsTable(pd.DataFrame):
 
             # Shallow copy of metadata
             for prop in self._metadata:
-                setattr(counts_norm, prop, copy.copy(getattr(self, prop)))
+                # dataset if special, to avoid infinite loops
+                if prop == 'dataset':
+                    counts_norm.dataset = None
+                else:
+                    setattr(counts_norm, prop, copy.copy(getattr(self, prop)))
             counts_norm._normalized = method
             return counts_norm
 
