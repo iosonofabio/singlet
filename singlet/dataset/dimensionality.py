@@ -111,7 +111,15 @@ class DimensionalityReduction():
 
         Returns:
         '''
-        from bhtsne import tsne
+        # scikit-learn's <0.19 has a bug
+        import sklearn
+        vmaj, vmin, vrel = sklearn.__version__.split('.')
+        if (int(vmaj) == 0) and (int(vmin) < 19):
+            from bhtsne import tsne
+            use_bhtsne = True
+        else:
+            from sklearn.manifold import TSNE
+            use_bhtsne = False
 
         n = self.dataset.n_samples
         if(n - 1 < 3 * perplexity):
@@ -119,14 +127,26 @@ class DimensionalityReduction():
 
         X = self.dataset.counts.copy()
 
-        # this version does not require pre-whitening
-        Y = tsne(
-                data=X.values.T,
-                dimensions=n_dims,
-                perplexity=perplexity,
-                theta=theta,
-                rand_seed=rand_seed,
-                **kwargs)
+        if use_bhtsne:
+            # this version does not require pre-whitening
+            Y = tsne(
+                    data=X.values.T,
+                    dimensions=n_dims,
+                    perplexity=perplexity,
+                    theta=theta,
+                    rand_seed=rand_seed,
+                    **kwargs)
+        else:
+            Y = TSNE(
+                    n_components=n_dims,
+                    perplexity=perplexity,
+                    method='barnes_hut' if theta > 0 else 'exact',
+                    angle=theta,
+                    random_state=rand_seed,
+                    ).fit_transform(
+                    X.values.T
+                    )
+
         vs = pd.DataFrame(
                 Y,
                 index=X.columns,
