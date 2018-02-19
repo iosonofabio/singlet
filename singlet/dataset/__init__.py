@@ -45,6 +45,7 @@ class Dataset():
         from .cluster import Cluster
         from .fit import Fit
         from .feature_selection import FeatureSelection
+        from .graph import Graph
 
         # In general this class should be used for gene counts and phenotypes,
         # but we have to cover the corner cases that no counts or no phenotypes
@@ -95,6 +96,7 @@ class Dataset():
         self.cluster = Cluster(self)
         self.fit = Fit(self)
         self.feature_selection = FeatureSelection(self)
+        self.graph = Graph(self)
         if (plugins is not None) and len(plugins):
             self._plugins = dict(plugins)
             for key, val in plugins:
