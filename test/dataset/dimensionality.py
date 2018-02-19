@@ -55,13 +55,7 @@ if __name__ == '__main__':
             n_dims=2,
             theta=0.5,
             perplexity=0.8)
-    # t-SNE seems to give different results based on platform, but consistent.
-    # Must have something to do with the random seed.
-    print(vs.values[0])
-    if platform.system() == 'Linux':
-        assert(np.allclose(vs.values[0], [-19.164444, 1229.9626]))
-    elif platform.system() == 'Darwin':
-        assert(np.allclose(vs.values[0], [59.861705, 117.964336]))
+    assert(np.allclose(vs.values[0], [-19.164444, 1229.9626]))
     print('Done!')
 
     print('Test cache for t-SNE')
