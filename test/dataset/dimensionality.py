@@ -57,8 +57,9 @@ if __name__ == '__main__':
             perplexity=0.8)
     # t-SNE seems to give different results based on platform, but consistent.
     # Must have something to do with the random seed.
+    print(vs.values[0])
     if platform.system() == 'Linux':
-        assert(np.allclose(vs.values[0], [43.83527909, 1426.60556519]))
+        assert(np.allclose(vs.values[0], [-19.164444, 1229.9626]))
     elif platform.system() == 'Darwin':
         assert(np.allclose(vs.values[0], [59.861705, 117.964336]))
     print('Done!')
