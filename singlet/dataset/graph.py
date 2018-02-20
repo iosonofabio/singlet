@@ -21,6 +21,7 @@ class Graph():
 
     def lshknn(
             self,
+            axis='samples',
             n_neighbors=20,
             threshold=0.2,
             n_planes=100,
@@ -29,11 +30,12 @@ class Graph():
         '''K nearest neighbors via Local Sensitive Hashing (LSH).
 
         Args:
+            axis (str): 'samples' or 'features'
             n_neighbors (int): number of neighbors to include
             threshold (float): similarity threshold to cut neighbors at
             n_planes (int): number of random hyperplanes to use for signature
             slice_length (int or None): number of bits to use for the LSH. If \
-                    None, perform all n^2 comparisons of signatures.
+                    None, perform all n^2 comparisons of signatures
 
         Returns:
             tuple with (knn, similarity, n_neighbors)
@@ -45,6 +47,13 @@ class Graph():
 
         # TODO: decide on what to do with DataFrames
         data = self.dataset.counts.values
+        if axis == 'samples':
+            pass
+        elif axis == 'features':
+            data = data.T
+        else:
+            raise ValueError('axis not understood')
+
         c = lshknn.Lshknn(
                 data=data,
                 k=n_neighbors,
