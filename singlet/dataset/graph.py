@@ -42,9 +42,6 @@ class Graph():
         '''
         import lshknn
 
-        if slice_length is None:
-            slice_length = 0
-
         # TODO: decide on what to do with DataFrames
         data = self.dataset.counts.values
         if axis == 'samples':
