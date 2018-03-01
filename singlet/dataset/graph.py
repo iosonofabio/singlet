@@ -26,6 +26,7 @@ class Graph():
             threshold=0.2,
             n_planes=100,
             slice_length=None,
+            return_sparse=True,
             ):
         '''K nearest neighbors via Local Sensitive Hashing (LSH).
 
@@ -40,6 +41,7 @@ class Graph():
         Returns:
             tuple with (knn, similarity, n_neighbors)
         '''
+        from scipy.sparse import coo_matrix
         import lshknn
 
         # TODO: decide on what to do with DataFrames
@@ -59,4 +61,23 @@ class Graph():
                 slice_length=slice_length,
                 )
         (knn, similarity, n_neighbors) = c()
-        return (knn, similarity, n_neighbors)
+
+        data = []
+        i = []
+        j = []
+        for irow, (n, sim, nn) in enumerate(zip(knn, similarity, n_neighbors)):
+            for icoli, icol in enumerate(n[:nn[0]]):
+                data.append(sim[icoli])
+                i.append(irow)
+                j.append(icol)
+                # Notice: the matrix is symmetric
+                i.append(icol)
+                j.append(irow)
+                data.append(sim[icoli])
+
+        matrix = coo_matrix(
+                (data, (i, j)),
+                shape=(knn.shape[0], knn.shape[0]),
+                )
+
+        return matrix
