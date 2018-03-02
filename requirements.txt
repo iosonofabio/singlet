@@ -8,3 +8,4 @@ matplotlib
 seaborn
 #Cython
 #bhtsne
+lshknn
