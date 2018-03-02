@@ -53,7 +53,7 @@ if __name__ == '__main__':
 
         # TODO: one could set up PNG comparisons like Matplotlib itself does
         kwargs = {}
-        if te in ('plot',):
+        if te in ('plot', 'graph'):
             kwargs['where'] = 'local'
 
         run(te_fn, **kwargs)

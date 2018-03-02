@@ -27,9 +27,9 @@ pip install bhtsne
 pip install polo
 # Google API tests are only local anyway
 #pip install google-api-python-client
-pip install pkgconfig
-pip install pybind11
-pip install lshknn
+#pip install pkgconfig
+#pip install pybind11
+#pip install lshknn
 
 
 # old setuptools also has a bug for extras, but it still compiles
