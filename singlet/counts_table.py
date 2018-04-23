@@ -49,8 +49,8 @@ class CountsTable(pd.DataFrame):
 
         self = cls(parse_counts_table(tablename))
         self.name = tablename
-        self._spikeins = config['io']['count_tables'][tablename]['spikeins']
-        self._otherfeatures = config['io']['count_tables'][tablename]['other']
+        self._spikeins = config['io']['count_tables'][tablename].get('spikeins', [])
+        self._otherfeatures = config['io']['count_tables'][tablename].get('other', [])
         self._normalized = config['io']['count_tables'][tablename]['normalized']
 
         return self
