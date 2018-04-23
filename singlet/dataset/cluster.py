@@ -112,7 +112,7 @@ class Cluster():
             phenotypes=(),
             metric='correlation',
             method='average',
-            log_features=True,
+            log_features=False,
             optimal_ordering=False):
         '''Hierarchical clustering.
 
