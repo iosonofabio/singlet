@@ -50,22 +50,22 @@ class Correlation():
         '''Correlate feature expression with one or more phenotypes.
 
         Args:
-            phenotypes (list of string): list of phenotypes, i.e. columns of \
-                    the samplesheet. Use a string for a single phenotype.
-            features (list or string): list of features to correlate. Use a \
-                    string for a single feature. The special string 'all' \
-                    (default) uses all features.
-            method (string): type of correlation. Must be one of 'pearson' or \
-                    'spearman'.
-            fillna (dict, int, or None): a dictionary with phenotypes as keys \
-                    and numbers to fill for NaNs as values. None will do \
-                    nothing.
+            phenotypes (list of string): list of phenotypes, i.e. columns of
+                the samplesheet. Use a string for a single phenotype.
+            features (list or string): list of features to correlate. Use a
+                string for a single feature. The special string 'all'
+                (default) uses all features.
+            method (string): type of correlation. Must be one of 'pearson' or
+                'spearman'.
+            fillna (dict, int, or None): a dictionary with phenotypes as keys
+                and numbers to fill for NaNs as values. None will do
+                nothing.
 
         Returns:
-            pandas.DataFrame with the correlation coefficients. If either \
-                    phenotypes or features is a single string, the function \
-                    returns a pandas.Series. If both are a string, it returns \
-                    a single correlation coefficient.
+            pandas.DataFrame with the correlation coefficients. If either
+                phenotypes or features is a single string, the function
+                returns a pandas.Series. If both are a string, it returns
+                a single correlation coefficient.
         '''
 
         exp = self.dataset.counts
@@ -125,21 +125,21 @@ class Correlation():
         '''Correlate feature expression with one or more phenotypes.
 
         Args:
-            features (list or string): list of features to correlate. Use a \
-                    string for a single feature. The special string 'all' \
-                    (default) uses all features.
-            features2 (list or string): list of features to correlate with. \
-                    Use a string for a single feature. The special string \
-                    'all' uses all features. None (default) takes the same \
-                    list as features, returning a square matrix.
-            method (string): type of correlation. Must be one of 'pearson' or \
-                    'spearman'.
+            features (list or string): list of features to correlate. Use a
+                string for a single feature. The special string 'all'
+                (default) uses all features.
+            features2 (list or string): list of features to correlate with.
+                Use a string for a single feature. The special string
+                'all' uses all features. None (default) takes the same
+                list as features, returning a square matrix.
+            method (string): type of correlation. Must be one of 'pearson' or
+                'spearman'.
 
         Returns:
-            pandas.DataFrame with the correlation coefficients. If either \
-                    features or features2 is a single string, the function \
-                    returns a pandas.Series. If both are a string, it returns \
-                    a single correlation coefficient.
+            pandas.DataFrame with the correlation coefficients. If either
+                features or features2 is a single string, the function
+                returns a pandas.Series. If both are a string, it returns
+                a single correlation coefficient.
         '''
         exp_all = self.dataset.counts
         if not isinstance(features, str):
@@ -198,24 +198,24 @@ class Correlation():
         '''Correlate feature expression with one or more phenotypes.
 
         Args:
-            phenotypes (list of string): list of phenotypes, i.e. columns of \
-                    the samplesheet. Use a string for a single phenotype.
-            phenotypes2 (list of string): list of phenotypes, i.e. columns of \
-                    the samplesheet. Use a string for a single phenotype. \
-                    None (default) uses the same as phenotypes.
-            method (string): type of correlation. Must be one of 'pearson' or \
-                    'spearman'.
-            fillna (dict, int, or None): a dictionary with phenotypes as keys \
-                    and numbers to fill for NaNs as values. None will do \
-                    nothing, potentially yielding NaN as correlation \
-                    coefficients.
+            phenotypes (list of string): list of phenotypes, i.e. columns of
+                the samplesheet. Use a string for a single phenotype.
+            phenotypes2 (list of string): list of phenotypes, i.e. columns of
+                the samplesheet. Use a string for a single phenotype.
+                None (default) uses the same as phenotypes.
+            method (string): type of correlation. Must be one of 'pearson' or
+                'spearman'.
+            fillna (dict, int, or None): a dictionary with phenotypes as keys
+                and numbers to fill for NaNs as values. None will do
+                nothing, potentially yielding NaN as correlation
+                coefficients.
             fillna2 (dict, int, or None): as fillna, but for phenotypes2.
 
         Returns:
-            pandas.DataFrame with the correlation coefficients. If either \
-                    phenotypes or features is a single string, the function \
-                    returns a pandas.Series. If both are a string, it returns \
-                    a single correlation coefficient.
+            pandas.DataFrame with the correlation coefficients. If either
+                phenotypes or features is a single string, the function
+                returns a pandas.Series. If both are a string, it returns
+                a single correlation coefficient.
         '''
 
         phe_all = self.dataset.samplesheet
@@ -280,27 +280,27 @@ class Correlation():
         '''Mutual information between feature counts and/or phenotypes
 
         Args:
-            xs (list or string): Features and/or phenotypes to use as \
-                    abscissa (independent variable). The string \
-                    'total' means all features including spikeins and other, \
-                    'mapped' means all features excluding spikeins and other, \
-                    'spikeins' means only spikeins, and 'other' means only \
-                    'other' features.
-            ys (list or string): Features and/or phenotypes to use as \
-                    ordinate (dependent variable). The string \
-                    'total' means all features including spikeins and other, \
-                    'mapped' means all features excluding spikeins and other, \
-                    'spikeins' means only spikeins, and 'other' means only \
-                    'other' features.
+            xs (list or string): Features and/or phenotypes to use as
+                abscissa (independent variable). The string
+                'total' means all features including spikeins and other,
+                'mapped' means all features excluding spikeins and other,
+                'spikeins' means only spikeins, and 'other' means only
+                'other' features.
+            ys (list or string): Features and/or phenotypes to use as
+                ordinate (dependent variable). The string
+                'total' means all features including spikeins and other,
+                'mapped' means all features excluding spikeins and other,
+                'spikeins' means only spikeins, and 'other' means only
+                'other' features.
 
-        NOTE: Mutual information is defined only for discrete or categorical \
-                variables and require a decent coverage of all bins or \
-                categories because it has p(x)p(y) in the denominator. \
-                Feature counts and quantitative phenotypes require binning \
-                prior to calculating Mutual information. See CountsTable.bin \
-                and SampleSheet.bin for options. This function uses \
-                all unique values in the counts and phenotyes as separate \
-                bins.
+        NOTE: Mutual information is defined only for discrete or categorical
+            variables and require a decent coverage of all bins or
+            categories because it has p(x)p(y) in the denominator.
+            Feature counts and quantitative phenotypes require binning
+            prior to calculating Mutual information. See CountsTable.bin
+            and SampleSheet.bin for options. This function uses
+            all unique values in the counts and phenotyes as separate
+            bins.
         '''
         datad = {'x': {'names': xs, 'data': []},
                  'y': {'names': ys, 'data': []}}

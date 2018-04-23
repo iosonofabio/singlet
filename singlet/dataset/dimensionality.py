@@ -32,14 +32,14 @@ class DimensionalityReduction():
         Args:
             n_dims (int): Number of dimensions (2+).
             transform (string or None): Whether to preprocess the data.
-            robust (bool): Whether to use Principal Component Pursuit to \
-                    exclude outliers.
+            robust (bool): Whether to use Principal Component Pursuit to
+                exclude outliers.
 
         Returns:
-            dict of the left eigenvectors (vs), right eigenvectors (us) \
-                    of the singular value decomposition, eigenvalues \
-                    (lambdas), the transform, and the whiten function (for \
-                    plotting).
+            dict of the left eigenvectors (vs), right eigenvectors (us)
+                of the singular value decomposition, eigenvalues
+                (lambdas), the transform, and the whiten function (for
+                plotting).
         '''
         from sklearn.decomposition import PCA
 
@@ -104,8 +104,8 @@ class DimensionalityReduction():
         Args:
             n_dims (int): Number of dimensions to use.
             perplexity (float): Perplexity of the algorithm.
-            theta (float): A number between 0 and 1. Higher is faster but \
-                    less accurate (via the Barnes-Hut approximation).
+            theta (float): A number between 0 and 1. Higher is faster but
+                less accurate (via the Barnes-Hut approximation).
             rand_seed (int): Random seed. -1 randomizes each run.
             **kwargs: Named arguments passed to the t-SNE algorithm.
 

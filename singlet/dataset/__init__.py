@@ -24,20 +24,20 @@ class Dataset():
         '''Collection of cells, with feature counts and metadata
 
         Args:
-            counts_table (string): Name of the counts table (to load from a \
-                    config file) or instance of CountsTable
-            samplesheet (string or None): Name of the samplesheet (to load \
-                    from a config file) or instance of SampleSheet
-            featuresheet (string or None): Name of the samplesheet (to load \
-                    from a config file) or instance of FeatureSheet
-            plugins (dict): Dictionary of classes that take the Dataset \
-                    instance as only argument for __init__, to expand the \
-                    possibilities of Dataset operations.
+            counts_table (string): Name of the counts table (to load from a
+                config file) or instance of CountsTable
+            samplesheet (string or None): Name of the samplesheet (to load from
+                a config file) or instance of SampleSheet
+            featuresheet (string or None): Name of the samplesheet (to load
+                from a config file) or instance of FeatureSheet
+            plugins (dict): Dictionary of classes that take the Dataset
+                instance as only argument for __init__, to expand the
+                possibilities of Dataset operations.
 
-        NOTE: All samples in the counts_table must also be in the \
-                samplesheet, but the latter can have additional samples. If \
-                that is the case, the samplesheet is sliced down to the \
-                samples present in the counts_table.
+        NOTE: All samples in the counts_table must also be in the
+            samplesheet, but the latter can have additional samples. If
+            that is the case, the samplesheet is sliced down to the
+            samples present in the counts_table.
         '''
         from .correlations import Correlation
         from .plot import Plot
@@ -131,13 +131,13 @@ class Dataset():
     def __add__(self, other):
         '''Merge two Datasets.
 
-        For samples with the same names, counts will be added and metadata of \
-                one of the Datasets used. For new samples, the new counts and \
-                metadata will be used.
+        For samples with the same names, counts will be added and metadata of
+            one of the Datasets used. For new samples, the new counts and
+            metadata will be used.
 
-        NOTE: metadata and gene names must be aligned for this operation to \
-                succeed. If one of the two Datasets has more metadata or \
-                features than the other, they cannot be added.
+        NOTE: metadata and gene names must be aligned for this operation to
+            succeed. If one of the two Datasets has more metadata or
+            features than the other, they cannot be added.
         '''
         selfcopy = self.copy()
         selfcopy += other
@@ -146,13 +146,13 @@ class Dataset():
     def __iadd__(self, other):
         '''Merge two Datasets.
 
-        For samples with the same names, counts will be added and metadata of \
-                one of the Datasets used. For new samples, the new counts and \
-                metadata will be used.
+        For samples with the same names, counts will be added and metadata of
+            one of the Datasets used. For new samples, the new counts and
+            metadata will be used.
 
-        NOTE: metadata and gene names must be aligned for this operation to \
-                succeed. If one of the two Datasets has more metadata or \
-                features than the other, they cannot be added.
+        NOTE: metadata and gene names must be aligned for this operation to
+            succeed. If one of the two Datasets has more metadata or
+            features than the other, they cannot be added.
         '''
         if set(self.samplemetadatanames) != set(other.samplemetadatanames):
             raise IndexError('The Datasets have different sample metadata')
@@ -173,14 +173,14 @@ class Dataset():
         '''Split Dataset based on one or more categorical phenotypes
 
         Args:
-            phenotypes (string or list of strings): one or more phenotypes to \
-                    use for the split. Unique values of combinations of these \
-                    determine the split Datasets.
+            phenotypes (string or list of strings): one or more phenotypes to
+                use for the split. Unique values of combinations of these
+                determine the split Datasets.
 
         Returns:
-            dict of Datasets: the keys are either unique values of the \
-                    phenotype chosen or, if more than one, tuples of unique \
-                    combinations.
+            dict of Datasets: the keys are either unique values of the
+                phenotype chosen or, if more than one, tuples of unique
+                combinations.
         '''
         from itertools import product
 
@@ -270,9 +270,9 @@ class Dataset():
 
         Rows are features, columns are samples.
 
-        Notice: If you reset this matrix with features that are not in the \
-                featuresheet or samples that are not in the samplesheet, \
-                those tables will be reset to empty.
+        Notice: If you reset this matrix with features that are not in the
+            featuresheet or samples that are not in the samplesheet,
+            those tables will be reset to empty.
         '''
         return self._counts
 
@@ -320,12 +320,14 @@ class Dataset():
         '''Select samples based on metadata.
 
         Args:
-            expression (string): An expression compatible with pandas.DataFrame.query.
-            inplace (bool): Whether to change the Dataset in place or return a new one.
-            local_dict (dict): A dictionary of local variables, useful if you \
-                    are using @var assignments in your expression. By far the \
-                    most common usage of this argument is to set \
-                    local_dict=locals().
+            expression (string): An expression compatible with
+                pandas.DataFrame.query.
+            inplace (bool): Whether to change the Dataset in place or return a
+                new one.
+            local_dict (dict): A dictionary of local variables, useful if you
+                are using @var assignments in your expression. By far the
+                most common usage of this argument is to set
+                local_dict=locals().
 
         Returns:
             If `inplace` is True, None. Else, a Dataset.
@@ -354,12 +356,14 @@ class Dataset():
         '''Select features based on metadata.
 
         Args:
-            expression (string): An expression compatible with pandas.DataFrame.query.
-            inplace (bool): Whether to change the Dataset in place or return a new one.
-            local_dict (dict): A dictionary of local variables, useful if you \
-                    are using @var assignments in your expression. By far the \
-                    most common usage of this argument is to set \
-                    local_dict=locals().
+            expression (string): An expression compatible with
+                pandas.DataFrame.query.
+            inplace (bool): Whether to change the Dataset in place or return a
+                new one.
+            local_dict (dict): A dictionary of local variables, useful if you
+                are using @var assignments in your expression. By far the
+                most common usage of this argument is to set
+                local_dict=locals().
         Returns:
             If `inplace` is True, None. Else, a Dataset.
         '''
@@ -385,12 +389,13 @@ class Dataset():
         '''Select samples based on gene expression.
 
         Args:
-            expression (string): An expression compatible with pandas.DataFrame.query.
-            inplace (bool): Whether to change the Dataset in place or return a new one.
-            local_dict (dict): A dictionary of local variables, useful if you \
-                    are using @var assignments in your expression. By far the \
-                    most common usage of this argument is to set \
-                    local_dict=locals().
+            expression (string): An expression compatible with
+                pandas.DataFrame.query.
+            inplace (bool): Whether to change the Dataset in place or return a
+                new one.
+            local_dict (dict): A dictionary of local variables, useful if you
+                are using @var assignments in your expression. By far the most
+                common usage of this argument is to set local_dict=locals().
         Returns:
             If `inplace` is True, None. Else, a Dataset.
         '''
@@ -424,12 +429,14 @@ class Dataset():
         '''Select features based on their expression.
 
         Args:
-            expression (string): An expression compatible with pandas.DataFrame.query.
-            inplace (bool): Whether to change the Dataset in place or return a new one.
-            local_dict (dict): A dictionary of local variables, useful if you \
-                    are using @var assignments in your expression. By far the \
-                    most common usage of this argument is to set \
-                    local_dict=locals().
+            expression (string): An expression compatible with
+                pandas.DataFrame.query.
+            inplace (bool): Whether to change the Dataset in place or return a
+                new one.
+            local_dict (dict): A dictionary of local variables, useful if you
+                are using @var assignments in your expression. By far the
+                most common usage of this argument is to set
+                local_dict=locals().
         Returns:
             If `inplace` is True, None. Else, a Dataset.
         '''
@@ -459,9 +466,10 @@ class Dataset():
         Args:
             axis (string): Must be 'samples' or 'features'.
             column (string): Must be a column of the samplesheet (for
-            axis='samples') or of the featuresheet (for axis='features') with
-            unique names of samples or features.
-            inplace (bool): Whether to change the Dataset in place or return a new one.
+                axis='samples') or of the featuresheet (for axis='features')
+                with unique names of samples or features.
+            inplace (bool): Whether to change the Dataset in place or return a
+                new one.
         '''
         if axis not in ('samples', 'features'):
             raise ValueError('axis must be "samples" or "features"')
@@ -491,22 +499,22 @@ class Dataset():
 
         Args:
             other (Dataset): The Dataset to compare with.
-            features (list, string, or None): Features to compare. The string \
-                    'total' means all features including spikeins and other, \
-                    'mapped' means all features excluding spikeins and other, \
-                    'spikeins' means only spikeins, and 'other' means only \
-                    'other' features. If empty list or None, do not compare \
-                    features (useful for phenotypic comparison).
+            features (list, string, or None): Features to compare. The string
+                'total' means all features including spikeins and other,
+                'mapped' means all features excluding spikeins and other,
+                'spikeins' means only spikeins, and 'other' means only
+                'other' features. If empty list or None, do not compare
+                features (useful for phenotypic comparison).
             phenotypes (list of strings): Phenotypes to compare.
-            method (string or function): Statistical test to use for the \
-                    comparison. If a string it must be one of \
-                    'kolmogorov-smirnov' or 'mann-whitney'. If a function, it \
-                    must accept two arrays as arguments (one for each \
-                    dataset, running over the samples) and return a P-value \
-                    for the comparison.
+            method (string or function): Statistical test to use for the
+                comparison. If a string it must be one of
+                'kolmogorov-smirnov' or 'mann-whitney'. If a function, it
+                must accept two arrays as arguments (one for each
+                dataset, running over the samples) and return a P-value
+                for the comparison.
         Return:
-            A pandas.DataFrame containing the P-values of the comparisons for \
-                    all features and phenotypes.
+            A pandas.DataFrame containing the P-values of the comparisons for
+                all features and phenotypes.
         '''
 
         pvalues = []

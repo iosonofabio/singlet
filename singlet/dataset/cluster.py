@@ -30,13 +30,13 @@ class Cluster():
 
         Args:
             n_clusters (int): The number of clusters you want.
-            axis (string): It must be 'samples' or 'features'. \
-                    The Dataset.counts matrix is used and \
-                    either samples or features are clustered.
-            phenotypes (iterable of strings): Phenotypes to add to the \
-                    features for joint clustering.
-            log_features (bool): Whether to add pseudocounts and take a log \
-                    of the feature counts before calculating distances.
+            axis (string): It must be 'samples' or 'features'.
+                The Dataset.counts matrix is used and
+                either samples or features are clustered.
+            phenotypes (iterable of strings): Phenotypes to add to the
+                features for joint clustering.
+            log_features (bool): Whether to add pseudocounts and take a log
+                of the feature counts before calculating distances.
             random_state (int): Set to the same int for deterministic results.
 
         Returns:
@@ -71,13 +71,13 @@ class Cluster():
         '''Density-Based Spatial Clustering of Applications with Noise.
 
         Args:
-            axis (string): It must be 'samples' or 'features'. \
-                    The Dataset.counts matrix is used and \
-                    either samples or features are clustered.
-            phenotypes (iterable of strings): Phenotypes to add to the \
-                    features for joint clustering.
-            log_features (bool): Whether to add pseudocounts and take a log \
-                    of the feature counts before calculating distances.
+            axis (string): It must be 'samples' or 'features'.
+                The Dataset.counts matrix is used and
+                either samples or features are clustered.
+            phenotypes (iterable of strings): Phenotypes to add to the
+                features for joint clustering.
+            log_features (bool): Whether to add pseudocounts and take a log
+                of the feature counts before calculating distances.
             **kwargs: arguments passed to sklearn.cluster.DBSCAN.
 
         Returns:
@@ -117,20 +117,20 @@ class Cluster():
         '''Hierarchical clustering.
 
         Args:
-            axis (string): It must be 'samples' or 'features'. \
-                    The Dataset.counts matrix is used and \
-                    either samples or features are clustered.
-            phenotypes (iterable of strings): Phenotypes to add to the \
-                    features for joint clustering.
-            metric (string): Metric to calculate the distance matrix. Should \
-                    be a string accepted by scipy.spatial.distance.pdist.
-            method (string): Clustering method. Must be a string accepted by \
-                    scipy.cluster.hierarchy.linkage.
-            log_features (bool): Whether to add pseudocounts and take a log \
-                    of the feature counts before calculating distances.
-            optimal_ordering (bool): Whether to resort the linkage so that \
-                    nearest neighbours have shortest distance. This may take \
-                    longer than the clustering itself.
+            axis (string): It must be 'samples' or 'features'. The
+                Dataset.counts matrix is used and either samples or features
+                are clustered.
+            phenotypes (iterable of strings): Phenotypes to add to the
+                features for joint clustering.
+            metric (string): Metric to calculate the distance matrix. Should
+                be a string accepted by scipy.spatial.distance.pdist.
+            method (string): Clustering method. Must be a string accepted by
+                scipy.cluster.hierarchy.linkage.
+            log_features (bool): Whether to add pseudocounts and take a log
+                of the feature counts before calculating distances.
+            optimal_ordering (bool): Whether to resort the linkage so that
+                nearest neighbours have shortest distance. This may take
+                longer than the clustering itself.
         Returns:
             dict with the linkage, distance matrix, and ordering.
         '''

@@ -34,18 +34,18 @@ class Graph():
             n_neighbors (int): number of neighbors to include
             threshold (float): similarity threshold to cut neighbors at
             n_planes (int): number of random hyperplanes to use for signature
-            slice_length (int or None): number of bits to use for the LSH. If \
-                    None, perform all n^2 comparisons of signatures
-            return_sparse (bool): return sparse matrix instead of raw lshknn \
-                    output.
+            slice_length (int or None): number of bits to use for the LSH. If
+                None, perform all n^2 comparisons of signatures
+            return_sparse (bool): return sparse matrix instead of raw lshknn
+                output.
             metric (str): metric to use to calculate the distance matrix. If
-                    this is a distance metric, similarity is -distance.
+                this is a distance metric, similarity is -distance.
             metric_kwargs (dict or None): dictionary of keyword arguments for
-                    scipy.spatial.distance.pdist.
+                scipy.spatial.distance.pdist.
 
         Returns:
-            tuple with (knn, similarity, n_neighbors) or COO sparse matrix \
-            similarities. The sparse matrix is NOT symmetric: each row has \
+            tuple with (knn, similarity, n_neighbors) or COO sparse matrix
+            similarities. The sparse matrix is NOT symmetric: each row has
             the k neighbors of the cell corresponding to that row.
         '''
         from scipy.sparse import coo_matrix
@@ -122,14 +122,14 @@ class Graph():
             n_neighbors (int): number of neighbors to include
             threshold (float): similarity threshold to cut neighbors at
             n_planes (int): number of random hyperplanes to use for signature
-            slice_length (int or None): number of bits to use for the LSH. If \
-                    None, perform all n^2 comparisons of signatures
-            return_sparse (bool): return sparse matrix instead of raw lshknn \
-                    output.
+            slice_length (int or None): number of bits to use for the LSH. If
+                None, perform all n^2 comparisons of signatures
+            return_sparse (bool): return sparse matrix instead of raw lshknn
+                output.
 
         Returns:
-            tuple with (knn, similarity, n_neighbors) or COO sparse matrix \
-            similarities. The sparse matrix is NOT symmetric: each row has \
+            tuple with (knn, similarity, n_neighbors) or COO sparse matrix
+            similarities. The sparse matrix is NOT symmetric: each row has
             the k neighbors of the cell corresponding to that row.
         '''
         from scipy.sparse import coo_matrix

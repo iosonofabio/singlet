@@ -27,8 +27,8 @@ class FeatureSelection():
         '''Select features that are expressed in at least some samples.
 
         Args:
-            n_samples (int): Minimum number of samples the features should be \
-                    expressed in.
+            n_samples (int): Minimum number of samples the features should be
+                expressed in.
             exp_min (float): Minimum level of expression of the features.
             inplace (bool): Whether to change the feature list in place.
 
@@ -48,17 +48,17 @@ class FeatureSelection():
         '''Select overdispersed features in strata of increasing expression.
 
         Args:
-            bins (int or list): Bin edges determining the strata. If this is \
-                    a number, use that number of quantiles.
-            n_features_per_stratum (int): Number of features per stratum to \
-                    select.
+            bins (int or list): Bin edges determining the strata. If this is
+                a number, use that number of quantiles.
+            n_features_per_stratum (int): Number of features per stratum to
+                select.
 
         Returns:
             pd.Index of selected features if not inplace, else None.
 
-        Notice that the number of selected features may be smaller than \
-        expected if some strata have no dispersion (e.g. only dropouts). \
-        Because of this, it is recommended you restrict the counts to \
+        Notice that the number of selected features may be smaller than
+        expected if some strata have no dispersion (e.g. only dropouts).
+        Because of this, it is recommended you restrict the counts to
         expressed features before using this function.
         '''
 

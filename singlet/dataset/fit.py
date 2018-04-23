@@ -30,42 +30,42 @@ class Fit():
         '''Fit feature expression or phenotypes against other.
 
         Args:
-            xs (list or string): Features and/or phenotypes to use as \
-                    abscissa (independent variable). The string \
-                    'total' means all features including spikeins and other, \
-                    'mapped' means all features excluding spikeins and other, \
-                    'spikeins' means only spikeins, and 'other' means only \
-                    'other' features.
-            ys (list or string): Features and/or phenotypes to use as \
-                    ordinate (dependent variable). The string \
-                    'total' means all features including spikeins and other, \
-                    'mapped' means all features excluding spikeins and other, \
-                    'spikeins' means only spikeins, and 'other' means only \
-                    'other' features.
-            model (string or function): The model to use for fitting. If a \
-                    string, it must be one of 'linear', 'threshold-linear', \
-                    'logistic'. If a function, it must accept an array \
-                    as first argument (the x) and the parameters as \
-                    additional arguments (like scipy.optimize.curve_fit).
-            method (string or function): The minimization algorithm. For now, \
-                    only 'least-squares' is accepted. In this case, the \
-                    goodness of fit is the sum of the squared residues.
-            handle_nans (string): How to deal with Not a Numbers, typically \
-                    in the phenotypes. Must be either 'ignore' (default), in \
-                    which case only the non-NaN samples will be used for \
-                    fitting, or 'raise', in which case NaNs will stop the fit.
-            **kwargs: Passed to the fit function. For nonlinear \
-                    least-squares, this is scipy.optimize.curve_fit. Linear \
-                    least-squares is analytical so it ignores **kwargs.
+            xs (list or string): Features and/or phenotypes to use as
+                abscissa (independent variable). The string
+                'total' means all features including spikeins and other,
+                'mapped' means all features excluding spikeins and other,
+                'spikeins' means only spikeins, and 'other' means only
+                'other' features.
+            ys (list or string): Features and/or phenotypes to use as
+                ordinate (dependent variable). The string
+                'total' means all features including spikeins and other,
+                'mapped' means all features excluding spikeins and other,
+                'spikeins' means only spikeins, and 'other' means only
+                'other' features.
+            model (string or function): The model to use for fitting. If a
+                string, it must be one of 'linear', 'threshold-linear',
+                'logistic'. If a function, it must accept an array
+                as first argument (the x) and the parameters as
+                additional arguments (like scipy.optimize.curve_fit).
+            method (string or function): The minimization algorithm. For now,
+                only 'least-squares' is accepted. In this case, the
+                goodness of fit is the sum of the squared residues.
+            handle_nans (string): How to deal with Not a Numbers, typically
+                in the phenotypes. Must be either 'ignore' (default), in
+                which case only the non-NaN samples will be used for
+                fitting, or 'raise', in which case NaNs will stop the fit.
+            **kwargs: Passed to the fit function. For nonlinear
+                least-squares, this is scipy.optimize.curve_fit. Linear
+                least-squares is analytical so it ignores **kwargs.
 
         Returns:
-            A 3-dimensional xarray with the xs, ys as first two axes. The \
-                    third axis, called 'results', contains the parameters \
-                    and an assessment of the fit quality. If method is \
-                    least-squres, it is the sum of squared residuals.
+            A 3-dimensional xarray with the xs, ys as first two axes. The
+            third axis, called 'results', contains the parameters
+            and an assessment of the fit quality. If method is
+            least-squres, it is the sum of squared residuals.
 
-        NOTE: This function fits every combination of x and y independently, \
-                interactions are not considered.
+        NOTE: This function fits every combination of x and y independently,
+            interactions are not considered.
         '''
         datad = {'x': {'names': xs, 'data': []},
                  'y': {'names': ys, 'data': []}}
