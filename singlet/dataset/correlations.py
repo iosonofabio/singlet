@@ -128,7 +128,7 @@ class Correlation():
             features (list or string): list of features to correlate. Use a \
                     string for a single feature. The special string 'all' \
                     (default) uses all features.
-            features (list or string): list of features to correlate with. \
+            features2 (list or string): list of features to correlate with. \
                     Use a string for a single feature. The special string \
                     'all' uses all features. None (default) takes the same \
                     list as features, returning a square matrix.
@@ -142,21 +142,24 @@ class Correlation():
                     a single correlation coefficient.
         '''
         exp_all = self.dataset.counts
-        if features == 'all':
-            exp = exp_all
-        elif isinstance(features, str):
-            exp = exp_all.loc[[features]]
-        else:
+        if not isinstance(features, str):
             exp = exp_all.loc[features]
+        elif features == 'all':
+            features = exp_all.index
+            exp = exp_all
+        else:
+            exp = exp_all.loc[[features]]
 
         if features2 is None:
+            features = exp.index
             exp2 = exp
-        elif features2 == 'all':
-            exp2 = exp_all
-        elif isinstance(features2, str):
-            exp2 = exp_all.loc[[features2]]
-        else:
+        elif not isinstance(features2, str):
             exp2 = exp_all.loc[features2]
+        elif features2 == 'all':
+            features = exp_all.index
+            exp2 = exp_all
+        else:
+            exp2 = exp_all.loc[[features2]]
 
         x = exp.values
         y = exp2.values
