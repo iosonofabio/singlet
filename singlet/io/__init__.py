@@ -3,6 +3,7 @@
 # date:       14/08/17
 # content:    Parse sample sheets.
 # Modules
+import numpy as np
 import pandas as pd
 from singlet.config import config
 
@@ -82,6 +83,41 @@ def parse_counts_table(tablename):
             table.set_index(table.columns[0], inplace=True, drop=True)
 
         table = table.astype(float)
+
+        tables.append(table)
+
+    if len(tables) == 1:
+        table = tables[0]
+    else:
+        table = pd.concat(tables, axis=1)
+    return table
+
+
+def parse_counts_table_sparse(tablename):
+    from .npz import parse_counts_table_sparse as parse_npz
+    # FIXME: check this function!!
+    sheet = config['io']['count_tables'][tablename]
+    paths = sheet['path']
+    fmts = sheet['format']
+    if isinstance(paths, str):
+        paths = [paths]
+        fmts = [fmts]
+
+    tables = []
+    for path, fmt in zip(paths, fmts):
+        if fmt == 'npz':
+            parse = parse_npz
+        else:
+            raise ValueError('Format not understood')
+
+        table = parse(path, fmt)
+        if ('cells' in sheet) and (sheet['cells'] != 'columns'):
+            table = table.T
+
+        if 'index' in sheet:
+            table.set_index(sheet['index'], inplace=True, drop=True)
+        elif not table.index.name:
+            table.set_index(table.columns[0], inplace=True, drop=True)
 
         tables.append(table)
 
