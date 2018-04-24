@@ -20,7 +20,8 @@ if __name__ == '__main__':
     print('Hierarchical clustering of samples')
     d = ds.cluster.hierarchical(
             'samples',
-            optimal_ordering=True)
+            optimal_ordering=True,
+            log_features=True)
     assert(tuple(d['leaves']) == ('second_sample', 'test_pipeline',
                                   'first_sample', 'third_sample'))
     print('Done!')
@@ -29,7 +30,8 @@ if __name__ == '__main__':
     ds.counts = ds.counts.iloc[:200]
     d = ds.cluster.hierarchical(
             'features',
-            optimal_ordering=True)
+            optimal_ordering=True,
+            log_features=True)
     assert(tuple(d['leaves'])[:3] == ('PNPLA4', 'ITGAL', 'HOXA11'))
     print('Done!')
 
@@ -38,6 +40,7 @@ if __name__ == '__main__':
     d = ds.cluster.hierarchical(
             axis='features',
             phenotypes=('quantitative_phenotype_1_[A.U.]',),
-            optimal_ordering=True)
+            optimal_ordering=True,
+            log_features=True)
     assert(d['leaves'][23] == 'quantitative_phenotype_1_[A.U.]')
     print('Done!')
