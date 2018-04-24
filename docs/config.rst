@@ -39,7 +39,7 @@ Before going into the specifics, here's a schematic example of the configuration
         spikeins:
           - ERCC-00002
           - ERCC-00003
-        other
+        other:
           - __alignment_not_unique
           - __not_aligned
 
