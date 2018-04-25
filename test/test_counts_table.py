@@ -46,3 +46,6 @@ if __name__ == '__main__':
 
     # Bin
     run('test/counts_table/bin.py')
+
+    # Init sparse
+    run('test/counts_table/initialize_sparse.py')
