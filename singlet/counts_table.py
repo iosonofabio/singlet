@@ -107,7 +107,7 @@ class CountsTable(pd.DataFrame):
         Returns:
             If inplace is False, a transformed CountsTable.
         '''
-        clog = np.log10(self.pseudocount + self) / np.log10(base)
+        clog = np.log(self.pseudocount + self) / np.log(base)
         if inplace:
             self[:] = clog.values
         else:
