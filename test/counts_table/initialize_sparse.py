@@ -12,5 +12,5 @@ if __name__ == '__main__':
     # calling this script
     print('Instantiating CountsTableSparse')
     from singlet.counts_table_sparse import CountsTableSparse
-    ct = CountsTableSparse.from_tablename('example_table_sparse_npz')
+    ct = CountsTableSparse.from_tablename('example_PBMC_sparse')
     print('Done!')

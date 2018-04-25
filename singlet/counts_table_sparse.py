@@ -55,3 +55,9 @@ class CountsTableSparse(pd.SparseDataFrame):
         self._normalized = config['io']['count_tables'][tablename]['normalized']
 
         return self
+
+    def to_npz(self, filename):
+        '''Save to numpy compressed file format'''
+        from .io.npz import to_counts_table_sparse
+
+        to_counts_table_sparse(self, filename)
