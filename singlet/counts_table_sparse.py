@@ -50,10 +50,10 @@ class CountsTableSparse(pd.SparseDataFrame):
 
         self = cls(parse_counts_table_sparse(tablename))
         self.name = tablename
-        self._spikeins = config['io']['count_tables'][tablename].get('spikeins', [])
-        self._otherfeatures = config['io']['count_tables'][tablename].get('other', [])
-        self._normalized = config['io']['count_tables'][tablename]['normalized']
-
+        config_table = config['io']['count_tables'][tablename]
+        self._spikeins = config_table.get('spikeins', [])
+        self._otherfeatures = config_table.get('other', [])
+        self._normalized = config_table['normalized']
         return self
 
     def to_npz(self, filename):
@@ -61,3 +61,45 @@ class CountsTableSparse(pd.SparseDataFrame):
         from .io.npz import to_counts_table_sparse
 
         to_counts_table_sparse(self, filename)
+
+    def exclude_features(self, spikeins=True, other=True, inplace=False,
+                         errors='raise'):
+        '''Get a slice that excludes secondary features.
+
+        Args:
+            spikeins (bool): Whether to exclude spike-ins
+            other (bool): Whether to exclude other features, e.g. unmapped reads
+            inplace (bool): Whether to drop those features in place.
+            errors (string): Whether to raise an exception if the features
+                to be excluded are already not present. Must be 'ignore'
+                or 'raise'.
+
+        Returns:
+            CountsTable: a slice of self without those features.
+        '''
+        drop = []
+        if spikeins:
+            drop.extend(self._spikeins)
+        if other:
+            drop.extend(self._otherfeatures)
+        out = self.drop(drop, axis=0, inplace=inplace, errors=errors)
+        if inplace and (self.dataset is not None):
+            self.dataset._featuresheet.drop(drop, inplace=True, errors=errors)
+        return out
+
+    def get_spikeins(self):
+        '''Get spike-in features
+
+        Returns:
+            CountsTable: a slice of self with only spike-ins.
+        '''
+        return self.loc[self._spikeins]
+
+    def get_other_features(self):
+        '''Get other features
+
+        Returns:
+            CountsTable: a slice of self with only other features (e.g.
+                unmapped).
+        '''
+        return self.loc[self._otherfeatures]

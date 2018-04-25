@@ -49,10 +49,10 @@ class CountsTable(pd.DataFrame):
 
         self = cls(parse_counts_table(tablename))
         self.name = tablename
-        self._spikeins = config['io']['count_tables'][tablename].get('spikeins', [])
-        self._otherfeatures = config['io']['count_tables'][tablename].get('other', [])
-        self._normalized = config['io']['count_tables'][tablename]['normalized']
-
+        config_table = config['io']['count_tables'][tablename]
+        self._spikeins = config_table.get('spikeins', [])
+        self._otherfeatures = config_table.get('other', [])
+        self._normalized = config_table['normalized']
         return self
 
     def exclude_features(self, spikeins=True, other=True, inplace=False,
@@ -63,9 +63,9 @@ class CountsTable(pd.DataFrame):
             spikeins (bool): Whether to exclude spike-ins
             other (bool): Whether to exclude other features, e.g. unmapped reads
             inplace (bool): Whether to drop those features in place.
-            errors (string): Whether to raise an exception if the features \
-                    to be excluded are already not present. Must be 'ignore' \
-                    or 'raise'.
+            errors (string): Whether to raise an exception if the features
+                to be excluded are already not present. Must be 'ignore'
+                or 'raise'.
 
         Returns:
             CountsTable: a slice of self without those features.
