@@ -15,6 +15,11 @@ if __name__ == '__main__':
     ct = CountsTableSparse.from_tablename('example_PBMC_sparse')
     print('Done!')
 
-    print('CountsTableSparse.log')
+    print('log CountsTableSparse')
     ctlog = ct.log(base=10)
     print('Done!')
+
+    print('unlog CountsTableSparse')
+    ctunlog = ctlog.unlog(base=10)
+    print('Done!')
+
