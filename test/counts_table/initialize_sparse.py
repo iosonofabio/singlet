@@ -14,3 +14,7 @@ if __name__ == '__main__':
     from singlet.counts_table_sparse import CountsTableSparse
     ct = CountsTableSparse.from_tablename('example_PBMC_sparse')
     print('Done!')
+
+    print('CountsTableSparse.log')
+    ctlog = ct.log(base=10)
+    print('Done!')

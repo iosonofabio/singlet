@@ -103,3 +103,28 @@ class CountsTableSparse(pd.SparseDataFrame):
                 unmapped).
         '''
         return self.loc[self._otherfeatures]
+
+    def log(self, base=10):
+        '''Take the pseudocounted log of the counts.
+
+        Args:
+            base (float): Base of the log transform
+
+        Returns:
+            A transformed CountsTableSparse with zeros at the zero-count items.
+        '''
+        from scipy.sparse import coo_matrix
+
+        coo = self.to_coo()
+        coobase = np.log(self.pseudocount) * coo_matrix((np.ones(coo.nnz), (coo.row, coo.col)), shape=coo.shape)
+        coolog = ((coo / self.pseudocount).log1p() - coobase) / np.log(base)
+        # NOTE: the entries that should be log(pseudocount) are zeros now
+
+        clog = CountsTableSparse(
+            coolog,
+            index=self.index,
+            columns=self.columns,
+            dtype=float,
+            default_fill_value=0)
+
+        return clog
