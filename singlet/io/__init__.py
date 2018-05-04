@@ -70,6 +70,8 @@ def parse_counts_table(tablename):
             parse = parse_csv
         elif fmt == 'pickle':
             parse = parse_pickle
+        elif fmt == 'tsv.gz':
+            parse = parse_csv
         else:
             raise ValueError('Format not understood')
 

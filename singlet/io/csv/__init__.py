@@ -39,9 +39,9 @@ def parse_featuresheet(path, fmt):
 def parse_counts_table(path, fmt):
     import pandas as pd
 
-    if fmt == 'tsv':
+    if fmt in ('tsv', 'tsv.gz'):
         sep = '\t'
-    elif fmt == 'csv':
+    elif fmt in ('csv', 'csv.gz'):
         sep = ','
     else:
         raise ValueError('Format not understood')
