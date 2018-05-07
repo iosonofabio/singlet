@@ -13,7 +13,18 @@ if __name__ == '__main__':
     from singlet.dataset import Dataset
     ds = Dataset(
             samplesheet='example_sheet_tsv',
-            counts_table='example_table_tsv')
+            counts_table='example_table_tsv',
+            featuresheet='example_sheet_tsv')
+
+    print('Average samples')
+    ds_avg = ds.average(axis='samples', column='experiment')
+    assert(tuple(ds_avg.samplenames) == ('exp1', 'test_pipeline'))
+    print('Done!')
+
+    print('Average features')
+    ds_avg = ds.average(axis='features', column='annotation')
+    assert(tuple(ds_avg.featurenames) == ('gene', 'other', 'spikein'))
+    print('Done!')
 
     print('Query samples by metadata')
     ds_tmp = ds.query_samples_by_metadata(

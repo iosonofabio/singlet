@@ -1,4 +1,10 @@
 'io':
+  'featuresheets':
+    'example_sheet_tsv':
+      'description': 'Example TSV file for feature metadata'
+      'path': 'example_data/example_featuresheet.tsv'
+      'index': 'gene name'
+
   'samplesheets':
     'example_sheet_googleapi':
       'description': 'Example Google Spreadsheet for cell metadata'

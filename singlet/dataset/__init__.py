@@ -649,3 +649,73 @@ class Dataset():
             featuresheet=fs,
             plugins=plugins,
             )
+
+    def average(self, axis, column):
+        '''Average samples or features based on metadata
+
+
+        Args:
+            axis (string): Must be 'samples' or 'features'.
+            column (string): Must be a column of the samplesheet (for
+                axis='samples') or of the featuresheet (for axis='features').
+                Samples or features with a common value in this column are
+                averaged over.
+        Returns:
+            A Dataset with the averaged counts.
+
+        Note: if you average over samples, you get an empty samplesheet.
+        Simlarly, if you average over features, you get an empty featuresheet.
+
+        '''
+        if axis not in ('samples', 'features'):
+            raise ValueError('axis must be "samples" or "features"')
+
+        if axis == 'samples':
+            if column not in self.samplesheet.columns:
+                raise ValueError(
+                    '{:} is not a column of the SampleSheet'.format(column))
+
+            vals = pd.Index(np.unique(self.samplesheet[column]), name=column)
+            n_conditions = len(vals)
+            counts = np.zeros(
+                    (self.n_features, n_conditions),
+                    dtype=self.counts.values.dtype)
+            for i, val in enumerate(vals):
+                ind = self.samplesheet[column] == val
+                counts[:, i] = self.counts.loc[:, ind].values.mean(axis=1)
+            counts = self.counts.__class__(
+                    pd.DataFrame(
+                        counts,
+                        index=self.counts.index,
+                        columns=vals))
+
+            featuresheet = self._featuresheet.copy()
+
+            return Dataset(
+                    counts_table=counts,
+                    featuresheet=featuresheet)
+
+        elif axis == 'features':
+            if column not in self.featuresheet.columns:
+                raise ValueError(
+                    '{:} is not a column of the FeatureSheet'.format(column))
+
+            vals = pd.Index(np.unique(self.featuresheet[column]), name=column)
+            n_conditions = len(vals)
+            counts = np.zeros(
+                    (n_conditions, self.n_samples),
+                    dtype=self.counts.values.dtype)
+            for i, val in enumerate(vals):
+                ind = self.featuresheet[column] == val
+                counts[i] = self.counts.loc[ind].values.mean(axis=0)
+            counts = self.counts.__class__(
+                    pd.DataFrame(
+                        counts,
+                        index=vals,
+                        columns=self.counts.columns))
+
+            samplesheet = self._samplesheet.copy()
+
+            return Dataset(
+                    counts_table=counts,
+                    samplesheet=samplesheet)
