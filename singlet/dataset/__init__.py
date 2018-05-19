@@ -613,14 +613,36 @@ class Dataset():
         df.set_index('name', drop=True, inplace=True)
         return df
 
-    def bootstrap(self):
+    def bootstrap(self, groupby=None):
         '''Resample with replacement, aka bootstrap dataset
+
+            Args:
+                groupby (str or list of str or None): If None, bootstrap random
+                samples disregarding sample metadata. If a string or a list of
+                strings, boostrap over groups of samples with consistent
+                entries for that/those columns.
 
             Returns:
                 A Dataset with the resampled samples.
         '''
         n = self.n_samples
-        ind = np.random.randint(n, size=n)
+        if groupby is None:
+            ind = np.random.randint(n, size=n)
+        else:
+            meta = self.samplesheet.loc[:, groupby]
+            meta_unique = meta.drop_duplicates().values
+            n_groups = meta_unique.shape[0]
+            ind_groups = np.random.randint(n_groups, size=n_groups)
+            ind = []
+            for i in ind_groups:
+                indi = (meta == meta_unique[i]).values
+                if indi.ndim > 1:
+                    indi = indi.all(axis=1)
+                indi = indi.nonzero()[0]
+                ind.extend(list(indi))
+            ind = np.array(ind)
+            print(ind)
+
         snames = self.samplenames
         from collections import Counter
         tmp = Counter()

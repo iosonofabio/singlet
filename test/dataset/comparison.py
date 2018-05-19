@@ -21,11 +21,6 @@ if __name__ == '__main__':
     ds.samplesheet = ds.samplesheet.iloc[:2]
     ds2.samplesheet = ds2.samplesheet.iloc[2:]
 
-    print('Bootstrap')
-    dsboot = ds.bootstrap()
-    assert('--sampling_' in dsboot.samplenames[0])
-    print('Done!')
-
     print('Test feature comparison (Mann-Whitney U)')
     pvals = ds.compare(
             ds2,
