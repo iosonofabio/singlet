@@ -641,7 +641,6 @@ class Dataset():
                 indi = indi.nonzero()[0]
                 ind.extend(list(indi))
             ind = np.array(ind)
-            print(ind)
 
         snames = self.samplenames
         from collections import Counter
