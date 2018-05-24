@@ -213,8 +213,8 @@ class CountsTableSparse(pd.SparseDataFrame):
         '''Get statistics of the counts.
 
         Args:
-            metrics (sequence of strings): any of 'mean', 'var', 'std', 'cv', \
-                    'fano', 'min', 'max'.
+            metrics (sequence of strings): any of 'mean', 'var', 'std', 'cv',
+                'fano', 'min', 'max'.
 
         Returns:
             pandas.DataFrame with features as rows and metrics as columns.

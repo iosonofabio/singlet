@@ -352,23 +352,23 @@ class CountsTable(pd.DataFrame):
         '''Bin feature counts.
 
         Args:
-            bins (int, array, or list of arrays): If an int, number \
-                    equal-width bins between pseudocounts and the max of \
-                    the counts matrix. If an array of indices of the same \
-                    length as the number of feature, use a different number \
-                    of equal-width bins for each feature. If an array of any \
-                    other length, use these bin edges (including rightmost \
-                    edge) for all features. If a list of arrays, it has to be \
-                    as long as the number of features, and every array in the \
-                    list determines the bin edges (including rightmost edge) \
-                    for that feature, in order.
-            result (string): Has to be one of 'index' (default), 'left', \
-                    'center', 'right'. 'index' assign to the feature the \
-                    index (starting at 0) of that bin, 'left' assign the left \
-                    bin edge, 'center' the bin center, 'right' the right \
-                    edge. If result is 'index', out-of-bounds values will be \
-                    assigned the value -1, which means Not A Number in ths \
-                    context.
+            bins (int, array, or list of arrays): If an int, number
+                equal-width bins between pseudocounts and the max of
+                the counts matrix. If an array of indices of the same
+                length as the number of features, use a different number
+                of equal-width bins for each feature. If an array of any
+                other length, use these bin edges (including rightmost
+                edge) for all features. If a list of arrays, it has to be
+                as long as the number of features, and every array in the
+                list determines the bin edges (including rightmost edge)
+                for that feature, in order.
+            result (string): Has to be one of 'index' (default), 'left',
+                'center', 'right'. 'index' assign to the feature the
+                index (starting at 0) of that bin, 'left' assign the left
+                bin edge, 'center' the bin center, 'right' the right
+                edge. If result is 'index', out-of-bounds values will be
+                assigned the value -1, which means Not A Number in ths
+                context.
             inplace (bool): Whether to perform the operation in place.
 
         Returns:
@@ -404,7 +404,8 @@ class CountsTable(pd.DataFrame):
                 raise ValueError('result parameter not understood')
 
             cbin = pd.cut(
-                    np.maximum(self.pseudocount, count), bini,
+                    np.maximum(self.pseudocount, count),
+                    bini,
                     labels=labels,
                     right=True,
                     include_lowest=True)
