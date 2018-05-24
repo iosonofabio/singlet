@@ -41,7 +41,7 @@ if __name__ == '__main__':
     # Init
     run('test/counts_table/initialize.py')
 
-    # Statistics
+    # Statistics and normalization
     run('test/counts_table/statistics.py')
 
     # Bin
@@ -49,3 +49,6 @@ if __name__ == '__main__':
 
     # Init sparse
     run('test/counts_table/initialize_sparse.py')
+
+    # Statistics and normalization sparse
+    run('test/counts_table/statistics_sparse.py')

@@ -153,3 +153,58 @@ class CountsTableSparse(pd.SparseDataFrame):
             default_fill_value=0)
 
         return cexp
+
+    def normalize(
+            self,
+            method='counts_per_million',
+            include_spikeins=False,
+            **kwargs):
+        '''Normalize counts and return new CountsTable.
+
+        Args:
+            method (string or function): The method to use for normalization.
+                One of 'counts_per_million', 'counts_per_thousand_spikeins',
+                'counts_per_thousand_features'. If this argument is a
+                function, its signature depends on the inplace argument.
+                It must take the CountsTable as input and return the normalized
+                one as output. You can end your function by
+                self[:] = <normalized counts>.
+            include_spikeins (bool): Whether to include spike-ins in the
+                normalization and result.
+            inplace (bool): Whether to modify the CountsTable in place or
+                return a new one.
+
+        Returns:
+            A new, normalized CountsTableSparse.
+        '''
+        import copy
+
+        if method == 'counts_per_million':
+            counts = self.exclude_features(spikeins=(not include_spikeins), other=True)
+            norm = counts.sum(axis=0)
+            counts_norm = 1e6 * counts / norm
+        elif method == 'counts_per_thousand_spikeins':
+            counts = self.exclude_features(spikeins=(not include_spikeins), other=True)
+            norm = self.get_spikeins().sum(axis=0)
+            counts_norm = 1e3 * counts / norm
+        elif method == 'counts_per_thousand_features':
+            if 'features' not in kwargs:
+                raise ValueError('Set features=<list of normalization features>')
+            counts = self.exclude_features(spikeins=(not include_spikeins), other=True)
+            norm = self.loc[kwargs['features']].sum(axis=0)
+            counts_norm = 1e3 * counts / norm
+        elif callable(method):
+            counts_norm = method(self)
+            method = 'custom'
+        else:
+            raise ValueError('Method not understood')
+
+        # Shallow copy of metadata
+        for prop in self._metadata:
+            # dataset if special, to avoid infinite loops
+            if prop == 'dataset':
+                counts_norm.dataset = None
+            else:
+                setattr(counts_norm, prop, copy.copy(getattr(self, prop)))
+        counts_norm._normalized = method
+        return counts_norm
