@@ -8,6 +8,7 @@ import pandas as pd
 
 from ..samplesheet import SampleSheet
 from ..counts_table import CountsTable
+from ..counts_table_sparse import CountsTableSparse
 from ..featuresheet import FeatureSheet
 
 
@@ -25,7 +26,7 @@ class Dataset():
 
         Args:
             counts_table (string): Name of the counts table (to load from a
-                config file) or instance of CountsTable
+                config file) or instance of CountsTable or CountsTableSparse
             samplesheet (string or None): Name of the samplesheet (to load from
                 a config file) or instance of SampleSheet
             featuresheet (string or None): Name of the samplesheet (to load
@@ -39,6 +40,7 @@ class Dataset():
             that is the case, the samplesheet is sliced down to the
             samples present in the counts_table.
         '''
+        from .config import config
         from .correlations import Correlation
         from .plot import Plot
         from .dimensionality import DimensionalityReduction
@@ -59,8 +61,16 @@ class Dataset():
                 self._samplesheet = samplesheet
             self._counts = CountsTable(data=[], index=[], columns=self._samplesheet.index)
         else:
-            if not isinstance(counts_table, CountsTable):
-                counts_table = CountsTable.from_tablename(counts_table)
+            if isinstance(counts_table, CountsTable):
+                pass
+            elif isinstance(counts_table, CountsTableSparse):
+                pass
+            else:
+                config_table = config['io']['count_tables'][counts_table]
+                if config_table.get('sparse', False):
+                    counts_table = CountsTableSparse.from_tablename(counts_table)
+                else:
+                    counts_table = CountsTable.from_tablename(counts_table)
             self._counts = counts_table
 
             if samplesheet is None:
@@ -80,7 +90,8 @@ class Dataset():
             self._featuresheet = featuresheet
 
         # Uniform axes across data and metadata
-        assert(self._counts.columns.isin(self._samplesheet.index).all())
+        # FIXME: this is very slow
+        #assert(self._counts.columns.isin(self._samplesheet.index).all())
         self._samplesheet = self._samplesheet.loc[self._counts.columns]
         # FIXME: this is very slow
         #assert(self._counts.index.isin(self._featuresheet.index).all())
@@ -167,7 +178,13 @@ class Dataset():
                 self.samplesheet.loc[samplename] = meta
                 self.counts.loc[:, samplename] = other.counts.loc[:, samplename]
             else:
-                self.counts.loc[:, samplename] += other.counts.loc[:, samplename]
+                counts_col_other = other.counts.loc[:, samplename]
+                if isinstance(other._counts, CountsTableSparse):
+                    counts_col_other = counts_col_other.to_dense()
+                if isinstance(self._counts, CountsTableSparse):
+                    self.counts.loc[:, samplename] = (self.counts.loc[:, samplename].to_dense() + counts_col_other).to_sparse()
+                else:
+                    self.counts.loc[:, samplename] += counts_col_other
 
     def split(self, phenotypes, copy=True):
         '''Split Dataset based on one or more categorical phenotypes

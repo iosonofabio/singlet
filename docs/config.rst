@@ -89,7 +89,8 @@ The following key value pairs are available:
  - ``path``: a filename on disk containing the counts table, usually in CSV/TSV format.
  - ``format``: a file format of the counts table (optional). If missing, it is inferred from the ``path`` filename.
  - ``cells``: one of ``rows`` or ``columns``. If each row in the counts table is a sample, use ``rows``, else use ``columns``.
- - ``normalized``: either ``yes`` or ``no``. If data is not notmalized, you can normalize it with singlet by using the ``CountsTable.normalize`` method.
+ - ``normalized``: either ``yes`` or ``no``. If data is not normalized, you can normalize it with singlet by using the ``CountsTable.normalize`` method.
+ - ``sparse``: either ``yes`` or ``no`` (default). If ``yes``, the count table will be loaded by default as ``CountsTableSparse``, else as ``CountsTable`` (dense).
  - ``spikeins``: a YAML list of features that appear in the counts table and represent spike-in controls as opposed to real features. Spikeins can be excluded from the counts table using ``CountsTable.exclude_features``.
  - ``other``: a YAML list of features that are neither biological features nor spike-in controls. This list typically includes ambiguous alignments, multiple-aligned reads, reads outside features, etc. Other features can be excluded from the counts table using ``CountsTable.exclude_features``.
 
