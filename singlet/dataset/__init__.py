@@ -40,7 +40,7 @@ class Dataset():
             that is the case, the samplesheet is sliced down to the
             samples present in the counts_table.
         '''
-        from .config import config
+        from ..config import config
         from .correlations import Correlation
         from .plot import Plot
         from .dimensionality import DimensionalityReduction
