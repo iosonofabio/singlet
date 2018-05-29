@@ -56,10 +56,18 @@ class Graph():
 
         # Get full similarity matrix
         if metric in ('pearson', 'spearman'):
-            similarity_matrix = self.dataset.correlations.correlate_features_features(
-                    features='all',
-                    method=metric,
-                    )
+            if axis == 'samples':
+                similarity_matrix = self.dataset.correlations.correlate_samples(
+                        samples='all',
+                        method=metric,
+                        )
+            elif axis == 'features':
+                similarity_matrix = self.dataset.correlations.correlate_features_features(
+                        features='all',
+                        method=metric,
+                        )
+            else:
+                raise ValueError('axis not understood')
         else:
             data = self.dataset.counts.values
             if axis == 'samples':
@@ -74,7 +82,7 @@ class Graph():
         # Get top k neighbors
         knn = []
         similarity = []
-        n_neighbors = []
+        nn_neighbors = []
         for irow, row in enumerate(similarity_matrix):
             knn.append([])
             similarity.append([])
@@ -85,15 +93,15 @@ class Graph():
             for i in indi:
                 knn[-1].append((irow, i))
                 similarity[-1].append(row[i])
-            n_neighbors.append(len(indi))
+            nn_neighbors.append(len(indi))
 
         if not return_sparse:
-            return (knn, similarity, n_neighbors)
+            return (knn, similarity, nn_neighbors)
 
         data = []
         i = []
         j = []
-        for irow, (n, sim, nn) in enumerate(zip(knn, similarity, n_neighbors)):
+        for irow, (n, sim, nn) in enumerate(zip(knn, similarity, nn_neighbors)):
             for icoli, icol in enumerate(n[:nn[0]]):
                 data.append(sim[icoli])
                 i.append(irow)
