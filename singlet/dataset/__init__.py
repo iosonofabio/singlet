@@ -365,6 +365,36 @@ class Dataset():
                     featuresheet=self._featuresheet.copy(),
                     )
 
+    def query_features_by_name(
+            self,
+            featurenames,
+            inplace=False,
+            ignore_missing=False,
+            ):
+        '''Select features by name.
+
+        Args:
+            featurenames: names of the features to keep.
+            inplace (bool): Whether to change the Dataset in place or return a
+                new one.
+            ignore_missing (bool): Whether to silently skip missing features.
+        '''
+        if ignore_missing:
+            fnall = self.featurenames
+            featurenames = [fn for fn in featurenames if fn in fnall]
+
+        if inplace:
+            self._featuresheet = self._featuresheet.loc[featurenames]
+            self._counts = self._counts.loc[featurenames]
+        else:
+            featuresheet = self._featuresheet.loc[featurenames].copy()
+            counts_table = self._counts.loc[featurenames].copy()
+            samplesheet = self._samplesheet.copy()
+            return self.__class__(
+                    samplesheet=samplesheet,
+                    counts_table=counts_table,
+                    featuresheet=featuresheet)
+
     def query_features_by_metadata(
             self,
             expression,
