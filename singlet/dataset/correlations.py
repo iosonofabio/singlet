@@ -40,6 +40,85 @@ class Correlation():
         r = np.dot(xw, yw.T) / n
         return r
 
+    def correlate_samples(
+            self,
+            samples='all',
+            samples2=None,
+            phenotypes=None,
+            method='spearman'):
+        '''Correlate feature expression with one or more phenotypes.
+
+        Args:
+            samples (list or string): list of samples to correlate. Use a
+                string for a single sample. The special string 'all'
+                (default) uses all samples.
+            samples2 (list or string): list of samples to correlate with.
+                Use a string for a single sample. The special string
+                'all' uses all samples. None (default) takes the same
+                list as samples, returning a square matrix.
+            method (string): type of correlation. Must be one of 'pearson' or
+                'spearman'.
+            phenotypes (list): phenotypes to include as additional features in
+                the correlation calculation. None (default) means only feature
+                counts are used.
+
+        Returns:
+            pandas.DataFrame with the correlation coefficients. If either
+                samples or samples2 is a single string, the function
+                returns a pandas.Series. If both are a string, it returns
+                a single correlation coefficient.
+        '''
+        exp_all = self.dataset.counts.T
+
+        if phenotypes is not None:
+            for pheno in phenotypes:
+                exp_all[pheno] = self.dataset.samplesheet[pheno].astype(float)
+
+        if not isinstance(samples, str):
+            exp = exp_all.loc[samples]
+        elif samples == 'all':
+            samples = exp_all.index
+            exp = exp_all
+        else:
+            exp = exp_all.loc[[samples]]
+
+        if samples2 is None:
+            samples = exp.index
+            exp2 = exp
+        elif not isinstance(samples2, str):
+            exp2 = exp_all.loc[samples2]
+        elif samples2 == 'all':
+            samples = exp_all.index
+            exp2 = exp_all
+        else:
+            exp2 = exp_all.loc[[samples2]]
+
+        x = exp.values
+        y = exp2.values
+
+        r = self._correlate(x, y, method=method)
+
+        if (not isinstance(samples, str)) and (not isinstance(samples2, str)):
+            return pd.DataFrame(
+                    data=r,
+                    index=exp.index,
+                    columns=exp2.index,
+                    dtype=float)
+        elif isinstance(samples, str) and (not isinstance(samples, str)):
+            return pd.Series(
+                    data=r[0],
+                    index=exp2.index,
+                    name='correlation',
+                    dtype=float)
+        elif (not isinstance(samples, str)) and isinstance(samples, str):
+            return pd.Series(
+                    data=r[:, 0],
+                    index=exp.index,
+                    name='correlation',
+                    dtype=float)
+        else:
+            return r[0, 0]
+
     def correlate_features_phenotypes(
             self,
             phenotypes,
@@ -355,3 +434,5 @@ class Correlation():
 
                 # FIXME: finish this
                 import ipdb; ipdb.set_trace() 
+
+
