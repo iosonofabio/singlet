@@ -20,6 +20,7 @@ if __name__ == '__main__':
     r = ds.correlation.correlate_features_phenotypes(
             phenotypes=['quantitative_phenotype_1_[A.U.]'],
             features=['TSPAN6', 'DPM1'])
+    print(-10 * r.iloc[0])
     assert(int(-10 * r.iloc[0, 0]) == 8)
     print('Done!')
 
