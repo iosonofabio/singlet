@@ -18,6 +18,8 @@ if __name__ == '__main__':
             samplesheet='example_sheet_tsv',
             counts_table='example_table_tsv')
 
+    ds.counts.exclude_features(spikeins=True, other=True, inplace=True)
+
     print('Test feature selection by expression')
     res = ds.feature_selection.expressed(n_samples=1, exp_min=1)
     assert(res[0] == 'TSPAN6')
@@ -31,11 +33,11 @@ if __name__ == '__main__':
 
     print('Test feature selection by overdispersed strata')
     res = ds.feature_selection.overdispersed_strata()
-    assert(res[-1] == 'GLIPR2')
+    assert(res[-1] == 'FTL')
     print('Done!')
 
     print('Test feature selection by overdispersed strata, in place')
     dsp = ds.copy()
     dsp.feature_selection.overdispersed_strata(inplace=True)
-    assert(dsp.featurenames[-1] == 'GLIPR2')
+    assert(dsp.featurenames[-1] == 'FTL')
     print('Done!')

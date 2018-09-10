@@ -49,7 +49,8 @@ class FeatureSelection():
 
         Args:
             bins (int or list): Bin edges determining the strata. If this is
-                a number, use that number of quantiles.
+                a number, split the expression in this many equally spaced bins
+                between minimal and maximal expression.
             n_features_per_stratum (int): Number of features per stratum to
                 select.
 
@@ -66,7 +67,8 @@ class FeatureSelection():
         mean = stats.loc[:, 'mean']
 
         if np.isscalar(bins):
-            bins = mean.quantile(np.linspace(0, 1, bins+1)).values
+            exp_min, exp_max = mean.values.min(), mean.values.max()
+            bins = np.linspace(exp_min, exp_max, bins+1)
 
         features = []
         for i in range(len(bins) - 1):
