@@ -7,14 +7,20 @@ Single cell RNA-Seq analysis with quantitative phenotypes.
 
 ## Requirements
 Python 3.4+ is required. Moreover, you will need:
-- pyyaml
-- numpy
-- scipy
-- pandas
-- xarray
-- scikit-learn
-- matplotlib
-- seaborn
+- [pyyaml](https://pyyaml.org/)
+- [numpy](http://www.numpy.org/)
+- [scipy](https://www.scipy.org/)
+- [pandas](http://pandas.pydata.org/)
+- [xarray](http://xarray.pydata.org/en/stable/)
+- [scikit-learn](http://scikit-learn.org)
+
+Optional dependencies:
+- **plotting**:
+  - [matplotlib](https://matplotlib.org/)
+  - [seaborn](https://seaborn.pydata.org/)
+- **dimensionality reduction/knn graphs**:
+  - [umap](https://github.com/lmcinnes/umap)
+  - [lshknn](https://github.com/iosonofabio/lshknn)
 
 Get those from your Linux distribution, `pip`, `conda`, or whatever other source of poison.
 

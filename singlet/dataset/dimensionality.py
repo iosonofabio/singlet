@@ -153,6 +153,38 @@ class DimensionalityReduction():
                 columns=['dimension '+str(i+1) for i in range(n_dims)])
         return vs
 
+    @method_caches
+    def umap(
+            self,
+            n_dims=2,
+            rand_seed=0,
+            **kwargs):
+        '''Uniform Manifold Approximation and Projection.
+
+        Args:
+            n_dims (int): Number of dimensions to use.
+            rand_seed (int): Random seed. -1 randomizes each run.
+            **kwargs: Named arguments passed to umap.UMAP.
+
+        Returns:
+        '''
+        from umap import UMAP
+
+        X = self.dataset.counts
+        Y = UMAP(
+                n_components=n_dims,
+                random_state=rand_seed,
+                **kwargs,
+                ).fit_transform(
+                X.values.T,
+                )
+
+        vs = pd.DataFrame(
+                Y,
+                index=X.columns,
+                columns=['dimension '+str(i+1) for i in range(n_dims)])
+        return vs
+
 
 # Supplementary classes
 class _RPCA:

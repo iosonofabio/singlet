@@ -65,3 +65,18 @@ if __name__ == '__main__':
             theta=0.5,
             perplexity=0.8)
     print('Done!')
+
+    print('Test Dataset UMAP')
+    ds.counts = ds.counts.iloc[:200]
+    vs = ds.dimensionality.umap(
+            n_dims=2,
+            n_neighbors=3)
+    assert(np.allclose(vs.values[0], [12.637338, -6.560592]))
+    print('Done!')
+
+    print('Test cache for UMAP')
+    ds.dimensionality._umap_cache['func_kwargs']['n_dims'] = 'none'
+    vs = ds.dimensionality.umap(
+            n_dims='none',
+            n_neighbors=3)
+    print('Done!')
