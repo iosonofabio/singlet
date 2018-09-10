@@ -21,7 +21,7 @@ matrix:
     - python: 3.4
       os: linux
       dist: trusty
-    - env: CC=gcc PYTHON_VERSION='3.6'
+    - env: CC=gcc PYTHON_VERSION='3.7'
       language: generic
       os: osx
 
