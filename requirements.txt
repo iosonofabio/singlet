@@ -9,3 +9,5 @@ seaborn
 #Cython
 #bhtsne
 #lshknn
+numba
+umap-learn

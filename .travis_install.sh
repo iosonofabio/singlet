@@ -30,7 +30,8 @@ pip install polo
 #pip install pkgconfig
 #pip install pybind11
 #pip install lshknn
-
+pip install numba
+pip install umap-learn
 
 # old setuptools also has a bug for extras, but it still compiles
 pip install -v '.'

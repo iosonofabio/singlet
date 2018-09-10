@@ -19,6 +19,7 @@ Optional dependencies:
   - [matplotlib](https://matplotlib.org/)
   - [seaborn](https://seaborn.pydata.org/)
 - **dimensionality reduction/knn graphs**:
+  - [numba](https://numba.pydata.org/)
   - [umap](https://github.com/lmcinnes/umap)
   - [lshknn](https://github.com/iosonofabio/lshknn)
 
