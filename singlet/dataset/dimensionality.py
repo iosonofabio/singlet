@@ -174,9 +174,8 @@ class DimensionalityReduction():
         Y = UMAP(
                 n_components=n_dims,
                 random_state=rand_seed,
-                **kwargs,
-                ).fit_transform(
-                X.values.T,
+                **kwargs).fit_transform(
+                X.values.T
                 )
 
         vs = pd.DataFrame(
