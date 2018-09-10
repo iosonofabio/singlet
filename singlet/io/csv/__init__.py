@@ -11,9 +11,9 @@ from singlet.config import config
 def parse_samplesheet(path, fmt):
     import pandas as pd
 
-    if fmt == 'tsv':
+    if fmt in ('tsv', 'tsv.gz'):
         sep = '\t'
-    elif fmt == 'csv':
+    elif fmt in ('csv', 'csv.gz'):
         sep = ','
     else:
         raise ValueError('Format not understood')
@@ -25,9 +25,9 @@ def parse_samplesheet(path, fmt):
 def parse_featuresheet(path, fmt):
     import pandas as pd
 
-    if fmt == 'tsv':
+    if fmt in ('tsv', 'tsv.gz'):
         sep = '\t'
-    elif fmt == 'csv':
+    elif fmt in ('csv', 'csv.gz'):
         sep = ','
     else:
         raise ValueError('Format not understood')

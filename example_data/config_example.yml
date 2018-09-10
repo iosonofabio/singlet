@@ -5,6 +5,12 @@
       'path': 'example_data/example_featuresheet.tsv'
       'index': 'gene name'
 
+    'example_PBMC2':
+      'description': 'Just some blood cells'
+      'path': 'example_data/featuresheet_PBMC_2.tsv.gz'
+      'index': 'GeneName'
+      'format': 'tsv.gz'
+
   'samplesheets':
     'example_sheet_googleapi':
       'description': 'Example Google Spreadsheet for cell metadata'
@@ -13,10 +19,17 @@
       'client_secret_filename': 'example_data/example_google_client_secret.json'
       'sheet': 'cells'
       'cells': 'rows'
+
     'example_sheet_tsv':
       'description': 'Example TSV file for cell metadata'
       'path': 'example_data/example_sample_table - sequenced.tsv'
       'cells': 'rows'
+
+    'example_PBMC2':
+      'description': 'Just some blood cells'
+      'path': 'example_data/samplesheet_PBMC_2.tsv.gz'
+      'cells': 'rows'
+      'format': 'tsv.gz'
 
   'count_tables':
     'example_table_tsv':
@@ -350,4 +363,11 @@
          - '__no_feature'
          - '__ambiguous'
          - '__alignment_not_unique'
+
+    'example_PBMC2':
+      'description': 'Just some PBMCs (L1 normalized)'
+      'cells': 'columns'
+      'normalized': 'counts_per_million'
+      'path': 'example_data/counts_table_PBMC_2.tsv.gz'
+      'format': 'tsv.gz'
 

@@ -36,22 +36,25 @@ You can have a look inside the `test` folder for examples. To start using the ex
 - Open a Python/IPython shell and type:
 
 ```python
+import matplotlib.pyplot as plt
 from singlet.dataset import Dataset
-ds = Dataset(samplesheet='example_sheet_tsv', counts_table='example_table_tsv')
-
-ds.counts = ds.counts.iloc[:200]
-vs = ds.dimensionality.tsne(
-        n_dims=2,
-        transform='log10',
-        theta=0.5,
-        perplexity=0.8)
+ds = Dataset(
+    samplesheet='example_PBMC2',
+    counts_table='example_PBMC2',
+    featuresheet='example_PBMC2',
+    )
+ds.counts.log(inplace=True)
+ds.samplesheet['cluster'] = ds.cluster.kmeans(axis='samples', n_clusters=5)
+vs = ds.dimensionality.tsne(perplexity=15)
 ax = ds.plot.scatter_reduced_samples(
-        vs,
-        color_by='quantitative_phenotype_1_[A.U.]')
+    vs,
+    color_by='cellType',
+    figsize=(5, 4),    
+    )
 plt.show()
 ```
 
-This will calculate a t-SNE embedding of the first 200 features and then show your samples in the reduced space. It should look like this:
+This will calculate a t-SNE embedding of the log-transformed features and then show your samples in the reduced space, colored by cluster. It should look more or less like this:
 
-![t-SNE example](docs/_static/example_tsne.png)
+![t-SNE example](docs/_static/example_tsne_2.png)
 
