@@ -40,7 +40,7 @@ if __name__ == '__main__':
     d = ds.cluster.hierarchical(
             axis='features',
             phenotypes=('quantitative_phenotype_1_[A.U.]',),
-            optimal_ordering=False,
+            optimal_ordering=True,
             log_features=True)
-    assert(d['leaves'][116] == 'quantitative_phenotype_1_[A.U.]')
+    assert(d['leaves'][121] == 'quantitative_phenotype_1_[A.U.]')
     print('Done!')
