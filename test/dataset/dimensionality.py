@@ -74,8 +74,7 @@ if __name__ == '__main__':
     if 'Linux' in platform.platform():
         assert(np.allclose(vs.values[0], [12.637338, -6.560592]))
     else:
-        print(vs.values[0])
-        assert(np.allclose(vs.values[0], [12.637338, -6.560592]))
+        assert(np.allclose(vs.values[0], [11.358991, 1.3676481]))
     print('Done!')
 
     print('Test cache for UMAP')
