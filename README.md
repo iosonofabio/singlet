@@ -22,8 +22,6 @@ Optional dependencies:
   - [numba](https://numba.pydata.org/)
   - [umap](https://github.com/lmcinnes/umap)
   - [lshknn](https://github.com/iosonofabio/lshknn)
-- **optimal leaf ordering**:
-  - [polo](https://github.com/adrianveres/polo)
 
 Get those from your Linux distribution, `pip`, `conda`, or whatever other source of poison.
 
