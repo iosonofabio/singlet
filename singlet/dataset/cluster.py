@@ -135,14 +135,7 @@ class Cluster():
             dict with the linkage, distance matrix, and ordering.
         '''
         from scipy.spatial.distance import pdist
-        from scipy.cluster.hierarchy import linkage, leaves_list
-
-        if optimal_ordering:
-            try:
-                from polo import optimal_leaf_ordering
-            except ImportError:
-                raise ImportError(
-                    'The package "polo" is needed for optimal leaf ordering')
+        from scipy.cluster.hierarchy import linkage, leaves_list, optimal_leaf_ordering
 
         data = self.dataset.counts
 

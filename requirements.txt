@@ -9,6 +9,5 @@ seaborn
 #Cython
 #bhtsne
 #lshknn
-#polo
 numba
 umap-learn

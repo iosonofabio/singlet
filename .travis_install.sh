@@ -24,7 +24,6 @@ pip install seaborn
 # NOTE: one day they shall fix this (sigh!)
 pip install Cython
 #pip install bhtsne
-#pip install polo
 # Google API tests are only local anyway
 #pip install google-api-python-client
 #pip install pkgconfig
