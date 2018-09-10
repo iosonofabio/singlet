@@ -15,9 +15,8 @@ Python 3.4+ is required. Moreover, you will need:
 - scikit-learn
 - matplotlib
 - seaborn
-- bhtsne (for t-SNE dimensionality reduction)
 
-Get those from pip or conda.
+Get those from your Linux distribution, `pip`, `conda`, or whatever other source of poison.
 
 ## Install
 To get the latest **stable** version, use pip:
