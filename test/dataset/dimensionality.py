@@ -71,7 +71,11 @@ if __name__ == '__main__':
     vs = ds.dimensionality.umap(
             n_dims=2,
             n_neighbors=3)
-    assert(np.allclose(vs.values[0], [12.637338, -6.560592]))
+    if 'Linux' in platform.platform():
+        assert(np.allclose(vs.values[0], [12.637338, -6.560592]))
+    else:
+        print(vs.values[0])
+        assert(np.allclose(vs.values[0], [12.637338, -6.560592]))
     print('Done!')
 
     print('Test cache for UMAP')
