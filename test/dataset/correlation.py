@@ -20,29 +20,28 @@ if __name__ == '__main__':
     r = ds.correlation.correlate_features_phenotypes(
             phenotypes=['quantitative_phenotype_1_[A.U.]'],
             features=['TSPAN6', 'DPM1'])
-    print(-10 * r.iloc[0])
-    assert(int(-10 * r.iloc[0, 0]) == 8)
+    assert(np.isclose(r.values[0, 0], -0.8, rtol=1e-1, atol=1e-1))
     print('Done!')
 
     print('Correlation features to phenotype')
     r = ds.correlation.correlate_features_phenotypes(
             phenotypes='quantitative_phenotype_1_[A.U.]',
             features=['TSPAN6', 'DPM1'])
-    assert(int(-10 * r.iloc[0]) == 8)
+    assert(np.isclose(r.values[0], -0.8, rtol=1e-1, atol=1e-1))
     print('Done!')
 
     print('Correlation feature to phenotypes')
     r = ds.correlation.correlate_features_phenotypes(
             phenotypes=['quantitative_phenotype_1_[A.U.]'],
             features='TSPAN6')
-    assert(int(-10 * r.iloc[0]) == 8)
+    assert(np.isclose(r.values[0], -0.8, rtol=1e-1, atol=1e-1))
     print('Done!')
 
     print('Correlation feature to phenotype')
     r = ds.correlation.correlate_features_phenotypes(
             phenotypes='quantitative_phenotype_1_[A.U.]',
             features='TSPAN6')
-    assert(int(-10 * r) == 8)
+    assert(np.isclose(r, -0.8, rtol=1e-1, atol=1e-1))
     print('Done!')
 
     print('Correlation features to phenotypes (Pearson)')
@@ -51,7 +50,7 @@ if __name__ == '__main__':
             features=['TSPAN6', 'DPM1'],
             method='pearson',
             fillna=0)
-    assert(int(-10 * r.iloc[1, 0]) == 6)
+    assert(np.isclose(r.values[1, 0], -0.6, rtol=1e-1, atol=1e-1))
     print('Done!')
 
     print('Correlation features to phenotypes (Pearson, with complex fillna)')
@@ -60,7 +59,7 @@ if __name__ == '__main__':
             features=['TSPAN6', 'DPM1'],
             method='pearson',
             fillna={'quantitative_phenotype_1_[A.U.]': 0})
-    assert(int(-10 * r.iloc[1]) == 6)
+    assert(np.isclose(r.values[1], -0.6, rtol=1e-1, atol=1e-1))
     print('Done!')
 
     print('Correlation phenotypes to phenotypes (Pearson, with complex fillna)')
@@ -71,7 +70,7 @@ if __name__ == '__main__':
             fillna={'quantitative_phenotype_1_[A.U.]': 0},
             fillna2={'quantitative_phenotype_1_[A.U.]': 0},
             )
-    assert(int(r) == 1)
+    assert(np.isclose(r, 1, rtol=1e-1, atol=1e-1))
     print('Done!')
 
     print('Correlation features to features (Pearson)')
@@ -79,5 +78,5 @@ if __name__ == '__main__':
             features=['TSPAN6', 'DPM1'],
             features2=['TSPAN6'],
             method='pearson')
-    assert(int(np.round(r.iloc[0, 0], 0)) == 1)
+    assert(np.isclose(r.values[0, 0], 1, rtol=1e-1, atol=1e-1))
     print('Done!')
