@@ -86,6 +86,8 @@ def parse_counts_table(tablename):
         elif not table.index.name:
             table.set_index(table.columns[0], inplace=True, drop=True)
 
+        # Feature names are strings, but counts are floats
+        table.index = table.index.astype(str)
         table = table.astype(float)
 
         tables.append(table)
