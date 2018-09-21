@@ -5,6 +5,7 @@ author:     Fabio Zanini
 date:       07/08/17
 content:    Test Dataset class.
 '''
+import sys
 import platform
 import numpy as np
 
@@ -66,20 +67,22 @@ if __name__ == '__main__':
             perplexity=0.8)
     print('Done!')
 
-    print('Test Dataset UMAP')
-    ds.counts = ds.counts.iloc[:200]
-    vs = ds.dimensionality.umap(
-            n_dims=2,
-            n_neighbors=3)
-    if 'Linux' in platform.platform():
-        assert(np.allclose(vs.values[0], [12.637338, -6.560592]))
-    else:
-        assert(np.allclose(vs.values[0], [11.358991, 1.3676481]))
-    print('Done!')
+    #NOTE: llvmlite -> numba -> umap is buggy on Python 3.4
+    if (sys.version_info[0] == 3) and (sys.version_info[1] > 4):
+        print('Test Dataset UMAP')
+        ds.counts = ds.counts.iloc[:200]
+        vs = ds.dimensionality.umap(
+                n_dims=2,
+                n_neighbors=3)
+        if 'Linux' in platform.platform():
+            assert(np.allclose(vs.values[0], [12.637338, -6.560592]))
+        else:
+            assert(np.allclose(vs.values[0], [11.358991, 1.3676481]))
+        print('Done!')
 
-    print('Test cache for UMAP')
-    ds.dimensionality._umap_cache['func_kwargs']['n_dims'] = 'none'
-    vs = ds.dimensionality.umap(
-            n_dims='none',
-            n_neighbors=3)
-    print('Done!')
+        print('Test cache for UMAP')
+        ds.dimensionality._umap_cache['func_kwargs']['n_dims'] = 'none'
+        vs = ds.dimensionality.umap(
+                n_dims='none',
+                n_neighbors=3)
+        print('Done!')
