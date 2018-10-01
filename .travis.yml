@@ -15,10 +15,12 @@ matrix:
       sudo: true
     - python: 3.6
       os: linux
-      dist: trusty
+      dist: xenial
+      sudo: true
     - python: 3.5
       os: linux
-      dist: trusty
+      dist: xenial
+      sudo: true
     - python: 3.4
       os: linux
       dist: trusty
