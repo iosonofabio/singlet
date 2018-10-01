@@ -23,7 +23,10 @@ Python 3.4+ is required. Moreover, you will need:
 - scikit-learn
 - matplotlib
 - seaborn
-- bhtsne (for t-SNE dimensionality reduction)
+
+Optional requirements
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+- umap (for UMAP dimensionality reduction)
 
 Get those from pip or conda.
 
