@@ -44,7 +44,7 @@ if __name__ == '__main__':
 
     print('Test feature weight by self assembling manifolds')
     dsp = ds.copy()
-    sam = dsp.feature_selection.sam()
+    sam = dsp.feature_selection.sam(npcs=3)
     weights = sam.output_vars['gene_weights']
     print(weights)
     assert(dsp.featurenames[-1] == 'FTL')
