@@ -41,3 +41,11 @@ if __name__ == '__main__':
     dsp.feature_selection.overdispersed_strata(inplace=True)
     assert(dsp.featurenames[-1] == 'FTL')
     print('Done!')
+
+    print('Test feature weight by self assembling manifolds')
+    dsp = ds.copy()
+    sam = dsp.feature_selection.sam()
+    weights = sam.output_vars['gene_weights']
+    print(weights)
+    assert(dsp.featurenames[-1] == 'FTL')
+    print('Done!')

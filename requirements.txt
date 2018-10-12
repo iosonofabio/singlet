@@ -11,3 +11,4 @@ seaborn
 #lshknn
 numba
 umap-learn
+sam-algorithm

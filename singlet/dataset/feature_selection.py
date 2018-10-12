@@ -83,3 +83,26 @@ class FeatureSelection():
             self.dataset.counts = self.dataset.counts.loc[features]
         else:
             return features
+
+    def sam(self, k=None, distance='correlation', *args, **kwargs):
+        '''Calculate feature weights via self-assembling manifolds
+
+        Args:
+            k (int or None): The number of nearest neighbors for each sample
+            distance (str): The distance matrix
+            *args, **kwargs: Arguments to SAM.run
+
+        Returns:
+            SAM instance containing SAM.output_vars['gene_weights']
+
+        See also: https://github.com/atarashansky/self-assembling-manifold
+        '''
+        import SAM
+
+        sam = SAM.SAM(
+                counts=self.dataset.counts.T,
+                k=k,
+                distance=distance)
+        sam.run(*args, **kwargs)
+
+        return sam
