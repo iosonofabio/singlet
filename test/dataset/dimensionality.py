@@ -75,6 +75,7 @@ if __name__ == '__main__':
         vs = ds.dimensionality.umap(
                 n_dims=2,
                 n_neighbors=3)
+        print(vs.values[0])
         if 'Linux' in platform.platform():
             assert(np.allclose(vs.values[0], [12.637338, -6.560592]))
         else:
