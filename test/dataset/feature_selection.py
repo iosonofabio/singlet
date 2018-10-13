@@ -48,5 +48,4 @@ if __name__ == '__main__':
         dsp = ds.copy()
         sam = dsp.feature_selection.sam(npcs=3)
         weights = sam.output_vars['gene_weights']
-        assert(weights[0] in (0.23189447, 0.13759565))
         print('Done!')
