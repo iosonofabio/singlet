@@ -18,7 +18,16 @@ class SampleSheet(pd.DataFrame):
     def from_sheetname(cls, sheetname):
         from .io import parse_samplesheet
 
-        self = cls(parse_samplesheet(sheetname))
+        self = cls(parse_samplesheet({'sheetname': sheetname}))
         self.sheetname = sheetname
+
+        return self
+
+    @classmethod
+    def from_datasetname(cls, datasetname):
+        from .io import parse_samplesheet
+
+        self = cls(parse_samplesheet({'datasetname': datasetname}))
+        self.sheetname = datasetname
 
         return self

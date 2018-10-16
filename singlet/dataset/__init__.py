@@ -21,6 +21,7 @@ class Dataset():
             counts_table=None,
             samplesheet=None,
             featuresheet=None,
+            dataset=None,
             plugins=None):
         '''Collection of cells, with feature counts and metadata
 
@@ -31,6 +32,10 @@ class Dataset():
                 a config file) or instance of SampleSheet
             featuresheet (string or None): Name of the samplesheet (to load
                 from a config file) or instance of FeatureSheet
+            dataset (string or None): Name of the Dataset (to load from a
+                a config file). If dataset is not None, it is loaded first. Any
+                of counts_table, samplesheet, and featuresheet are overwritten
+                afterwards if supplied in addition to this argument.
             plugins (dict): Dictionary of classes that take the Dataset
                 instance as only argument for __init__, to expand the
                 possibilities of Dataset operations.
@@ -48,6 +53,10 @@ class Dataset():
         from .fit import Fit
         from .feature_selection import FeatureSelection
         from .graph import Graph
+
+        if dataset is not None:
+            d = 
+
 
         # In general this class should be used for gene counts and phenotypes,
         # but we have to cover the corner cases that no counts or no phenotypes

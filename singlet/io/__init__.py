@@ -9,15 +9,21 @@ from singlet.config import config
 
 
 # Parser
-def parse_samplesheet(sheetname):
+def parse_samplesheet(dictionary):
     from .csv import parse_samplesheet as parse_csv
     from .googleapi import parse_samplesheet as parse_googleapi
 
-    sheet = config['io']['samplesheets'][sheetname]
+    if 'sheetname' in dictionary:
+        sheet = config['io']['samplesheets'][dictionary['sheetname']]
+    elif 'datasetname' in dictionary:
+        sheet = config['io']['datasets'][dictionary['datasetname']]['samplesheet']
+    else:
+        raise ValueError('Please specify a samplesheet or a dataset')
+
     if 'path' in sheet:
         table = parse_csv(sheet['path'], sheet['format'])
     elif 'url' in sheet:
-        table = parse_googleapi(sheetname)
+        table = parse_googleapi(sheet)
 
     if ('cells' in sheet) and (sheet['cells'] != 'rows'):
         table = table.T
@@ -32,10 +38,16 @@ def parse_samplesheet(sheetname):
     return table
 
 
-def parse_featuresheet(sheetname):
+def parse_featuresheet(dictionary):
     from .csv import parse_featuresheet as parse_csv
 
-    sheet = config['io']['featuresheets'][sheetname]
+    if 'sheetname' in dictionary:
+        sheet = config['io']['featuresheets'][dictionary['sheetname']]
+    elif 'datasetname' in dictionary:
+        sheet = config['io']['datasets'][dictionary['datasetname']]['featuresheet']
+    else:
+        raise ValueError('Please specify a featuresheet or a dataset')
+
     table = parse_csv(sheet['path'], sheet['format'])
 
     if ('features' in sheet) and (sheet['features'] != 'rows'):
@@ -51,11 +63,17 @@ def parse_featuresheet(sheetname):
     return table
 
 
-def parse_counts_table(tablename):
+def parse_counts_table(dictionary):
     from .csv import parse_counts_table as parse_csv
     from .pickle import parse_counts_table as parse_pickle
 
-    sheet = config['io']['count_tables'][tablename]
+    if 'countsname' in dictionary:
+        sheet = config['io']['count_tables'][dictionary['countsname']]
+    elif 'datasetname' in dictionary:
+        sheet = config['io']['datasets'][dictionary['datasetname']]['counts_table']
+    else:
+        raise ValueError('Please specify a counts_table or a dataset')
+
     paths = sheet['path']
     fmts = sheet['format']
     if isinstance(paths, str):

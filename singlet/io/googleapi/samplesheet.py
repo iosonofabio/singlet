@@ -15,9 +15,7 @@ from .googleapi import GoogleIOError, GoogleAPI
 
 # Classes / functions
 class SampleSheet(GoogleAPI):
-    def __init__(self, spreadsheetname):
-        from ...config import config
-        sheet = config['io']['samplesheets'][spreadsheetname]
+    def __init__(self, sheet):
         self.sheetname = sheet['sheet']
 
         sheetid = sheet['google_id']
@@ -25,7 +23,7 @@ class SampleSheet(GoogleAPI):
         client_secret_filename = sheet['client_secret_filename']
         super().__init__(
                 sheetid,
-                spreadsheetname,
+                self.sheetname,
                 client_id_filename,
                 client_secret_filename)
 

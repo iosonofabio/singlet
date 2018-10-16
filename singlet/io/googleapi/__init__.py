@@ -6,6 +6,6 @@
 
 
 # Parser
-def parse_samplesheet(sheetname):
+def parse_samplesheet(sheet):
     from .samplesheet import SampleSheet
-    return SampleSheet(sheetname).get_table(fmt='pandas')
+    return SampleSheet(sheet).get_table(fmt='pandas')

@@ -18,7 +18,16 @@ class FeatureSheet(pd.DataFrame):
     def from_sheetname(cls, sheetname):
         from .io import parse_featuresheet
 
-        self = cls(parse_featuresheet(sheetname))
+        self = cls(parse_featuresheet({'sheetname': sheetname}))
         self.sheetname = sheetname
+
+        return self
+
+    @classmethod
+    def from_datasetname(cls, datasetname):
+        from .io import parse_featuresheet
+
+        self = cls(parse_featuresheet({'datasetname': datasetname}))
+        self.sheetname = datasetname
 
         return self

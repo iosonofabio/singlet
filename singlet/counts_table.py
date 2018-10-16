@@ -47,9 +47,30 @@ class CountsTable(pd.DataFrame):
         from .config import config
         from .io import parse_counts_table
 
-        self = cls(parse_counts_table(tablename))
+        self = cls(parse_counts_table({'countsname': tablename}))
         self.name = tablename
         config_table = config['io']['count_tables'][tablename]
+        self._spikeins = config_table.get('spikeins', [])
+        self._otherfeatures = config_table.get('other', [])
+        self._normalized = config_table['normalized']
+        return self
+
+    @classmethod
+    def from_datasetname(cls, datasetname):
+        '''Instantiate a CountsTable from its name in the config file.
+
+        Args:
+            datasetname (string): name of the dataset in the config file.
+
+        Returns:
+            CountsTable: the counts table.
+        '''
+        from .config import config
+        from .io import parse_counts_table
+
+        self = cls(parse_counts_table({'datasetname': datasetname}))
+        self.name = datasetname
+        config_table = config['io']['datasets'][datasetname]['counts_table']
         self._spikeins = config_table.get('spikeins', [])
         self._otherfeatures = config_table.get('other', [])
         self._normalized = config_table['normalized']
