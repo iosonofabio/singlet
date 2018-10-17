@@ -34,7 +34,6 @@ class CountsTableSparse(pd.SparseDataFrame):
     def _constructor(self):
         return CountsTableSparse
 
-
     @classmethod
     def from_tablename(cls, tablename):
         '''Instantiate a CountsTable from its name in the config file.
@@ -51,6 +50,27 @@ class CountsTableSparse(pd.SparseDataFrame):
         self = cls(parse_counts_table_sparse(tablename))
         self.name = tablename
         config_table = config['io']['count_tables'][tablename]
+        self._spikeins = config_table.get('spikeins', [])
+        self._otherfeatures = config_table.get('other', [])
+        self._normalized = config_table['normalized']
+        return self
+
+    @classmethod
+    def from_datasetname(cls, datasetname):
+        '''Instantiate a CountsTable from its name in the config file.
+
+        Args:
+            datasetename (string): name of the dataset in the config file.
+
+        Returns:
+            CountsTableSparse: the counts table.
+        '''
+        from .config import config
+        from .io import parse_counts_table_sparse
+
+        self = cls(parse_counts_table_sparse({'datasetname': datasetname}))
+        self.name = datasetname
+        config_table = config['io']['datasets'][datasetname]['counts_table']
         self._spikeins = config_table.get('spikeins', [])
         self._otherfeatures = config_table.get('other', [])
         self._normalized = config_table['normalized']

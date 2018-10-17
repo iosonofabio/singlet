@@ -54,9 +54,9 @@ class Dataset():
         from .feature_selection import FeatureSelection
         from .graph import Graph
 
+        # FIXME: fix the logic
         if dataset is not None:
-            d = 
-
+            self.from_datasetname(dataset)
 
         # In general this class should be used for gene counts and phenotypes,
         # but we have to cover the corner cases that no counts or no phenotypes
@@ -194,6 +194,22 @@ class Dataset():
                     self.counts.loc[:, samplename] = (self.counts.loc[:, samplename].to_dense() + counts_col_other).to_sparse()
                 else:
                     self.counts.loc[:, samplename] += counts_col_other
+
+    def from_datasetname(self, datasetname):
+        '''Load from config file using a dataset name'''
+        from ..config import config
+        dataset = config['io']['datasets'][datasetname]
+        if 'samplesheet' in dataset:
+            self._samplesheet = SampleSheet.from_datasetname(datasetname)
+        if 'featuresheet' in dataset:
+            self._featuresheet = FeatureSheet.from_datasetname(datasetname)
+        if 'counts_table' in dataset:
+            config_table = dataset['counts_table']
+            if config_table.get('sparse', False):
+                counts_table = CountsTableSparse.from_datasetname(datasetname)
+            else:
+                counts_table = CountsTable.from_datasetname(datasetname)
+            self._counts = counts_table
 
     def split(self, phenotypes, copy=True):
         '''Split Dataset based on one or more categorical phenotypes

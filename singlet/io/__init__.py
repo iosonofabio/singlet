@@ -117,10 +117,16 @@ def parse_counts_table(dictionary):
     return table
 
 
-def parse_counts_table_sparse(tablename):
+def parse_counts_table_sparse(dictionary):
     from .npz import parse_counts_table_sparse as parse_npz
-    # FIXME: check this function!!
-    sheet = config['io']['count_tables'][tablename]
+
+    if 'countsname' in dictionary:
+        sheet = config['io']['count_tables'][dictionary['countsname']]
+    elif 'datasetname' in dictionary:
+        sheet = config['io']['datasets'][dictionary['datasetname']]['counts_table']
+    else:
+        raise ValueError('Please specify a counts_table or a dataset')
+
     paths = sheet['path']
     fmts = sheet['format']
     if isinstance(paths, str):
