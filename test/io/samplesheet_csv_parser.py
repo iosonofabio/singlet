@@ -13,7 +13,7 @@ if __name__ == '__main__':
     from singlet.io import parse_samplesheet
 
     print('Parsing example TSV sample sheet')
-    table = parse_samplesheet('example_sheet_tsv')
+    table = parse_samplesheet({'sheetname': 'example_sheet_tsv'})
 
     #TODO: check it's correct
     print('Done!')
