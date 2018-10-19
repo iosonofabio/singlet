@@ -54,51 +54,64 @@ class Dataset():
         from .feature_selection import FeatureSelection
         from .graph import Graph
 
-        # FIXME: fix the logic
         if dataset is not None:
             self.from_datasetname(dataset)
 
         # In general this class should be used for gene counts and phenotypes,
         # but we have to cover the corner cases that no counts or no phenotypes
         # are provided
-        if counts_table is None:
-            if samplesheet is None:
-                raise ValueError('At least samplesheet or counts_table must be present')
-            elif isinstance(samplesheet, SampleSheet):
-                self._samplesheet = samplesheet
-            elif isinstance(samplesheet, pd.DataFrame):
-                self._samplesheet = SampleSheet(samplesheet)
-            else:
-                self._samplesheet = SampleSheet.from_sheetname(samplesheet)
-            self._counts = CountsTable(data=[], index=[], columns=self._samplesheet.index)
-        else:
-            if isinstance(counts_table, CountsTable):
-                pass
-            elif isinstance(counts_table, CountsTableSparse):
-                pass
-            elif isinstance(counts_table, pd.DataFrame):
-                counts_table = CountsTable(counts_table)
-            else:
-                config_table = config['io']['count_tables'][counts_table]
-                if config_table.get('sparse', False):
-                    counts_table = CountsTableSparse.from_tablename(counts_table)
-                else:
-                    counts_table = CountsTable.from_tablename(counts_table)
-            self._counts = counts_table
+        if ((not hasattr(self, '_samplesheet')) and (samplesheet is None) and
+            (not hasattr(self, '_counts') and (counts_table is None)):
+            raise ValueError('At least samplesheet or counts_table must be present')
 
-            if samplesheet is None:
+        if counts_table is None:
+            if hasattr(self, '_counts'):
+                pass
+            elif hasattr(self, '_samplesheet'):
+                self._counts = CountsTable(data=[], index=[], columns=self._samplesheet.index)
+            elif isinstance(samplesheet, SampleSheet):
+                self._counts = CountsTable(data=[], index=[], columns=samplesheet.index)
+            elif isinstance(samplesheet, pd.DataFrame):
+                self._counts = CountsTable(data=[], index=[], columns=samplesheet.index)
+            else:
+                # Load after the fact
+                pass
+        elif isinstance(counts_table, CountsTable):
+            self._counts = counts_table
+        elif isinstance(counts_table, CountsTableSparse):
+            self._counts = counts_table
+        elif isinstance(counts_table, pd.DataFrame):
+            self._counts = CountsTable(counts_table)
+        else:
+            config_table = config['io']['count_tables'][counts_table]
+            if config_table.get('sparse', False):
+                self._counts = CountsTableSparse.from_tablename(counts_table)
+            else:
+                self._counts = CountsTable.from_tablename(counts_table)
+
+        if samplesheet is None:
+            if hasattr(self, '_samplesheet'):
+                pass
+            elif hasattr(self, '_counts'):
                 self._samplesheet = SampleSheet(data=[], index=self._counts.columns)
                 self._samplesheet.sheetname = None
-            elif isinstance(samplesheet, SampleSheet):
-                self._samplesheet = samplesheet
-            elif isinstance(samplesheet, pd.DataFrame):
-                self._samplesheet = SampleSheet(samplesheet)
-            else:
-                self._samplesheet = SampleSheet.from_sheetname(samplesheet)
+        elif isinstance(samplesheet, SampleSheet):
+            self._samplesheet = samplesheet
+        elif isinstance(samplesheet, pd.DataFrame):
+            self._samplesheet = SampleSheet(samplesheet)
+        else:
+            self._samplesheet = SampleSheet.from_sheetname(samplesheet)
+
+        # This is the catchall for counts
+        if not hasattr(self, '_counts'):
+            self._counts = CountsTable(data=[], index=[], columns=self._samplesheet.index)
 
         if featuresheet is None:
-            self._featuresheet = FeatureSheet(data=[], index=self._counts.index)
-            self._featuresheet.sheetname = None
+            if hasattr(self, '_featuresheet'):
+                pass
+            else:
+                self._featuresheet = FeatureSheet(data=[], index=self._counts.index)
+                self._featuresheet.sheetname = None
         elif isinstance(featuresheet, FeatureSheet):
             self._featuresheet = featuresheet
         elif isinstance(featuresheet, pd.DataFrame):
