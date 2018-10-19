@@ -64,16 +64,20 @@ class Dataset():
         if counts_table is None:
             if samplesheet is None:
                 raise ValueError('At least samplesheet or counts_table must be present')
-            elif not isinstance(samplesheet, SampleSheet):
-                self._samplesheet = SampleSheet.from_sheetname(samplesheet)
-            else:
+            elif isinstance(samplesheet, SampleSheet):
                 self._samplesheet = samplesheet
+            elif isinstance(samplesheet, pd.DataFrame):
+                self._samplesheet = SampleSheet(samplesheet)
+            else:
+                self._samplesheet = SampleSheet.from_sheetname(samplesheet)
             self._counts = CountsTable(data=[], index=[], columns=self._samplesheet.index)
         else:
             if isinstance(counts_table, CountsTable):
                 pass
             elif isinstance(counts_table, CountsTableSparse):
                 pass
+            elif isinstance(counts_table, pd.DataFrame):
+                counts_table = CountsTable(counts_table)
             else:
                 config_table = config['io']['count_tables'][counts_table]
                 if config_table.get('sparse', False):
@@ -85,18 +89,22 @@ class Dataset():
             if samplesheet is None:
                 self._samplesheet = SampleSheet(data=[], index=self._counts.columns)
                 self._samplesheet.sheetname = None
-            elif not isinstance(samplesheet, SampleSheet):
-                self._samplesheet = SampleSheet.from_sheetname(samplesheet)
-            else:
+            elif isinstance(samplesheet, SampleSheet):
                 self._samplesheet = samplesheet
+            elif isinstance(samplesheet, pd.DataFrame):
+                self._samplesheet = SampleSheet(samplesheet)
+            else:
+                self._samplesheet = SampleSheet.from_sheetname(samplesheet)
 
         if featuresheet is None:
             self._featuresheet = FeatureSheet(data=[], index=self._counts.index)
             self._featuresheet.sheetname = None
-        elif not isinstance(featuresheet, FeatureSheet):
-            self._featuresheet = FeatureSheet.from_sheetname(featuresheet)
-        else:
+        elif isinstance(featuresheet, FeatureSheet):
             self._featuresheet = featuresheet
+        elif isinstance(featuresheet, pd.DataFrame):
+            self._featuresheet = FeatureSheet(featuresheet)
+        else:
+            self._featuresheet = FeatureSheet.from_sheetname(featuresheet)
 
         # Uniform axes across data and metadata
         # FIXME: this is very slow
