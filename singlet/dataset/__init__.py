@@ -61,7 +61,7 @@ class Dataset():
         # but we have to cover the corner cases that no counts or no phenotypes
         # are provided
         if ((not hasattr(self, '_samplesheet')) and (samplesheet is None) and
-            (not hasattr(self, '_counts') and (counts_table is None)):
+            (not hasattr(self, '_counts')) and (counts_table is None)):
             raise ValueError('At least samplesheet or counts_table must be present')
 
         if counts_table is None:
