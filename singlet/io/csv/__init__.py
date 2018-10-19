@@ -7,6 +7,9 @@ import numpy as np
 from singlet.config import config
 
 
+csv_formats = ['csv', 'tsv', 'csv.gz', 'tsv.gz']
+
+
 # Parser
 def parse_samplesheet(path, fmt):
     import pandas as pd

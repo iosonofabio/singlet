@@ -56,8 +56,8 @@ class Dataset():
         from .graph import Graph
 
         if ((dataset is not None) and
-           (counts_table is not None) or (samplesheet is not None) or
-           (featuresheet is not None)):
+           ((counts_table is not None) or (samplesheet is not None) or
+           (featuresheet is not None))):
             raise ValueError('Set a dataset or a counts_table/samplesheet/featuresheet, but not both')
 
         if (dataset is None) and (samplesheet is None) and (counts_table is None):
@@ -211,18 +211,26 @@ class Dataset():
     def from_datasetname(self, datasetname):
         '''Load from config file using a dataset name'''
         from ..config import config
+        from ..io import parse_dataset, integrated_dataset_formats
         dataset = config['io']['datasets'][datasetname]
-        if 'samplesheet' in dataset:
-            self._samplesheet = SampleSheet.from_datasetname(datasetname)
-        if 'featuresheet' in dataset:
-            self._featuresheet = FeatureSheet.from_datasetname(datasetname)
-        if 'counts_table' in dataset:
-            config_table = dataset['counts_table']
-            if config_table.get('sparse', False):
-                counts_table = CountsTableSparse.from_datasetname(datasetname)
-            else:
-                counts_table = CountsTable.from_datasetname(datasetname)
-            self._counts = counts_table
+        if dataset['format'] in integrated_dataset_formats:
+            d = parse_dataset({'datasetname': datasetname})
+            self._counts = d['counts']
+            self._samplesheet = d['samplesheet']
+            self._featuresheet = d['featuresheet']
+        else:
+            # FIXME: fix the logic
+            if 'samplesheet' in dataset:
+                self._samplesheet = SampleSheet.from_datasetname(datasetname)
+            if 'featuresheet' in dataset:
+                self._featuresheet = FeatureSheet.from_datasetname(datasetname)
+            if 'counts_table' in dataset:
+                config_table = dataset['counts_table']
+                if config_table.get('sparse', False):
+                    counts_table = CountsTableSparse.from_datasetname(datasetname)
+                else:
+                    counts_table = CountsTable.from_datasetname(datasetname)
+                self._counts = counts_table
 
     def split(self, phenotypes, copy=True):
         '''Split Dataset based on one or more categorical phenotypes

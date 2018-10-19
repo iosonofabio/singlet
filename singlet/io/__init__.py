@@ -8,9 +8,12 @@ import pandas as pd
 from singlet.config import config
 
 
+integrated_dataset_formats = ['loom']
+
+
 # Parser
 def parse_samplesheet(dictionary):
-    from .csv import parse_samplesheet as parse_csv
+    from .csv import parse_samplesheet as parse_csv, csv_formats
     from .googleapi import parse_samplesheet as parse_googleapi
 
     if 'sheetname' in dictionary:
@@ -20,10 +23,12 @@ def parse_samplesheet(dictionary):
     else:
         raise ValueError('Please specify a samplesheet or a dataset')
 
-    if 'path' in sheet:
+    if sheet['format'] in csv_formats:
         table = parse_csv(sheet['path'], sheet['format'])
     elif 'url' in sheet:
         table = parse_googleapi(sheet)
+    else:
+        raise ValueError('samplesheet format not recognized')
 
     if ('cells' in sheet) and (sheet['cells'] != 'rows'):
         table = table.T
@@ -39,7 +44,7 @@ def parse_samplesheet(dictionary):
 
 
 def parse_featuresheet(dictionary):
-    from .csv import parse_featuresheet as parse_csv
+    from .csv import parse_featuresheet as parse_csv, csv_formats
 
     if 'sheetname' in dictionary:
         sheet = config['io']['featuresheets'][dictionary['sheetname']]
@@ -48,7 +53,10 @@ def parse_featuresheet(dictionary):
     else:
         raise ValueError('Please specify a featuresheet or a dataset')
 
-    table = parse_csv(sheet['path'], sheet['format'])
+    if sheet['format'] in csv_formats:
+        table = parse_csv(sheet['path'], sheet['format'])
+    else:
+        raise ValueError('samplesheet format not recognized')
 
     if ('features' in sheet) and (sheet['features'] != 'rows'):
         table = table.T
@@ -64,7 +72,7 @@ def parse_featuresheet(dictionary):
 
 
 def parse_counts_table(dictionary):
-    from .csv import parse_counts_table as parse_csv
+    from .csv import parse_counts_table as parse_csv, csv_formats
     from .pickle import parse_counts_table as parse_pickle
 
     if 'countsname' in dictionary:
@@ -82,16 +90,10 @@ def parse_counts_table(dictionary):
 
     tables = []
     for path, fmt in zip(paths, fmts):
-        if fmt == 'tsv':
-            parse = parse_csv
-        elif fmt == 'csv':
+        if fmt in csv_formats:
             parse = parse_csv
         elif fmt == 'pickle':
             parse = parse_pickle
-        elif fmt == 'csv.gz':
-            parse = parse_csv
-        elif fmt == 'tsv.gz':
-            parse = parse_csv
         else:
             raise ValueError('Format not understood')
 
@@ -156,3 +158,23 @@ def parse_counts_table_sparse(dictionary):
     else:
         table = pd.concat(tables, axis=1)
     return table
+
+
+def parse_integrated_dataset(dictionary):
+    from .loom import parse_dataset as parse_loom
+
+    if 'datasetname' in dictionary:
+        dataset = config['io']['datasets'][dictionary['datasetname']]
+    else:
+        raise ValueError('A datasetname is required')
+
+    if dataset['format'] == 'loom':
+        return parse_loom(
+                dataset['path'],
+                dataset['axis_samples'],
+                dataset['index_samples'],
+                dataset['index_features'],
+                )
+    else:
+        raise ValueError('Integrated dataset parsing supports the following formats: {:}'.format(
+            ', '.join(integrated_dataset_formats)))
