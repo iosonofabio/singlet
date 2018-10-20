@@ -219,11 +219,11 @@ class Dataset():
             self._samplesheet = d['samplesheet']
             self._featuresheet = d['featuresheet']
         else:
-            # FIXME: fix the logic
+            if ('samplesheet' not in dataset) and ('counts_table' not in dataset):
+                raise ValueError('Your dataset config must include a counts_table or a samplesheet')
+
             if 'samplesheet' in dataset:
                 self._samplesheet = SampleSheet.from_datasetname(datasetname)
-            if 'featuresheet' in dataset:
-                self._featuresheet = FeatureSheet.from_datasetname(datasetname)
             if 'counts_table' in dataset:
                 config_table = dataset['counts_table']
                 if config_table.get('sparse', False):
@@ -231,6 +231,22 @@ class Dataset():
                 else:
                     counts_table = CountsTable.from_datasetname(datasetname)
                 self._counts = counts_table
+
+            if not hasattr(self, '_samplesheet'):
+                self._samplesheet = SampleSheet(
+                    data=[],
+                    index=self._counts.columns)
+                self._samplesheet.sheetname = None
+            elif not hasattr(self, '_counts'):
+                self._counts = CountsTable(
+                        data=[],
+                        index=[],
+                        columns=self._samplesheet.index)
+
+            if 'featuresheet' in dataset:
+                self._featuresheet = FeatureSheet.from_datasetname(datasetname)
+            else:
+                self._featuresheet = FeatureSheet(data=[], index=self._counts.index)
 
     def split(self, phenotypes, copy=True):
         '''Split Dataset based on one or more categorical phenotypes
