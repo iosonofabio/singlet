@@ -22,6 +22,8 @@ Optional dependencies:
   - [numba](https://numba.pydata.org/)
   - [umap](https://github.com/lmcinnes/umap)
   - [lshknn](https://github.com/iosonofabio/lshknn)
+- **I/O of loom files**:
+  - [loompy](http://loompy.org/)
 
 Get those from your Linux distribution, `pip`, `conda`, or whatever other source of poison.
 

@@ -28,10 +28,12 @@ Before going into the specifics, here's a schematic example of the configuration
       ss1:
         path: xxx.csv
         index: samplename
+
     featuresheets:
       fs1:
         path: yyy.csv
         index: EnsemblGeneID
+
     count_tables:
       ct1:
         path: zzz.csv
@@ -42,6 +44,14 @@ Before going into the specifics, here's a schematic example of the configuration
         other:
           - __alignment_not_unique
           - __not_aligned
+
+    datasets:
+      ds1:
+        path: xxx.loom
+        format: loom
+        axis_samples: columns
+        index_samples: Cell
+        index_features: Gene
 
 Now for the full specification, the root key value pairs are:
 
@@ -56,6 +66,7 @@ The ``io`` section has the following key value pairs:
  - ``samplesheets``: samplesheet files or Google Documents (for sample metadata).
  - ``featuresheets``: featuresheet files (for feature/gene annotations or metadata). 
  - ``count_tables``: count table files.
+ - ``datasets``: integrated datasets (a single file contains all three properties above, e.g. `loom <http://loompy.org/>`_ files).
 
 samplesheets
 _______________
@@ -99,7 +110,7 @@ The following key value pairs are available:
 
 featuresheets
 ________________
-The ``featuresheets`` section contains an arbitrary number of key value pairs and no lists. Each entry describes a featuresheet, i.e. a table with metadata for the features. A typical usage of featuresheets is to connect feature ids (e.g. ``EnsemblGeneID``) with human-readable names, Gene Ontology terms, species information, pathways, cellular localization, etc.Each entry has the following format:
+The ``featuresheets`` section contains an arbitrary number of key value pairs and no lists. Each entry describes a featuresheet, i.e. a table with metadata for the features. A typical usage of featuresheets is to connect feature ids (e.g. ``EnsemblGeneID``) with human-readable names, Gene Ontology terms, species information, pathways, cellular localization, etc. Each entry has the following format:
  - the key is the id of the featuresheet: this id is used in the constructor of ``Dataset``.
  - the value is a series of key value pairs, no lists.
 
@@ -110,3 +121,17 @@ The following key value pairs are available:
  - ``features``: one of ``rows`` or ``columns``. If each feature in the featuresheet is a feature, use ``rows``, otherwise use ``columns``.
  -  ``index``: the name of the column/row of the featuresheet containing the feature names. This defaults to ``name`` (optional).
 
+
+datasets
+________________
+The ``datasets`` section contains an arbitrary number of key value pairs and no lists. Each entry describes an integrated dataset, i.e. a single file containing one or more of the three main data structures (``CountsTable``, ``Samplesheet``, and ``Featuresheet``). The most common use of integrated datasets is when all three data structures are present and they are embedded in a single file for portability purposes or lazy evaluation (the latter is not implemented yet). Each entry has the following format:
+ - the key is the id of the dataset: this id is used in the constructor of ``Dataset``.
+ - the value is a series of key value pairs, no lists.
+
+The following key value pairs are available:
+ - ``description``: a description of the dataset (optional).
+ - ``path``: a filename on disk containing the integrated dataset, e.g. in LOOM format.
+ - ``format``: a file format of the dataset (optional). If missing, it is inferred from the ``path`` filename.
+ - ``axis_samples``: one of ``rows`` or ``columns``. If every sample is a column in the count matrix, use ``columns``, else use ``rows``.
+ - ``index_samples``: the name of the column/row of the dataset containing the sample names.
+ - ``index_features``: the name of the column/row of the dataset containing the feature names.

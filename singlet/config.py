@@ -23,7 +23,6 @@ def reload_config():
     # Warnings that should be seen only once
     config['_once_warnings'] = []
 
-
     # Process config
     if 'io' in config:
         if 'count_tables' in config['io']:
@@ -51,6 +50,12 @@ def reload_config():
                 if ('format' not in sheet) and ('path' in sheet):
                     path = sheet['path']
                     config['io']['featuresheets'][sheetname]['format'] = path.split('.')[-1].lower()
+
+        if 'datasets' in config['io']:
+            for datasetname, dataset in config['io']['datasets'].items():
+                if ('format' not in dataset) and ('path' in dataset):
+                    path = dataset['path']
+                    config['io']['datasets'][datasetname]['format'] = path.split('.')[-1].lower()
 
     return config
 
