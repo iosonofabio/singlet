@@ -160,7 +160,7 @@ def parse_counts_table_sparse(dictionary):
     return table
 
 
-def parse_integrated_dataset(dictionary):
+def parse_dataset(dictionary):
     from .loom import parse_dataset as parse_loom
 
     if 'datasetname' in dictionary:
