@@ -21,4 +21,10 @@ Then you can load you ``Dataset`` easily:
   from singlet.dataset import Dataset
   ds = Dataset(dataset='ds1')
 
+To export a ``Dataset`` to a loom file, you can use the method ``to_dataset_file``:
 
+.. code-block:: python
+
+  from singlet.dataset import Dataset
+  ds = Dataset(dataset='ds1')
+  ds.to_dataset_file('xxx.loom')

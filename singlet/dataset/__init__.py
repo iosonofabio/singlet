@@ -248,6 +248,38 @@ class Dataset():
             else:
                 self._featuresheet = FeatureSheet(data=[], index=self._counts.index)
 
+    def to_dataset_file(self, filename, fmt=None, **kwargs):
+        '''Store dataset into an integrated dataset file
+
+        Args:
+            filename (str): path of the file to write to.
+            fmt (str or None): file format. If None, infer from the file
+            extension.
+            **kwargs (keyword arguments): depend on the format.
+
+        The additional keyword argument for the supported formats are:
+        - loom:
+         - axis_samples: `rows` or `columns` (default)
+        '''
+        if fmt is None:
+            fmt = filename.split('.')[-1]
+
+        if fmt == 'loom':
+            import loompy
+
+            matrix = self.counts.values
+            row_attrs = {col: self.featuresheet[col].values for col in self.featuresheet}
+            col_attrs = {col: self.samplesheet[col].values for col in self.samplesheet}
+
+            if kwargs.get('axis_samples', 'columns') != 'columns':
+                matrix = matrix.T
+                row_attrs, col_attrs = col_attrs, row_attrs
+
+            loompy.create(filename, matrix, row_attrs, col_attrs)
+
+        else:
+            raise ValueError('File format not supported')
+
     def split(self, phenotypes, copy=True):
         '''Split Dataset based on one or more categorical phenotypes
 
