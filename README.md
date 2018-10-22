@@ -5,6 +5,31 @@
 # Singlet
 Single cell RNA-Seq analysis with quantitative phenotypes.
 
+## Features
+The vision is to let you **explore** your data **your way** while providing support for repetitive tasks. Here a few things I do pretty regularly:
+- quality control and filtering
+- sample and feature filtering (e.g. querying by quantitative phenotypes in certain ranges)
+- dataset splitting (e.g. by metadata) and merging
+- bootstrapping
+- normalization
+- log/unlog transform
+- summary statistics (mean expression, std, cv)
+- feature selection
+- clustering (e.g. k-means)
+- dimensionality reduction and feature weighting including phenotypes (e.g. PCA, tSNE, umap, SAM)
+- k nearest neighbors (knn) graphs
+- plotting dimensionality reductions colored by categorical or quantitative metadata
+- plotting hierarchical clustering
+- correlations of gene expression to gene expression or to quantitative phenotypes
+- differential expression at the distribution level (e.g. Mann-Whitney test)
+- load/write to loom files
+- support for custom plugins to expand the list of features at runtime
+
+Singlet is similar to other packages like ``scanpy`` or ``seurat``. However, there are differences too:
+- ``scanpy`` focuses on huge datasets and graphical methods. Singlet is not opinionated about graphs and works best with smaller datasets that include quantitative phenotypes (e.g. single cell size)
+- ``seurat`` focuses on emanating a simple user experience. Singlet does try to take over repetitive tasks (e.g. data filtering) but refuses to perform strongly opinionated operations without explicit user consent (e.g. normalization using a particular statistical model).
+- ``singlet`` tries to use object oriented programming to keep clean interfaces and has an open plugin structure.
+
 ## Requirements
 Python 3.4+ is required. Moreover, you will need:
 - [pyyaml](https://pyyaml.org/)
