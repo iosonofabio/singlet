@@ -63,7 +63,7 @@ python3 setup.py install
 ## Usage example
 You can have a look inside the `test` folder for examples. To start using the example dataset:
 - Set the environment variable `SINGLET_CONFIG_FILENAME` to the location of the example YAML file
-- Open a Python/IPython shell and type:
+- Open a Python/IPython shell or a Jupyter notebook and type:
 
 ```python
 import matplotlib.pyplot as plt
