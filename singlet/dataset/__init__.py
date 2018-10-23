@@ -46,14 +46,6 @@ class Dataset():
             that is the case, the samplesheet is sliced down to the
             samples present in the counts_table.
         '''
-        from ..config import config
-        from .correlations import Correlation
-        from .plot import Plot
-        from .dimensionality import DimensionalityReduction
-        from .cluster import Cluster
-        from .fit import Fit
-        from .feature_selection import FeatureSelection
-        from .graph import Graph
 
         if ((dataset is not None) and
            ((counts_table is not None) or (samplesheet is not None) or
@@ -64,78 +56,19 @@ class Dataset():
             raise ValueError('A dataset, samplesheet or counts_table must be present')
 
         if dataset is not None:
-            self.from_datasetname(dataset)
+            self._from_dataset(dataset)
         else:
-            if counts_table is None:
-                if (isinstance(samplesheet, SampleSheet) or
-                   isinstance(samplesheet, pd.DataFrame)):
-                    self._counts = CountsTable(
-                            data=[],
-                            index=[],
-                            columns=samplesheet.index)
-            elif isinstance(counts_table, CountsTable):
-                self._counts = counts_table
-            elif isinstance(counts_table, CountsTableSparse):
-                self._counts = counts_table
-            elif isinstance(counts_table, pd.DataFrame):
-                self._counts = CountsTable(counts_table)
-            else:
-                config_table = config['io']['count_tables'][counts_table]
-                if config_table.get('sparse', False):
-                    self._counts = CountsTableSparse.from_tablename(counts_table)
-                else:
-                    self._counts = CountsTable.from_tablename(counts_table)
-
-            if samplesheet is None:
-                self._samplesheet = SampleSheet(
-                    data=[],
-                    index=self._counts.columns)
-                self._samplesheet.sheetname = None
-            elif isinstance(samplesheet, SampleSheet):
-                self._samplesheet = samplesheet
-            elif isinstance(samplesheet, pd.DataFrame):
-                self._samplesheet = SampleSheet(samplesheet)
-            else:
-                self._samplesheet = SampleSheet.from_sheetname(samplesheet)
-
-            # This is the catchall for counts
-            if not hasattr(self, '_counts'):
-                self._counts = CountsTable(
-                    data=[],
-                    index=[],
-                    columns=self._samplesheet.index)
-
-            if featuresheet is None:
-                self._featuresheet = FeatureSheet(data=[], index=self._counts.index)
-                self._featuresheet.sheetname = None
-            elif isinstance(featuresheet, FeatureSheet):
-                self._featuresheet = featuresheet
-            elif isinstance(featuresheet, pd.DataFrame):
-                self._featuresheet = FeatureSheet(featuresheet)
-            else:
-                self._featuresheet = FeatureSheet.from_sheetname(featuresheet)
-
-            # Uniform axes across data and metadata
-            self._samplesheet = self._samplesheet.loc[self._counts.columns]
-            #self._featuresheet = self._featuresheet.loc[self._counts.index]
+            self._from_datastructures(
+                counts_table=counts_table,
+                samplesheet=samplesheet,
+                featuresheet=featuresheet,
+                )
 
         # Inject yourself into counts_table
         self.counts.dataset = self
 
         # Plugins
-        self.correlation = Correlation(self)
-        self.plot = Plot(self)
-        self.dimensionality = DimensionalityReduction(self)
-        self.cluster = Cluster(self)
-        self.fit = Fit(self)
-        self.feature_selection = FeatureSelection(self)
-        self.graph = Graph(self)
-        if (plugins is not None) and len(plugins):
-            self._plugins = dict(plugins)
-            for key, val in plugins:
-                setattr(self, key, val(self))
-        else:
-            self._plugins = {}
+        self._set_plugins(plugins=plugins)
 
     def __str__(self):
         return '{:} with {:} samples and {:} features'.format(
@@ -208,7 +141,92 @@ class Dataset():
                 else:
                     self.counts.loc[:, samplename] += counts_col_other
 
-    def from_datasetname(self, datasetname):
+    def _set_plugins(self, plugins=None):
+        '''Set plugins according to user's request'''
+        from .correlations import Correlation
+        from .plot import Plot
+        from .dimensionality import DimensionalityReduction
+        from .cluster import Cluster
+        from .fit import Fit
+        from .feature_selection import FeatureSelection
+        from .graph import Graph
+
+        self.correlation = Correlation(self)
+        self.plot = Plot(self)
+        self.dimensionality = DimensionalityReduction(self)
+        self.cluster = Cluster(self)
+        self.fit = Fit(self)
+        self.feature_selection = FeatureSelection(self)
+        self.graph = Graph(self)
+        if (plugins is not None) and len(plugins):
+            self._plugins = dict(plugins)
+            for key, val in plugins:
+                setattr(self, key, val(self))
+        else:
+            self._plugins = {}
+
+    def _from_datastructures(
+            self,
+            counts_table=None,
+            samplesheet=None,
+            featuresheet=None):
+        '''Set main data structures'''
+        from ..config import config
+
+        if counts_table is None:
+            if (isinstance(samplesheet, SampleSheet) or
+               isinstance(samplesheet, pd.DataFrame)):
+                self._counts = CountsTable(
+                        data=[],
+                        index=[],
+                        columns=samplesheet.index)
+        elif isinstance(counts_table, CountsTable):
+            self._counts = counts_table
+        elif isinstance(counts_table, CountsTableSparse):
+            self._counts = counts_table
+        elif isinstance(counts_table, pd.DataFrame):
+            self._counts = CountsTable(counts_table)
+        else:
+            config_table = config['io']['count_tables'][counts_table]
+            if config_table.get('sparse', False):
+                self._counts = CountsTableSparse.from_tablename(counts_table)
+            else:
+                self._counts = CountsTable.from_tablename(counts_table)
+
+        if samplesheet is None:
+            self._samplesheet = SampleSheet(
+                data=[],
+                index=self._counts.columns)
+            self._samplesheet.sheetname = None
+        elif isinstance(samplesheet, SampleSheet):
+            self._samplesheet = samplesheet
+        elif isinstance(samplesheet, pd.DataFrame):
+            self._samplesheet = SampleSheet(samplesheet)
+        else:
+            self._samplesheet = SampleSheet.from_sheetname(samplesheet)
+
+        # This is the catchall for counts
+        if not hasattr(self, '_counts'):
+            self._counts = CountsTable(
+                data=[],
+                index=[],
+                columns=self._samplesheet.index)
+
+        if featuresheet is None:
+            self._featuresheet = FeatureSheet(data=[], index=self._counts.index)
+            self._featuresheet.sheetname = None
+        elif isinstance(featuresheet, FeatureSheet):
+            self._featuresheet = featuresheet
+        elif isinstance(featuresheet, pd.DataFrame):
+            self._featuresheet = FeatureSheet(featuresheet)
+        else:
+            self._featuresheet = FeatureSheet.from_sheetname(featuresheet)
+
+        # Uniform axes across data and metadata
+        self._samplesheet = self._samplesheet.loc[self._counts.columns]
+        #self._featuresheet = self._featuresheet.loc[self._counts.index]
+
+    def _from_dataset(self, datasetname):
         '''Load from config file using a dataset name'''
         from ..config import config
         from ..io import parse_dataset, integrated_dataset_formats
