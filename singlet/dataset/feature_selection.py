@@ -19,6 +19,26 @@ class FeatureSelection():
         '''
         self.dataset = dataset
 
+    def unique(
+            self,
+            inplace=False):
+        '''Select features with unique ids
+
+        Args:
+            inplace (bool): Whether to change the feature list in place.
+
+        Returns:
+            pd.Index of selected features if not inplace, else None.
+        '''
+        from collections import Counter
+        d = Counter(self.dataset._featuresheet.index)
+        features = [f for f, count in d.items() if count == 1]
+
+        if inplace:
+            self.dataset.counts = self.dataset._counts.loc[features]
+        else:
+            return pd.Index(features, name=self.dataset._featuresheet.index.name)
+
     def expressed(
             self,
             n_samples,
