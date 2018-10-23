@@ -32,8 +32,8 @@ class Dataset():
                 a config file) or instance of SampleSheet
             featuresheet (string or None): Name of the samplesheet (to load
                 from a config file) or instance of FeatureSheet
-            dataset (string or None): Name of the Dataset (to load from a
-                a config file).
+            dataset (string or dict or None): Name of the Dataset (to load from
+                a config file) or dict with the config settings themselves.
             plugins (dict): Dictionary of classes that take the Dataset
                 instance as only argument for __init__, to expand the
                 possibilities of Dataset operations.
@@ -226,11 +226,24 @@ class Dataset():
         self._samplesheet = self._samplesheet.loc[self._counts.columns]
         #self._featuresheet = self._featuresheet.loc[self._counts.index]
 
-    def _from_dataset(self, datasetname):
-        '''Load from config file using a dataset name'''
-        from ..config import config
+    def _from_dataset(self, dataset):
+        '''Load from config file using a dataset name or config
+        
+        Args:
+            dataset (str or dict): if a string, a dataset with this name is
+            searched for in the config file. If a dict, it is interpreted as
+            the dataset config itself.
+        '''
+        from ..config import config, _normalize_dataset
         from ..io import parse_dataset, integrated_dataset_formats
-        dataset = config['io']['datasets'][datasetname]
+
+        if isinstance(dataset, str):
+            datasetname = dataset
+            dataset = config['io']['datasets'][datasetname]
+        else:
+            datasetname = ''
+            dataset = _normalize_dataset(dataset)
+
         if dataset['format'] in integrated_dataset_formats:
             d = parse_dataset({'datasetname': datasetname})
             self._counts = d['counts']
