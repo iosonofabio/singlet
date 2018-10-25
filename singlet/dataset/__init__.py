@@ -228,7 +228,7 @@ class Dataset():
 
     def _from_dataset(self, dataset):
         '''Load from config file using a dataset name or config
-        
+
         Args:
             dataset (str or dict): if a string, a dataset with this name is
             searched for in the config file. If a dict, it is interpreted as

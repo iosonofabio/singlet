@@ -15,6 +15,12 @@ def _normalize_count_table(sheet):
         else:
             fmt = [p.split('.')[-1].lower() for p in path]
         sheet['format'] = fmt
+
+    if ('bit_precision' not in sheet):
+        sheet['bit_precision'] = 64
+    elif sheet['bit_precision'] not in (16, 32, 64, 128):
+        raise ValueError('Bit precision must be one of 16, 32, 64, or 128')
+
     return sheet
 
 
@@ -40,6 +46,12 @@ def _normalize_dataset(dataset):
     if ('format' not in dataset) and ('path' in dataset):
         path = dataset['path']
         dataset['format'] = path.split('.')[-1].lower()
+
+    if ('bit_precision' not in dataset):
+        dataset['bit_precision'] = 64
+    elif dataset['bit_precision'] not in (16, 32, 64, 128):
+        raise ValueError('Bit precision must be one of 16, 32, 64, or 128')
+
     return dataset
 
 

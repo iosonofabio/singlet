@@ -106,9 +106,20 @@ def parse_counts_table(dictionary):
         elif not table.index.name:
             table.set_index(table.columns[0], inplace=True, drop=True)
 
-        # Feature names are strings, but counts are floats
+        # Feature names are strings
         table.index = table.index.astype(str)
-        table = table.astype(float)
+
+        # Counts are floats
+        if sheet['bit_precision'] == 64:
+            table = table.astype(np.float64)
+        elif sheet['bit_precision'] == 128:
+            table = table.astype(np.float128)
+        elif sheet['bit_precision'] == 32:
+            table = table.astype(np.float32)
+        elif sheet['bit_precision'] == 16:
+            table = table.astype(np.float16)
+        else:
+            raise ValueError('Bit precision must be one of 16, 32, 64, or 128')
 
         tables.append(table)
 
@@ -174,6 +185,7 @@ def parse_dataset(dictionary):
                 dataset['axis_samples'],
                 dataset['index_samples'],
                 dataset['index_features'],
+                bit_precision=dataset['bit_precision'],
                 )
     else:
         raise ValueError('Integrated dataset parsing supports the following formats: {:}'.format(
