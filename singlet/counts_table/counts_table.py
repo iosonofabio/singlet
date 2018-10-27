@@ -1,7 +1,7 @@
 # vim: fdm=indent
 # author:     Fabio Zanini
 # date:       09/08/17
-# content:    Table of gene counts
+# content:    Table of feature counts
 # Modules
 import numpy as np
 import pandas as pd
@@ -44,8 +44,8 @@ class CountsTable(pd.DataFrame):
         Returns:
             CountsTable: the counts table.
         '''
-        from .config import config
-        from .io import parse_counts_table
+        from ..config import config
+        from ..io import parse_counts_table
 
         self = cls(parse_counts_table({'countsname': tablename}))
         self.name = tablename
@@ -65,8 +65,8 @@ class CountsTable(pd.DataFrame):
         Returns:
             CountsTable: the counts table.
         '''
-        from .config import config
-        from .io import parse_counts_table
+        from ..config import config
+        from ..io import parse_counts_table
 
         self = cls(parse_counts_table({'datasetname': datasetname}))
         self.name = datasetname

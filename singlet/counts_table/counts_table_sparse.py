@@ -44,8 +44,8 @@ class CountsTableSparse(pd.SparseDataFrame):
         Returns:
             CountsTable: the counts table.
         '''
-        from .config import config
-        from .io import parse_counts_table_sparse
+        from ..config import config
+        from ..io import parse_counts_table_sparse
 
         self = cls(parse_counts_table_sparse({'countsname': tablename}))
         self.name = tablename
@@ -65,8 +65,8 @@ class CountsTableSparse(pd.SparseDataFrame):
         Returns:
             CountsTableSparse: the counts table.
         '''
-        from .config import config
-        from .io import parse_counts_table_sparse
+        from ..config import config
+        from ..io import parse_counts_table_sparse
 
         self = cls(parse_counts_table_sparse({'datasetname': datasetname}))
         self.name = datasetname

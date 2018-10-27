@@ -8,7 +8,7 @@ import pandas as pd
 
 from ..samplesheet import SampleSheet
 from ..counts_table import CountsTable
-from ..counts_table_sparse import CountsTableSparse
+from ..counts_table import CountsTableSparse
 from ..featuresheet import FeatureSheet
 
 
