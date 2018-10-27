@@ -490,6 +490,36 @@ class Dataset():
                     featuresheet=self._featuresheet.copy(),
                     )
 
+    def query_samples_by_name(
+            self,
+            samplenames,
+            inplace=False,
+            ignore_missing=False,
+            ):
+        '''Select samples by name.
+
+        Args:
+            samplenames: names of the samples to keep.
+            inplace (bool): Whether to change the Dataset in place or return a
+                new one.
+            ignore_missing (bool): Whether to silently skip missing samples.
+        '''
+        if ignore_missing:
+            snall = self.samplenames
+            samplenames = [fn for fn in samplenames if fn in snall]
+
+        if inplace:
+            self._samplesheet = self._samplesheet.loc[samplenames]
+            self._counts = self._counts.loc[:, samplenames]
+        else:
+            samplesheet = self._samplesheet.loc[samplenames].copy()
+            counts_table = self._counts.loc[:, samplenames].copy()
+            featuresheet = self._featuresheet.copy()
+            return self.__class__(
+                    samplesheet=samplesheet,
+                    counts_table=counts_table,
+                    featuresheet=featuresheet)
+
     def query_features_by_name(
             self,
             featurenames,
