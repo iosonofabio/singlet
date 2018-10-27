@@ -4,5 +4,5 @@
 # content:    Main singlet module.
 # Module exporting
 from .samplesheet import SampleSheet
-from .counts_table import CountsTable
+from .counts_table import CountsTable, CountsTableSparse, CountsTableXR
 from .dataset import Dataset
