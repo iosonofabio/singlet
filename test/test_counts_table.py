@@ -52,3 +52,11 @@ if __name__ == '__main__':
 
     # Statistics and normalization sparse
     run('test/counts_table/statistics_sparse.py')
+
+    # Init xarray
+    run('test/counts_table/initialize_xr.py')
+
+    # Statistics and normalization
+    run('test/counts_table/statistics_xr.py')
+
+

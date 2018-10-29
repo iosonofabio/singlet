@@ -7,6 +7,7 @@ content:    Table of feature counts, using xarrays and possibly dask arrays.
 NOTE: We use composition over inheritance, but it's a discrete pain.
 '''
 import numpy as np
+import pandas as pd
 import xarray as xr
 
 
@@ -44,9 +45,10 @@ class CountsTableXR(object):
     def __init__(self, data):
         self._data = xr.DataArray(data)
 
-    def _set_metadata_from_other(self, other):
+    def _set_metadata_from_other(self, other, exclude=('dataset',)):
         for key in self._metadata:
-            setattr(self, key, getattr(other, key))
+            if key not in exclude:
+                setattr(self, key, getattr(other, key))
 
     def copy(self, deep=True):
         c = self.__class__(self._data.copy(deep=deep))
@@ -105,9 +107,10 @@ class CountsTableXR(object):
         c._set_metadata_from_other(self)
         return c
 
-    def __getitem__(key):
-        #FIXME
-        pass
+    def __getitem__(self, key):
+        c = self.__class__(self._data.__getitem__(key))
+        c._set_metadata_from_other(self)
+        return c
 
     @unwrap_data1
     def __gt__(self, b):
@@ -634,3 +637,259 @@ class CountsTableXR(object):
 
     def where(self, *args, **kwargs):
         return self._data.where(*args, **kwargs)
+
+    @classmethod
+    def from_tablename(cls, tablename):
+        '''Instantiate a CountsTable from its name in the config file.
+
+        Args:
+            tablename (string): name of the counts table in the config file.
+
+        Returns:
+            CountsTableXR: the counts table.
+        '''
+        from ..config import config
+        from ..io import parse_counts_table
+
+        # Initially parsed as a dataframe (xarray does not parse csv directly)
+        self = cls(xr.DataArray(parse_counts_table({'countsname': tablename})))
+        if self._data.dims[1] == 'dim_1':
+            self._data = self._data.rename({'dim_1': 'sample name'})
+
+        self.name = tablename
+        config_table = config['io']['count_tables'][tablename]
+        self._spikeins = config_table.get('spikeins', [])
+        self._otherfeatures = config_table.get('other', [])
+        self._normalized = config_table['normalized']
+        return self
+
+    # FIXME
+    @classmethod
+    def from_datasetname(cls, datasetname):
+        '''Instantiate a CountsTable from its name in the config file.
+
+        Args:
+            datasetname (string): name of the dataset in the config file.
+
+        Returns:
+            CountsTable: the counts table.
+        '''
+        from ..config import config
+        from ..io import parse_counts_table
+
+        # TODO: support lazy evaluation
+        self = cls(parse_counts_table({'datasetname': datasetname}))
+        if self._data.dims[1] == 'dim_1':
+            self._data = self._data.rename({'dim_1': 'sample name'})
+
+        self.name = datasetname
+        config_table = config['io']['datasets'][datasetname]['counts_table']
+        self._spikeins = config_table.get('spikeins', [])
+        self._otherfeatures = config_table.get('other', [])
+        self._normalized = config_table['normalized']
+        return self
+
+    def get_spikeins(self):
+        '''Get spike-in features
+
+        Returns:
+            CountsTable: a slice of self with only spike-ins.
+        '''
+        return self.loc[self._spikeins]
+
+    def get_other_features(self):
+        '''Get other features
+
+        Returns:
+            CountsTable: a slice of self with only other features (e.g. unmapped).
+        '''
+        return self.loc[self._otherfeatures]
+
+    def log(self, base=10, inplace=False):
+        '''Take the pseudocounted log of the counts.
+
+        Args:
+            base (float): Base of the log transform
+            inplace (bool): Whether to do the operation in place or return \
+                    a new CountsTable
+
+        Returns:
+            If inplace is False, a transformed CountsTable.
+        '''
+        clog = np.log(self.pseudocount + self._data) / np.log(base)
+        if inplace:
+            self._data = clog
+        else:
+            clog = self.__class__(clog)
+            clog._set_metadata_from_other(self)
+            return clog
+
+    def unlog(self, base=10, inplace=False):
+        '''Reverse the pseudocounted log of the counts.
+
+        Args:
+            base (float): Base of the log transform
+            inplace (bool): Whether to do the operation in place or return \
+                    a new CountsTable
+
+        Returns:
+            If inplace is False, a transformed CountsTable.
+        '''
+        cunlog = base**self._data - self.pseudocount
+        if inplace:
+            self = cunlog
+        else:
+            cunlog = self.__class__(cunlog)
+            cunlog._set_metadata_from_other(self)
+            return cunlog
+
+    def get_statistics(self, metrics=('mean', 'cv')):
+        '''Get statistics of the counts.
+
+        Args:
+            metrics (sequence of strings): any of 'mean', 'var', 'std', 'cv', \
+                    'fano', 'min', 'max'.
+
+        Returns:
+            pandas.DataFrame with features as rows and metrics as columns.
+        '''
+        st = {}
+        if 'mean' in metrics or 'cv' in metrics or 'fano' in metrics:
+            st['mean'] = self._data.mean(axis=1)
+        if ('std' in metrics or 'cv' in metrics or 'fano' in metrics or
+           'var' in metrics):
+            st['std'] = self._data.std(axis=1)
+        if 'var' in metrics:
+            st['var'] = st['std'] ** 2
+        if 'cv' in metrics:
+            st['cv'] = st['std'] / np.maximum(st['mean'], 1e-10)
+        if 'fano' in metrics:
+            st['fano'] = st['std'] ** 2 / np.maximum(st['mean'], 1e-10)
+        if 'min' in metrics:
+            st['min'] = self._data.min(axis=1)
+        if 'max' in metrics:
+            st['max'] = self._data.max(axis=1)
+
+        df = pd.concat([st[m].to_series() for m in metrics], axis=1)
+        df.columns = pd.Index(list(metrics), name='metrics')
+        return df
+
+    def exclude_features(self, spikeins=True, other=True, inplace=False,
+                         errors='raise'):
+        '''Get a slice that excludes secondary features.
+
+        Args:
+            spikeins (bool): Whether to exclude spike-ins
+            other (bool): Whether to exclude other features, e.g. unmapped reads
+            inplace (bool): Whether to drop those features in place.
+            errors (string): Whether to raise an exception if the features
+                to be excluded are already not present. Must be 'ignore'
+                or 'raise'.
+
+        Returns:
+            CountsTable: a slice of self without those features.
+        '''
+        drop = []
+        if spikeins:
+            drop.extend(self._spikeins)
+        if other:
+            drop.extend(self._otherfeatures)
+
+        drop_bool = [True if x not in drop else False for x in self._data.get_index(self._data.dims[0])]
+
+        if not inplace:
+            c = self.__class__(self._data[drop_bool])
+            c._set_metadata_from_other(self)
+            return c
+
+        self._data = self._data[drop_bool]
+        if self.dataset is not None:
+            self.dataset._featuresheet.drop(drop, inplace=True, errors=errors)
+
+    def normalize(
+            self,
+            method='counts_per_million',
+            include_spikeins=False,
+            inplace=False,
+            **kwargs):
+        '''Normalize counts and return new CountsTableXR.
+
+        Args:
+            method (string or function): The method to use for normalization.
+            One of 'counts_per_million', 'counts_per_thousand_spikeins',
+            'counts_per_thousand_features'. If this argument is a function, its
+            signature depends on the inplace argument. If inplace=False, it
+            must take the CountsTable as input and return the normalized one as
+            output. If inplace=True, it must take the CountsTableXR as input
+            and modify it in place. Notice that if inplace=True and you do
+            non-inplace operations you might lose the _metadata properties. You
+            can end your function by self[:] = <normalized counts>.
+            include_spikeins (bool): Whether to include spike-ins in the
+            normalization and result.
+            inplace (bool): Whether to modify the CountsTableXR in place or
+            return a new one.
+
+        Returns:
+            If `inplace` is False, a new, normalized CountsTableXR.
+        '''
+        import copy
+
+        if self._normalized:
+            raise ValueError('CountsTableXR is already normalized')
+
+        if inplace:
+            if method == 'counts_per_million':
+                self.exclude_features(
+                        spikeins=(not include_spikeins),
+                        other=True,
+                        inplace=True)
+                self._data *= 1e6 / self._data.sum(axis=0)
+            elif method == 'counts_per_thousand_spikeins':
+                spikeins = self.get_spikeins().sum(axis=0)
+                self.exclude_features(
+                        spikeins=(not include_spikeins),
+                        other=True,
+                        inplace=True)
+                self._data *= 1e3 / spikeins
+            elif method == 'counts_per_thousand_features':
+                if 'features' not in kwargs:
+                    raise ValueError('Set features=<list of normalization features>')
+                features = self.loc[kwargs['features']].sum(axis=0)
+                self.exclude_features(
+                        spikeins=(not include_spikeins),
+                        other=True,
+                        inplace=True)
+                self._data *= 1e3 / features
+            elif callable(method):
+                method(self)
+                method = 'custom'
+            else:
+                raise ValueError('Method not understood')
+
+            self._normalized = method
+
+        else:
+            if method == 'counts_per_million':
+                counts = self.exclude_features(spikeins=(not include_spikeins), other=True)._data
+                norm = counts.sum(axis=0)
+                counts_norm = 1e6 * counts / norm
+            elif method == 'counts_per_thousand_spikeins':
+                counts = self.exclude_features(spikeins=(not include_spikeins), other=True)._data
+                norm = self.get_spikeins()._data.sum(axis=0)
+                counts_norm = 1e3 * counts / norm
+            elif method == 'counts_per_thousand_features':
+                if 'features' not in kwargs:
+                    raise ValueError('Set features=<list of normalization features>')
+                counts = self.exclude_features(spikeins=(not include_spikeins), other=True)._data
+                norm = self.loc[kwargs['features']]._data.sum(axis=0)
+                counts_norm = 1e3 * counts / norm
+            elif callable(method):
+                counts_norm = method(self)
+                method = 'custom'
+            else:
+                raise ValueError('Method not understood')
+
+            c = self.__class__(counts_norm)
+            c._set_metadata_from_other(self)
+            c._normalized = method
+            return c

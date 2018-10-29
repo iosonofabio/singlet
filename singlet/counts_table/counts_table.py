@@ -252,21 +252,19 @@ class CountsTable(pd.DataFrame):
         '''Normalize counts and return new CountsTable.
 
         Args:
-            method (string or function): The method to use for normalization. \
-                    One of 'counts_per_million', \
-                    'counts_per_thousand_spikeins', \
-                    'counts_per_thousand_features'. If this argument is a \
-                    function, its signature depends on the inplace argument. \
-                    If inplace=False, it must take the CountsTable as input \
-                    and return the normalized one as output. If inplace=True, \
-                    it must take the CountsTable as input and modify it in \
-                    place. Notice that if inplace=True and you do non-inplace \
-                    operations you might lose the _metadata properties. You \
-                    can end your function by self[:] = <normalized counts>.
-            include_spikeins (bool): Whether to include spike-ins in the \
-                    normalization and result.
-            inplace (bool): Whether to modify the CountsTable in place or \
-                    return a new one.
+            method (string or function): The method to use for normalization.
+            One of 'counts_per_million', 'counts_per_thousand_spikeins',
+            'counts_per_thousand_features'. If this argument is a function, its
+            signature depends on the inplace argument. If inplace=False, it
+            must take the CountsTable as input and return the normalized one as
+            output. If inplace=True, it must take the CountsTableXR as input
+            and modify it in place. Notice that if inplace=True and you do
+            non-inplace operations you might lose the _metadata properties. You
+            can end your function by self[:] = <normalized counts>.
+            include_spikeins (bool): Whether to include spike-ins in the
+            normalization and result.
+            inplace (bool): Whether to modify the CountsTableXR in place or
+            return a new one.
 
         Returns:
             If `inplace` is False, a new, normalized CountsTable.
