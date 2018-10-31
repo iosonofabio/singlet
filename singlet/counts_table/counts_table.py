@@ -409,6 +409,8 @@ class CountsTable(pd.DataFrame):
             for (key, c), nbin in zip(self.iterrows(), bins):
                 bins_new.append(np.linspace(self.pseudocount, c.max(), nbin + 1))
             bins = bins_new
+        elif np.isscalar(bins[0]):
+            bins = [bins for i in range(nf)]
 
         for i, (bini, (fea, count)) in enumerate(zip(bins, self.iterrows())):
             if result == 'index':

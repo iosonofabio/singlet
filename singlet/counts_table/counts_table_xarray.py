@@ -893,3 +893,171 @@ class CountsTableXR(object):
             c._set_metadata_from_other(self)
             c._normalized = method
             return c
+
+    def center(self, axis='samples', inplace=False):
+        '''Center the counts table (subtract mean).
+
+        Args:
+            axis (string): The axis to average over, has to be 'samples' \
+                    or 'features'.
+            inplace (bool): Whether to do the operation in place or return \
+                    a new CountsTableXR
+
+        Returns:
+            If inplace is False, a transformed CountsTableXR.
+        '''
+        if axis == 'samples':
+            mean = self.mean(axis=1)
+        elif axis == 'features':
+            mean = self.mean(axis=0)
+        else:
+            raise ValueError('Axis not found')
+
+        if inplace:
+            self -= mean
+        else:
+            return self - mean
+
+    def z_score(self, axis='samples', inplace=False, add_to_den=0):
+        '''Calculate the z scores of the counts table.
+
+        In other words, subtract the mean and divide by the standard \
+                deviation.
+
+        Args:
+            axis (string): The axis to average over, has to be 'samples' \
+                    or 'features'.
+            inplace (bool): Whether to do the operation in place or return \
+                    a new CountsTableXR
+            add_to_den (float): Whether to add a (small) value to the \
+                    denominator to avoid NaNs. 1e-5 or so should be fine.
+
+        Returns:
+            If inplace is False, a transformed CountsTableXR.
+        '''
+        if axis == 'samples':
+            mean = self.mean(axis=1)
+            den = add_to_den + self.std(axis=1)
+        elif axis == 'features':
+            mean = self.mean(axis=0)
+            den = add_to_den + self.std(axis=0)
+        else:
+            raise ValueError('Axis not found')
+
+        if inplace:
+            self -= mean
+            self /= den
+        else:
+            return (self - mean) / den
+
+    def standard_scale(self, axis='samples', inplace=False, add_to_den=0):
+        '''Subtract minimum and divide by (maximum - minimum).
+
+        Args:
+            axis (string): The axis to average over, has to be 'samples' \
+                    or 'features'.
+            inplace (bool): Whether to do the operation in place or return \
+                    a new CountsTableXR
+            add_to_den (float): Whether to add a (small) value to the \
+                    denominator to avoid NaNs. 1e-5 or so should be fine.
+
+        Returns:
+            If inplace is False, a transformed CountsTableXR.
+        '''
+        if axis == 'samples':
+            mi = self.min(axis=1)
+            ma = self.max(axis=1)
+        elif axis == 'features':
+            mi = self.min(axis=0)
+            ma = self.max(axis=0)
+        else:
+            raise ValueError('Axis not found')
+
+        den = (add_to_den + ma - mi)
+
+        if inplace:
+            self -= mi
+            self /= den
+        else:
+            return (self - mi) / den
+
+    def bin(self, bins=5, result='index', inplace=False):
+        '''Bin feature counts.
+
+        Args:
+            bins (int, array, or list of arrays): If an int, number
+                equal-width bins between pseudocounts and the max of
+                the counts matrix. If an array of indices of the same
+                length as the number of features, use a different number
+                of equal-width bins for each feature. If an array of any
+                other length, use these bin edges (including rightmost
+                edge) for all features. If a list of arrays, it has to be
+                as long as the number of features, and every array in the
+                list determines the bin edges (including rightmost edge)
+                for that feature, in order.
+            result (string): Has to be one of 'index' (default), 'left',
+                'center', 'right'. 'index' assign to the feature the
+                index (starting at 0) of that bin, 'left' assign the left
+                bin edge, 'center' the bin center, 'right' the right
+                edge. If result is 'index', out-of-bounds values will be
+                assigned the value -1, which means Not A Number in ths
+                context.
+            inplace (bool): Whether to perform the operation in place.
+
+        Returns:
+            If inplace is False, a CountsTableXR with the binned counts.
+        '''
+        # Prepare bin edges: a list of lists
+        nf = self.shape[0]
+        if np.isscalar(bins):
+            bins = np.linspace(self.pseudocount, self._data.data.max(), bins + 1)
+            bins = np.repeat(bins, nf).reshape((len(bins), nf)).T
+        elif len(bins) == nf:
+            bins_new = []
+            for (key, c), nbin in zip(self.iterrows(), bins):
+                bins_new.append(np.linspace(self.pseudocount, c.max(), nbin + 1))
+            bins = bins_new
+        elif np.isscalar(bins[0]):
+            bins = [bins for i in range(nf)]
+
+        # Prepare output data structure
+        if result == 'index':
+            out_dtype = int
+        else:
+            out_dtype = float
+        out = xr.zeros_like(self._data, dtype=out_dtype)
+
+        # Bin data
+        for i, bini in enumerate(bins):
+            if result == 'index':
+                labels = False
+            elif result == 'left':
+                labels = bini[:-1]
+            elif result == 'right':
+                labels = bini[1:]
+            elif result == 'center':
+                labels = 0.5 * (bini[1:] + bini[:-1])
+            else:
+                raise ValueError('result parameter not understood')
+
+            cbin = pd.cut(
+                    np.maximum(self.pseudocount, self._data.data[i]),
+                    bini,
+                    labels=labels,
+                    right=True,
+                    include_lowest=True)
+
+            if result == 'index':
+                cbin = cbin.astype(int)
+                cbin[np.isnan(cbin)] = -1
+            else:
+                cbin = cbin.astype(out.dtype)
+
+            out.data[i] = cbin
+
+        if inplace:
+            self._data = out
+        else:
+            c = self.__class__(out)
+            c._set_metadata_from_other(self)
+            return c
