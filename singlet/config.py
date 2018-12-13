@@ -21,6 +21,11 @@ def _normalize_count_table(sheet):
     elif sheet['bit_precision'] not in (16, 32, 64, 128):
         raise ValueError('Bit precision must be one of 16, 32, 64, or 128')
 
+    if ('spikeins' not in sheet) or (sheet['spikeins'] is None):
+        sheet['spikeins'] = []
+    if ('other' not in sheet) or (sheet['other'] is None):
+        sheet['other'] = []
+
     return sheet
 
 
