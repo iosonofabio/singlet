@@ -5,6 +5,9 @@
 # Singlet
 Single cell RNA-Seq analysis with quantitative phenotypes.
 
+## Documentation
+Hosted on [readthedocs](https://singlet.readthedocs.io/en/master).
+
 ## Features
 The vision is to let you **explore** your data **your way** while providing support for repetitive tasks. Here a few things I do pretty regularly:
 - quality control and filtering
