@@ -1,4 +1,4 @@
-singlet\.featureshet
+singlet\.featuresheet
 ---------------------------
 
 .. automodule:: singlet.featuresheet
