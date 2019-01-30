@@ -58,9 +58,9 @@ class Cluster():
         else:
             raise ValueError('axis must be "samples" or "features"')
 
-        kmeans = (KMeans(n_clusters=n_clusters, random_state=random_state)
-                  .fit(data.values))
-        labels = pd.Series(kmeans.labels_, index=data.index, dtype='category')
+        model = (KMeans(n_clusters=n_clusters, random_state=random_state)
+                 .fit(data.values))
+        labels = pd.Series(model.labels_, index=data.index, dtype='category')
         return labels
 
     def dbscan(
@@ -99,9 +99,8 @@ class Cluster():
         else:
             raise ValueError('axis must be "samples" or "features"')
 
-        kmeans = (DBSCAN(**kwargs)
-                  .fit(data.values))
-        labels = pd.Series(kmeans.labels_, index=data.index, dtype='category')
+        model = DBSCAN(**kwargs).fit(data.values)
+        labels = pd.Series(model.labels_, index=data.index, dtype='category')
         return labels
 
     # NOTE: caching this one is tricky because it has non-kwargs AND it would
@@ -122,8 +121,9 @@ class Cluster():
                 are clustered.
             phenotypes (iterable of strings): Phenotypes to add to the
                 features for joint clustering.
-            metric (string): Metric to calculate the distance matrix. Should
-                be a string accepted by scipy.spatial.distance.pdist.
+            metric (string or matrix): Metric to calculate the distance matrix.
+                If it is a matrix already, use it as distance (squared). Else
+                it should be a string accepted by scipy.spatial.distance.pdist.
             method (string): Clustering method. Must be a string accepted by
                 scipy.cluster.hierarchy.linkage.
             log_features (bool): Whether to add pseudocounts and take a log
@@ -134,7 +134,7 @@ class Cluster():
         Returns:
             dict with the linkage, distance matrix, and ordering.
         '''
-        from scipy.spatial.distance import pdist
+        from scipy.spatial.distance import pdist, squareform
         from scipy.cluster.hierarchy import linkage, leaves_list, optimal_leaf_ordering
 
         data = self.dataset.counts
@@ -154,7 +154,14 @@ class Cluster():
         else:
             raise ValueError('axis must be "samples" or "features"')
 
-        Y = pdist(data.values, metric=metric)
+        if isinstance(metric, str):
+            Y = pdist(data.values, metric=metric)
+        else:
+            Y = np.asarray(metric)
+            assert len(Y.shape) == 2
+            assert Y.shape[0] == Y.shape[1]
+            assert Y.shape[0] == data.shape[0]
+            Y = squareform(Y)
 
         # Some metrics (e.g. correlation) give nan whenever the matrix has no
         # variation, default this to zero distance (e.g. two features that are
@@ -173,3 +180,63 @@ class Cluster():
                 'linkage': Z,
                 'leaves': ids,
                 }
+
+    def affinity_propagation(
+            self,
+            axis,
+            phenotypes=(),
+            metric='correlation',
+            log_features=False,
+            ):
+        '''Affinity/label/message propagation.
+
+        Args:
+            axis (string): It must be 'samples' or 'features'. The
+                Dataset.counts matrix is used and either samples or features
+                are clustered.
+            phenotypes (iterable of strings): Phenotypes to add to the
+                features for joint clustering.
+            metric (string or matrix): Metric to calculate the distance matrix.
+                If it is a matrix already, use it as distance (squared). Else
+                it should be a string accepted by scipy.spatial.distance.pdist.
+            log_features (bool): Whether to add pseudocounts and take a log
+                of the feature counts before calculating distances.
+        Returns:
+            dict with the linkage, distance matrix, and ordering.
+        '''
+        from scipy.spatial.distance import pdist, squareform
+        from sklearn.cluster import AffinityPropagation
+
+        data = self.dataset.counts
+
+        if log_features:
+            data = np.log10(self.dataset.counts.pseudocount + data)
+
+        if phenotypes is not None:
+            data = data.copy()
+            for pheno in phenotypes:
+                data.loc[pheno] = self.dataset.samplesheet.loc[:, pheno]
+
+        if axis == 'samples':
+            data = data.T
+        elif axis == 'features':
+            pass
+        else:
+            raise ValueError('axis must be "samples" or "features"')
+
+        if isinstance(metric, str):
+            Y = squareform(pdist(data.values, metric=metric))
+        else:
+            Y = np.asarray(metric)
+            assert len(Y.shape) == 2
+            assert Y.shape[0] == Y.shape[1]
+            assert Y.shape[0] == data.shape[0]
+
+        # Affinity is the opposite of distance
+        Y = -Y
+        model = AffinityPropagation(
+                affinity='precomputed',
+                )
+        model.fit(Y)
+        labels = pd.Series(model.labels_, index=data.index, dtype='category')
+        return labels
