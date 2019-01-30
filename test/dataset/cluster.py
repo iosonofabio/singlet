@@ -45,3 +45,10 @@ if __name__ == '__main__':
     #FIXME: ordering seems to be slightly nondeterministic?
     assert('quantitative_phenotype_1_[A.U.]' in d['leaves'])
     print('Done!')
+
+    print('Affinity propagation (precomputed)')
+    from scipy.spatial.distance import pdist, squareform
+    distance = squareform(pdist(ds.counts.values.T))
+    labels = ds.cluster.affinity_propagation(axis='samples', metric=distance)
+    assert(labels.tolist() == [0, 0, 0, 1])
+    print('Done!')
