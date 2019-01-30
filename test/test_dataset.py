@@ -49,11 +49,13 @@ if __name__ == '__main__':
         tests = [fn.split('.')[0] for fn in os.listdir('test/dataset')]
 
     for te in tests:
-        te_fn = 'test/dataset/test_{:}.py'.format(te)
 
         # TODO: one could set up PNG comparisons like Matplotlib does
         kwargs = {}
         if te in ('plot', 'graph'):
             kwargs['where'] = 'local'
+            te_fn = 'test/dataset/local/test_{:}.py'.format(te)
+        else:
+            te_fn = 'test/dataset/test_{:}.py'.format(te)
 
         run(te_fn, **kwargs)
