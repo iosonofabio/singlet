@@ -35,6 +35,7 @@ install:
   - ./.travis_install.sh
  
 script:
+  - ./.travis_pytest.sh
   - ./.travis_test.sh
 
 after_success:

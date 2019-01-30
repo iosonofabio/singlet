@@ -39,12 +39,12 @@ def run(script, where=None, **kwargs):
 if __name__ == '__main__':
 
     # Config
-    run('test/io/config.py')
+    run('test/io/test_config.py')
 
     # IO samplesheet
-    run('test/io/samplesheet_csv_parser.py')
-    run('test/io/samplesheet_googleapi_parser.py', where='local')
-    run('test/io/samplesheet_parser.py')
+    run('test/io/test_samplesheet_csv_parser.py')
+    run('test/io/local/test_samplesheet_googleapi_parser.py', where='local')
+    run('test/io/test_samplesheet_parser.py')
 
     # IO count_table
-    run('test/io/count_table_csv_parser.py')
+    run('test/io/test_count_table_csv_parser.py')

@@ -5,16 +5,19 @@ author:     Fabio Zanini
 date:       15/08/17
 content:    Test CountsTableSparse class.
 '''
-# Script
-if __name__ == '__main__':
+import pytest
 
-    # NOTE: an env variable for the config file needs to be set when
-    # calling this script
+
+@pytest.fixture(scope="module")
+def ct():
     print('Instantiating CountsTableSparse')
     from singlet.counts_table import CountsTableSparse
-    ct = CountsTableSparse.from_tablename('example_PBMC_sparse')
+    ctable = CountsTableSparse.from_tablename('example_PBMC_sparse')
     print('Done!')
+    return ctable
 
+
+def test_log(ct):
     print('log CountsTableSparse')
     ctlog = ct.log(base=10)
     print('Done!')
@@ -22,3 +25,13 @@ if __name__ == '__main__':
     print('unlog CountsTableSparse')
     ctunlog = ctlog.unlog(base=10)
     print('Done!')
+
+
+# Script
+if __name__ == '__main__':
+
+    # NOTE: an env variable for the config file needs to be set when
+    # calling this script
+    ct1 = ct()
+    test_log(ct1)
+

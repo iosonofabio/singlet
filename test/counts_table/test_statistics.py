@@ -5,25 +5,42 @@ author:     Fabio Zanini
 date:       15/08/17
 content:    Test CountsTable class.
 '''
-# Script
-if __name__ == '__main__':
+import pytest
 
-    # NOTE: an env variable for the config file needs to be set when
-    # calling this script
+
+@pytest.fixture(scope="module")
+def ct():
     from singlet.counts_table import CountsTable
-    ct = CountsTable.from_tablename('example_table_tsv')
+    return CountsTable.from_tablename('example_table_tsv')
 
+
+def test_statistics(ct):
     print('Test statistics of CountsTable')
     assert(ct.get_statistics(metrics=('min', 'cv')).iloc[0, 0] == 29.0)
     print('Done!')
 
+
+def test_normalization(ct):
     print('Test normalization of CountsTable')
     ctn = ct.normalize('counts_per_million')
     assert(int(ctn.iloc[0, 0]) == 147)
     print('Done!')
 
+
+def test_normalization_inplace(ct):
     print('Test inplace normalization of CountsTable')
     ctn = ct.copy()
     ctn.normalize('counts_per_million', inplace=True)
     assert(int(ctn.iloc[0, 0]) == 147)
     print('Done!')
+
+
+# Script
+if __name__ == '__main__':
+
+    # NOTE: an env variable for the config file needs to be set when
+    # calling this script
+    ct1 = ct()
+    test_statistics(ct1)
+    test_normalization(ct1)
+    test_normalization_inplace(ct1)

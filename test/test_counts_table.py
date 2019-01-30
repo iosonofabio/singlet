@@ -39,24 +39,24 @@ def run(script, where=None, **kwargs):
 if __name__ == '__main__':
 
     # Init
-    run('test/counts_table/initialize.py')
+    run('test/counts_table/test_initialize.py')
 
     # Statistics and normalization
-    run('test/counts_table/statistics.py')
+    run('test/counts_table/test_statistics.py')
 
     # Bin
-    run('test/counts_table/bin.py')
+    run('test/counts_table/test_bin.py')
 
     # Init sparse
-    run('test/counts_table/initialize_sparse.py')
+    run('test/counts_table/test_initialize_sparse.py')
 
     # Statistics and normalization sparse
-    run('test/counts_table/statistics_sparse.py')
+    run('test/counts_table/test_statistics_sparse.py')
 
     # Init xarray
-    run('test/counts_table/initialize_xr.py')
+    run('test/counts_table/test_initialize_xr.py')
 
     # Statistics and normalization
-    run('test/counts_table/statistics_xr.py')
+    run('test/counts_table/test_statistics_xr.py')
 
 

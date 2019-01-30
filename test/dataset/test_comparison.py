@@ -6,13 +6,11 @@ date:       07/08/17
 content:    Test Dataset class.
 '''
 import numpy as np
+import pytest
 
 
-# Script
-if __name__ == '__main__':
-
-    # NOTE: an env variable for the config file needs to be set when
-    # calling this script
+@pytest.fixture(scope="module")
+def ds_ds2():
     from singlet.dataset import Dataset
     ds = Dataset(
             samplesheet='example_sheet_tsv',
@@ -20,7 +18,11 @@ if __name__ == '__main__':
     ds2 = ds.copy()
     ds.samplesheet = ds.samplesheet.iloc[:2]
     ds2.samplesheet = ds2.samplesheet.iloc[2:]
+    return (ds, ds2)
 
+
+def test_mann_whitney(ds_ds2):
+    (ds, ds2) = ds_ds2
     print('Test feature comparison (Mann-Whitney U)')
     pvals = ds.compare(
             ds2,
@@ -28,6 +30,9 @@ if __name__ == '__main__':
     assert(np.isclose(pvals.values.min(), 0.193931))
     print('Done!')
 
+
+def test_ks(ds_ds2):
+    (ds, ds2) = ds_ds2
     print('Test feature comparison (Kolmogorov-Smirnov)')
     pvals = ds.compare(
             ds2,
@@ -35,6 +40,9 @@ if __name__ == '__main__':
     assert(np.isclose(pvals.values.min(), 0.097027))
     print('Done!')
 
+
+def test_ks_pheno(ds_ds2):
+    (ds, ds2) = ds_ds2
     print('Test phenotype comparison (Kolmogorov-Smirnov)')
     pvals = ds.compare(
             ds2,
@@ -44,6 +52,9 @@ if __name__ == '__main__':
     assert(np.isclose(pvals.values.min(), 0.84382))
     print('Done!')
 
+
+def test_mann_whitney_mixed(ds_ds2):
+    (ds, ds2) = ds_ds2
     print('Test mixed comparison (Mann-Whitney U)')
     pvals = ds.compare(
             ds2,
@@ -53,6 +64,9 @@ if __name__ == '__main__':
     assert(np.isclose(pvals.values.min(), 0.245278))
     print('Done!')
 
+
+def test_custom(ds_ds2):
+    (ds, ds2) = ds_ds2
     print('Test custom comparison')
     pvals = ds.compare(
             ds2,
@@ -61,3 +75,16 @@ if __name__ == '__main__':
             method=lambda x, y: 0.5 + 0.5 * float(x.min() < y.min()))
     assert(np.isclose(pvals.values.min(), 0.5))
     print('Done!')
+
+
+# Script
+if __name__ == '__main__':
+
+    # NOTE: an env variable for the config file needs to be set when
+    # calling this script
+    (ds, ds2) = ds_ds2()
+    test_mann_whitney((ds, ds2))
+    test_ks((ds, ds2))
+    test_ks_pheno((ds, ds2))
+    test_mann_whitney_mixed((ds, ds2))
+    test_custom((ds, ds2))

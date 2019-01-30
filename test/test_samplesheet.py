@@ -39,4 +39,4 @@ def run(script, where=None, **kwargs):
 if __name__ == '__main__':
 
     # Init
-    run('test/samplesheet/initialize.py')
+    run('test/samplesheet/test_initialize.py')
