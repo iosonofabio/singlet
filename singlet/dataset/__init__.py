@@ -302,6 +302,16 @@ class Dataset():
             row_attrs = {col: self.featuresheet[col].values for col in self.featuresheet}
             col_attrs = {col: self.samplesheet[col].values for col in self.samplesheet}
 
+            # Add attributes for the indices no matter what
+            if self.featuresheet.index.name is not None:
+                row_attrs[self.featuresheet.index.name] = self.featuresheet.index.values
+            else:
+                row_attrs['_index'] = self.featuresheet.index.values
+            if self.samplesheet.index.name is not None:
+                col_attrs[self.samplesheet.index.name] = self.samplesheet.index.values
+            else:
+                col_attrs['_index'] = self.samplesheet.index.values
+
             if kwargs.get('axis_samples', 'columns') != 'columns':
                 matrix = matrix.T
                 row_attrs, col_attrs = col_attrs, row_attrs

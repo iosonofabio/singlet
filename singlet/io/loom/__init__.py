@@ -39,8 +39,10 @@ def parse_dataset(
             for key, val in ds.ca.items():
                 featuresheet[key] = val
 
-        samplesheet.set_index(index_samples, drop=False, inplace=True)
-        featuresheet.set_index(index_features, drop=False, inplace=True)
+        if index_samples is not None:
+            samplesheet.set_index(index_samples, drop=False, inplace=True)
+        if index_features is not None:
+            featuresheet.set_index(index_features, drop=False, inplace=True)
 
         # Parse counts
         count_mat = ds[:, :]
