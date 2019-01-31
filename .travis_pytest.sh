@@ -6,7 +6,7 @@ if [ "$TRAVIS_OS_NAME" == 'osx' ]; then
   PYTEST="$HOME/miniconda/bin/pytest"
 else
   PYTHON=${PYTHON:-python}
-  PYTEST=${PYTEST:-pytest}
+  PYTEST=${PYTEST:-"pytest -rxXs"}
 fi
 
 export SINGLET_CONFIG_FILENAME='example_data/config_example.yml'
@@ -15,7 +15,7 @@ echo "python: ${PYTHON}"
 
 echo 'Running pytests...'
 # LOCAL TESTING:
-# PYTHONPATH=$(pwd):PYTHONPATH SINGLET_CONFIG_FILENAME='example_data/config_example.yml' pytest test
+# PYTHONPATH=$(pwd):PYTHONPATH SINGLET_CONFIG_FILENAME='example_data/config_example.yml' pytest -rxXs test
 
 echo 'IO tests...'
 ${PYTEST} "test/io"
