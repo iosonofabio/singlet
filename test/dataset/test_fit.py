@@ -38,17 +38,3 @@ def test_nonlinear_fit_phenotypes(ds):
     # TODO: assert result!
     assert(0 == 1)
     print('Done!')
-
-
-
-# Script
-if __name__ == '__main__':
-
-    # NOTE: an env variable for the config file needs to be set when
-    # calling this script
-    ds = ds()
-    test_linear_fit_phenotypes(ds)
-    test_nonlinear_fit_phenotypes(ds)
-
-
-

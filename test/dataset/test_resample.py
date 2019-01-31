@@ -36,14 +36,3 @@ def test_bootstrap_by_group_list(ds):
     dsboot = ds.bootstrap(groupby=['experiment', 'barcode'])
     assert('--sampling_' in dsboot.samplenames[0])
     print('Done!')
-
-
-# Script
-if __name__ == '__main__':
-
-    # NOTE: an env variable for the config file needs to be set when
-    # calling this script
-    ds = ds()
-    #test_bootstrap()
-    test_bootstrap_by_group_string(ds)
-    test_bootstrap_by_group_list(ds)

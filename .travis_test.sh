@@ -3,37 +3,43 @@ if [ "$TRAVIS_OS_NAME" == 'osx' ]; then
   export PATH="$HOME/miniconda/bin:$PATH"
   source $HOME/miniconda/bin/activate
   PYTHON="$HOME/miniconda/bin/python$PYTHON_VERSION"
+  PYTEST="$HOME/miniconda/bin/pytest"
 else
   PYTHON=${PYTHON:-python}
+  PYTEST=${PYTEST:-"pytest -rxXs"}
 fi
+
+export SINGLET_CONFIG_FILENAME='example_data/config_example.yml'
 
 echo "python: ${PYTHON}"
 
-echo 'Running tests...'
+echo 'Running pytests...'
+# LOCAL TESTING:
+# PYTHONPATH=$(pwd):PYTHONPATH SINGLET_CONFIG_FILENAME='example_data/config_example.yml' pytest -rxXs test
 
 echo 'IO tests...'
-${PYTHON} "test/test_io.py"
+${PYTEST} "test/io"
 if [ $? != 0 ]; then
     exit 1
 fi
 echo 'done!'
 
 echo 'Samplesheet tests...'
-${PYTHON} "test/test_samplesheet.py"
+${PYTEST} "test/samplesheet"
 if [ $? != 0 ]; then
     exit 1
 fi
 echo 'done!'
 
 echo 'Counts table tests...'
-${PYTHON} "test/test_counts_table.py"
+${PYTEST} "test/counts_table"
 if [ $? != 0 ]; then
     exit 1
 fi
 echo 'done!'
 
 echo 'Dataset tests...'
-${PYTHON} "test/test_dataset.py"
+${PYTEST} "test/dataset"
 if [ $? != 0 ]; then
     exit 1
 fi

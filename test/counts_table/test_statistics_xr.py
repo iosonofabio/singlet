@@ -34,14 +34,3 @@ def test_normalization_inplace(ct):
     ctn.normalize('counts_per_million', inplace=True)
     assert(int(ctn.data[0, 0]) == 147)
     print('Done!')
-
-
-# Script
-if __name__ == '__main__':
-
-    # NOTE: an env variable for the config file needs to be set when
-    # calling this script
-    ct1 = ct()
-    test_statistics(ct)
-    test_normalizaiton(ct)
-    test_normalization_inplace(ct)

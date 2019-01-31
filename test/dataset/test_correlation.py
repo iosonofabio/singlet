@@ -94,19 +94,3 @@ def test_features_features(ds):
             method='pearson')
     assert(np.isclose(r.values[0, 0], 1, rtol=1e-1, atol=1e-1))
     print('Done!')
-
-
-# Script
-if __name__ == '__main__':
-
-    # NOTE: an env variable for the config file needs to be set when
-    # calling this script
-    ds = ds()
-    test_features_phenotypes(ds)
-    test_features_phenotype(ds)
-    test_feature_phenotypes(ds)
-    test_feature_phenotype(ds)
-    test_features_phenotypes_pearson(ds)
-    test_features_phenotypes_fillna(ds)
-    test_features_phenotypes_pearson_fillna(ds)
-    test_features_features(ds)

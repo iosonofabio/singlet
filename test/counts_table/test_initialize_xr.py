@@ -25,12 +25,3 @@ def test_log(ct):
     print('unlog CountsTableXR')
     ctunlog = ctlog.unlog(base=10)
     print('Done!')
-
-
-# Script
-if __name__ == '__main__':
-
-    # NOTE: an env variable for the config file needs to be set when
-    # calling this script
-    ct1 = ct()
-    test_log(ct1)

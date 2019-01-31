@@ -58,16 +58,3 @@ def test_selfassemblingmanifolds(ds):
     sam = dsp.feature_selection.sam(npcs=3)
     weights = sam.output_vars['gene_weights']
     print('Done!')
-
-
-# Script
-if __name__ == '__main__':
-
-    # NOTE: an env variable for the config file needs to be set when
-    # calling this script
-    ds = ds()
-    test_expression(ds)
-    test_expression_inplace(ds)
-    test_overdispersed_strata(ds)
-    test_overdispersed_strata_inplace(ds)
-    test_selfassemblingmanifolds(ds)

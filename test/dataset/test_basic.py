@@ -46,16 +46,3 @@ def test_injection_count_table(ds):
     dsp.counts.exclude_features(inplace=True)
     assert(dsp.counts.shape[0] == dsp.featuresheet.shape[0])
     print('Done!')
-
-
-# Script
-if __name__ == '__main__':
-
-    # NOTE: an env variable for the config file needs to be set when
-    # calling this script
-    ds = ds()
-    test_str(ds)
-    test_repr(ds)
-    test_copy(ds)
-    test_copy_changes(ds)
-    test_injection_count_table(ds)

@@ -68,28 +68,3 @@ def test_query_features_counts(ds):
             inplace=False)
     assert(tuple(ds_tmp.featurenames) == ('__alignment_not_unique',))
     print('Done!')
-
-
-# Script
-if __name__ == '__main__':
-
-    # NOTE: an env variable for the config file needs to be set when
-    # calling this script
-    ds = ds()
-    test_average_samples(ds)
-    test_average_features(ds)
-    test_query_samples_meta(ds)
-    test_query_sample_counts_onegene(ds)
-    test_query_sample_total_counts(ds)
-    test_query_mapped_counts(ds)
-    test_query_features_counts(ds)
-
-
-
-
-
-
-
-
-
-

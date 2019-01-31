@@ -17,12 +17,3 @@ def test_parse_csv_split():
     from singlet.io import parse_counts_table
     table = parse_counts_table({'countsname': 'example_table_tsv_split'})
     print('Done!')
-
-
-# Script
-if __name__ == '__main__':
-
-    # NOTE: an env variable for the config file needs to be set when
-    # calling this script
-    test_parse_tsv()
-    test_parse_csv_split()

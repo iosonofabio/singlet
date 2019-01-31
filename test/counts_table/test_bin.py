@@ -20,16 +20,3 @@ def test_bin(ct):
     ct.bin(result='index', inplace=True)
     assert(ct.values.max() == 4)
     print('Done!')
-
-
-# Script
-if __name__ == '__main__':
-
-    # NOTE: an env variable for the config file needs to be set when
-    # calling this script
-    ct1 = ct()
-    test_bin(ct1)
-
-
-
-

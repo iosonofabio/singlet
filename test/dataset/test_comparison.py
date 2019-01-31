@@ -75,16 +75,3 @@ def test_custom(ds_ds2):
             method=lambda x, y: 0.5 + 0.5 * float(x.min() < y.min()))
     assert(np.isclose(pvals.values.min(), 0.5))
     print('Done!')
-
-
-# Script
-if __name__ == '__main__':
-
-    # NOTE: an env variable for the config file needs to be set when
-    # calling this script
-    (ds, ds2) = ds_ds2()
-    test_mann_whitney((ds, ds2))
-    test_ks((ds, ds2))
-    test_ks_pheno((ds, ds2))
-    test_mann_whitney_mixed((ds, ds2))
-    test_custom((ds, ds2))

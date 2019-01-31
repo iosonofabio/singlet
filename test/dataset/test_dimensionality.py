@@ -100,17 +100,3 @@ def test_umap(ds):
             n_dims='none',
             n_neighbors=3)
     print('Done!')
-
-
-# Script
-if __name__ == '__main__':
-
-    # NOTE: an env variable for the config file needs to be set when
-    # calling this script
-    ds = ds()
-    test_pca(ds)
-    test_pca_cache(ds)
-    test_robust_pca(ds)
-    test_tsne(ds)
-    test_tsne_cache(ds)
-    #test_umap(ds)

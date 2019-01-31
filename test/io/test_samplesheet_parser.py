@@ -5,11 +5,7 @@ author:     Fabio Zanini
 date:       07/08/17
 content:    Test parser for sample sheets.
 '''
-# Script
-if __name__ == '__main__':
-
-    # NOTE: an env variable for the config file needs to be set when
-    # calling this script
+def test_parse_samplesheet():
     from singlet.io import parse_samplesheet
     print('Parsing example sample sheet')
     table = parse_samplesheet({'sheetname': 'example_sheet_tsv'})
