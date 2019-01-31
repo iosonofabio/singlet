@@ -672,6 +672,25 @@ class Dataset():
                 with unique names of samples or features.
             inplace (bool): Whether to change the Dataset in place or return a
                 new one.
+
+        DEPRECATED: use `reindex` instead.
+        '''
+        return self.reindex(axis, column, inplace=inplace)
+
+    def reindex(
+            self,
+            axis,
+            column,
+            inplace=False):
+        '''Reindex samples or features from a metadata column
+
+        Args:
+            axis (string): Must be 'samples' or 'features'.
+            column (string): Must be a column of the samplesheet (for
+                axis='samples') or of the featuresheet (for axis='features')
+                with unique names of samples or features.
+            inplace (bool): Whether to change the Dataset in place or return a
+                new one.
         '''
         if axis not in ('samples', 'features'):
             raise ValueError('axis must be "samples" or "features"')
