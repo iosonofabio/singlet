@@ -6,4 +6,4 @@
 from .samplesheet import SampleSheet
 from .counts_table import CountsTable, CountsTableSparse, CountsTableXR
 from .dataset import Dataset
-from .version import version
+from ._version import version
