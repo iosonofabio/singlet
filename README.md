@@ -1,5 +1,7 @@
 [![Build Status](https://travis-ci.org/iosonofabio/singlet.svg?branch=master)](https://travis-ci.org/iosonofabio/singlet)
 [![Documentation Status](https://readthedocs.org/projects/singlet/badge/?version=master)](https://singlet.readthedocs.io/en/master)
+[![Coverage Status](https://coveralls.io/repos/github/iosonofabio/singlet/badge.svg?branch=master)](https://coveralls.io/github/iosonofabio/singlet?branch=master)
+
 
 ![Logo](docs/_static/logo.png)
 # Singlet
