@@ -4,6 +4,12 @@ author:     Fabio Zanini
 date:       30/01/19
 content:    Test parsing LOOM files.
 '''
+import sys
+import pytest
+
+
+@pytest.mark.skipif(sys.version_info < (3, 6),
+                    reason="requires python3.6 or higher")
 def test_loom_dataset():
     print('Parse integrated dataset as loom file')
     from singlet.io.loom import parse_dataset
