@@ -53,7 +53,7 @@ except ImportError:
 
 # Get version
 with open('singlet/_version.py') as fversion:
-    version = fversion.readline().rstrip()
+    version = fversion.readline().rstrip().split(' ')[-1]
 
 
 # Setup function

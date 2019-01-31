@@ -66,7 +66,7 @@ author = 'Fabio Zanini'
 #
 with open('../singlet/_version.py') as fversion:
     # The full version, including alpha/beta/rc tags.
-    release = fversion.readline().rstrip()
+    release = fversion.readline().rstrip().split(' ')[-1]
     # The short X.Y version.
     version = release.split('_')[0]
 

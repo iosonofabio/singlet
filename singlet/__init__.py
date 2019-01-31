@@ -6,5 +6,4 @@
 from .samplesheet import SampleSheet
 from .counts_table import CountsTable, CountsTableSparse, CountsTableXR
 from .dataset import Dataset
-with open('_version.py', 'rt') as f:
-    version = f.read().strip('\n')
+from .version import version
