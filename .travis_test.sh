@@ -6,7 +6,7 @@ if [ "$TRAVIS_OS_NAME" == 'osx' ]; then
   PYTEST="$HOME/miniconda/bin/pytest"
 else
   PYTHON=${PYTHON:-python}
-  PYTEST=${PYTEST:-"pytest -rxXs"}
+  PYTEST=${PYTEST:-"pytest -rxXs --cov=singlet/"}
 fi
 
 export SINGLET_CONFIG_FILENAME='example_data/config_example.yml'

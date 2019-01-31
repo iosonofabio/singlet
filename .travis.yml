@@ -38,4 +38,5 @@ script:
   - ./.travis_test.sh
 
 after_success:
+  - coveralls
   - ./.travis_deploy.sh

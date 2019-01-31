@@ -13,13 +13,16 @@ fi
 #fi
 
 # deps #FIXME: do better
+pip install pytest
+pip install pytest-cov
+pip install coveralls
+
 pip install pyyaml
 pip install numpy
 pip install scipy
 pip install pandas
 pip install xarray
 pip install scikit-learn
-pip install pytest
 pip install matplotlib
 pip install seaborn
 # NOTE: one day they shall fix this (sigh!)
