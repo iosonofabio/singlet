@@ -40,13 +40,55 @@ def test_center(ct):
     print('Done!')
 
 
+def test_center_inplace(ct):
+    print('Center')
+    ct2 = ct.copy()
+    ct2.center(inplace=True)
+    assert(np.isclose(ct2.iloc[0, 0], -63))
+    print('Done!')
+
+
+def test_center_features(ct):
+    print('Center')
+    assert(np.isclose(ct.center(axis='features').iloc[0, 0], 131.90425058875843))
+    print('Done!')
+
+
 def test_zscore(ct):
     print('z score')
     assert(np.isclose(ct.z_score().iloc[0, 0], -0.41125992263799543))
     print('Done!')
 
 
+def test_zscore_inplace(ct):
+    print('z score')
+    ct2 = ct.copy()
+    ct2.z_score(inplace=True)
+    assert(np.isclose(ct2.iloc[0, 0], -0.41125992263799543))
+    print('Done!')
+
+
+def test_zscore_features(ct):
+    print('z score')
+    assert(np.isclose(ct.z_score(axis='features').iloc[0, 0], 0.016413014240482873))
+    print('Done!')
+
+
 def test_standard_scale(ct):
     print('Standard scale')
     assert(np.isclose(ct.standard_scale().iloc[0, 0], 0.43561643835616437))
+    print('Done!')
+
+
+def test_standard_scale_inplace(ct):
+    print('Standard scale')
+    ct2 = ct.copy()
+    ct2.standard_scale(inplace=True)
+    assert(np.isclose(ct2.iloc[0, 0], 0.43561643835616437))
+    print('Done!')
+
+
+def test_standard_scale_features(ct):
+    print('Standard scale')
+    assert(np.isclose(ct.standard_scale(axis='features').iloc[0, 0], 9.510897059716292e-05))
     print('Done!')
