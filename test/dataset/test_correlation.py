@@ -94,3 +94,11 @@ def test_features_features(ds):
             method='pearson')
     assert(np.isclose(r.values[0, 0], 1, rtol=1e-1, atol=1e-1))
     print('Done!')
+
+
+def test_samples(ds):
+    print('Correlate samples')
+    n = ds.n_samples
+    r = ds.correlation.correlate_samples()
+    assert(np.allclose(r.values[np.arange(n), np.arange(n)], 1))
+    print('Done!')
