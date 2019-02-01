@@ -441,4 +441,4 @@ class CountsTable(pd.DataFrame):
         else:
             counts = self.copy()
             counts.loc[:] = out
-            return out
+            return counts
