@@ -20,3 +20,10 @@ def test_loom_dataset():
         index_features='EnsemblID',
         )
     print('Done')
+
+
+def test_loom_dataset_config():
+    print('Parse loom dataset from config file')
+    from singlet.io import parse_dataset
+    ds = parse_dataset({'datasetname': 'PBMC_loom'})
+    print('Done')

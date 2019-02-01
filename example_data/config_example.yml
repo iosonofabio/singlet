@@ -1,5 +1,11 @@
 'io':
   'datasets':
+    'PBMC_loom':
+       'path': 'example_data/dataset_PBMC.loom'
+       'axis_samples': 'columns'
+       'index_samples': '_index'
+       'index_features': 'EnsemblID'
+
     'example_dataset':
       'samplesheet':
         'path': 'example_data/example_sample_table - sequenced.tsv'
