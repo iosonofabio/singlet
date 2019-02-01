@@ -46,7 +46,7 @@ class Graph():
         Returns:
             tuple with (knn, similarity, n_neighbors) or COO sparse matrix
             similarities. The sparse matrix is NOT symmetric: each row has
-            the k neighbors of the cell corresponding to that row.
+            the k neighbors of the sample/feature corresponding to that row.
         '''
         from scipy.sparse import coo_matrix
         from scipy.spatial.distance import pdist, squareform
@@ -54,15 +54,20 @@ class Graph():
         if metric_kwargs is None:
             metric_kwargs = {}
 
+        if (axis == 'samples') and (n_neighbors >= self.dataset.n_samples):
+            raise ValueError('n_neighbors must be less than the number of samples')
+        if (axis == 'features') and (n_neighbors >= self.dataset.n_featuers):
+            raise ValueError('n_neighbors must be less than the number of features')
+
         # Get full similarity matrix
         if metric in ('pearson', 'spearman'):
             if axis == 'samples':
-                similarity_matrix = self.dataset.correlations.correlate_samples(
+                similarity_matrix = self.dataset.correlation.correlate_samples(
                         samples='all',
                         method=metric,
                         )
             elif axis == 'features':
-                similarity_matrix = self.dataset.correlations.correlate_features_features(
+                similarity_matrix = self.dataset.correlation.correlate_features_features(
                         features='all',
                         method=metric,
                         )
@@ -83,10 +88,9 @@ class Graph():
         knn = []
         similarity = []
         nn_neighbors = []
-        for irow, row in enumerate(similarity_matrix):
+        for irow, row in enumerate(similarity_matrix.values):
             knn.append([])
             similarity.append([])
-
             row[irow] = -np.inf
             ind = np.argpartition(row, -n_neighbors)[-n_neighbors:]
             indi = ind[row[ind] >= threshold]
@@ -102,16 +106,16 @@ class Graph():
         i = []
         j = []
         for irow, (n, sim, nn) in enumerate(zip(knn, similarity, nn_neighbors)):
-            for icoli, icol in enumerate(n[:nn[0]]):
+            for icoli, icol in enumerate(n[:nn]):
                 data.append(sim[icoli])
+                # NOTE: irow == icol[0], it's the first of the two nodes
                 i.append(irow)
-                j.append(icol)
+                j.append(icol[1])
 
         matrix = coo_matrix(
                 (data, (i, j)),
-                shape=(knn.shape[0], knn.shape[0]),
+                shape=(len(knn), len(knn)),
                 )
-
         return matrix
 
     def lshknn(
