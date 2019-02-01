@@ -10,3 +10,10 @@ def test_initialize():
     from singlet.counts_table import CountsTable
     ct = CountsTable.from_tablename('example_table_tsv')
     print('Done!')
+
+
+def test_initialize_fromdataset():
+    print('Instantiating CountsTable')
+    from singlet.counts_table import CountsTable
+    ct = CountsTable.from_datasetname('example_dataset')
+    print('Done!')
