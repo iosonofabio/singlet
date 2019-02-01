@@ -119,9 +119,12 @@ def test_samples_2(ds):
 def test_samples_withpheno(ds):
     print('Correlate samples')
     n = ds.n_samples
+    sns = ds.samplenames
     print(ds.samplesheet.columns)
     r = ds.correlation.correlate_samples(
+            samples=sns[0],
+            samples2=sns[0],
             phenotypes=['quantitative_phenotype_1_[A.U.]'],
             )
-    assert(np.allclose(r.values[np.arange(n), np.arange(n)], 1))
+    assert(np.isclose(r, 1))
     print('Done!')
