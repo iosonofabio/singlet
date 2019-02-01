@@ -30,7 +30,14 @@ def test_getother(ct):
 def test_log(ct):
     print('Log')
     assert(np.isclose(ct.log().iloc[0, 0], 2.274388795550379))
-    assert(np.isclose(ct.log().unlog().iloc[0, 0], 188.0))
+    print('Done!')
+
+
+def test_unlog(ct):
+    ctlog = ct.log()
+    assert(np.isclose(ctlog.unlog().iloc[0, 0], 188.0))
+    ctlog.unlog(inplace=True)
+    assert(np.isclose(ctlog.iloc[0, 0], 188.0))
     print('Done!')
 
 
