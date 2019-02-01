@@ -178,7 +178,6 @@
            - '__no_feature'
            - '__ambiguous'
            - '__alignment_not_unique'
-
         
   'featuresheets':
     'example_sheet_tsv':

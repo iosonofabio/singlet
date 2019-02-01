@@ -18,7 +18,7 @@ def ct():
 def test_statistics(ct):
     print('Test statistics of CountsTable')
     ctn = ct.iloc[-200:]
-    assert(np.allclose(ctn.get_statistics(metrics=('min', 'cv')).iloc[0, 1], 1.327366))
+    assert(np.allclose(ctn.get_statistics(metrics=('min', 'cv', 'fano', 'max', 'var')).iloc[0, 1], 1.327366))
     print('Done!')
 
 
