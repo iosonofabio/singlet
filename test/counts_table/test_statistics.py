@@ -16,7 +16,7 @@ def ct():
 
 def test_statistics(ct):
     print('Test statistics of CountsTable')
-    assert(ct.get_statistics(metrics=('min', 'cv')).iloc[0, 0] == 29.0)
+    assert(ct.get_statistics(metrics=('min', 'cv', 'fano', 'max', 'var')).iloc[0, 0] == 29.0)
     print('Done!')
 
 
