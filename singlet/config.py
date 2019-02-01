@@ -57,6 +57,13 @@ def _normalize_dataset(dataset):
     elif dataset['bit_precision'] not in (16, 32, 64, 128):
         raise ValueError('Bit precision must be one of 16, 32, 64, or 128')
 
+    if 'counts_table' in dataset:
+        dataset['counts_table'] = _normalize_count_table(dataset['counts_table'])
+    if 'samplesheet' in dataset:
+        dataset['samplesheet'] = _normalize_count_table(dataset['samplesheet'])
+    if 'featuresheet' in dataset:
+        dataset['featuresheet'] = _normalize_count_table(dataset['featuresheet'])
+
     return dataset
 
 
