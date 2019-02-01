@@ -12,11 +12,11 @@ import xarray as xr
 
 
 def unwrap_data1(fun):
-    def _unwrapped(b, *args, **kwargs):
-        if isinstance(b, CountsTableXR):
-            return fun(b._data, *args, **kwargs)
+    def _unwrapped(self, other, *args, **kwargs):
+        if isinstance(other, CountsTableXR):
+            return fun(self, other._data, *args, **kwargs)
         else:
-            return fun(b, *args, **kwargs)
+            return fun(self, other, *args, **kwargs)
     return _unwrapped
 
 
