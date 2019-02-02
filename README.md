@@ -20,9 +20,9 @@ The vision is to let you **explore** your data **your way** while providing supp
 - bootstrapping
 - normalization
 - log/unlog transform
-- summary statistics (mean expression, std, cv)
+- summary statistics (mean expression, std, cv, fano index)
 - feature selection
-- clustering (e.g. k-means)
+- clustering (e.g. k-means, affinity propagation)
 - dimensionality reduction and feature weighting including phenotypes (e.g. PCA, tSNE, umap, SAM)
 - k nearest neighbors (knn) graphs
 - plotting dimensionality reductions colored by categorical or quantitative metadata
