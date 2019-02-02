@@ -161,3 +161,76 @@ def test_dot(ct):
 
 def test_dropna(ct):
     assert(ct.dropna(dim='gene name') == ct)
+
+
+def test_equals(ct):
+    assert(ct.equals(ct))
+
+
+def test_fillna(ct):
+    assert(ct.fillna(0) == ct)
+
+
+def test_get_axis_num(ct):
+    assert(ct.get_axis_num('gene name') == 0)
+
+
+def test_identical(ct):
+    assert(ct.identical(ct))
+
+
+def test_max(ct):
+    assert(ct.max() == 1976680.0)
+
+
+def test_min(ct):
+    assert(ct.min() == 0)
+
+
+def test_mean(ct):
+    assert(np.isclose(ct.mean(), 45.644336))
+
+
+def test_var(ct):
+    assert(np.isclose(ct.var(), 44475514.709833))
+
+
+def test_median(ct):
+    assert(ct.median() == 0)
+
+
+def test_shape(ct):
+    assert(ct.shape == (60721, 4))
+
+
+# FIXME: how does this work?
+#def test_swap_dims(ct):
+#    assert(ct.swap_dims(
+#        {'gene name': 'sample name',
+#         'sample name': 'gene name'}).shape == (4, 60721))
+
+
+def test_T(ct):
+    ct = ct.__copy__()
+    assert(ct.T.shape == (4, 60721))
+
+
+def test_transpose(ct):
+    assert(ct.transpose('sample name', 'gene name').shape == (4, 60721))
+
+
+def test_values(ct):
+    assert(ct.values.shape == (60721, 4))
+
+
+# FIXME
+#def test_getspikeins(ct):
+#    print('Get spikeins')
+#    assert(ct.get_spikeins().index[0] == 'ERCC-00002')
+#    print('Done!')
+#
+#
+#def test_getother(ct):
+#    print('Get spikeins')
+#    assert(ct.get_other_features().index[0] == 'NIST_ConsensusVector')
+#    print('Done!')
