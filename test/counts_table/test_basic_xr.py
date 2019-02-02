@@ -5,6 +5,7 @@ author:     Fabio Zanini
 date:       15/08/17
 content:    Test CountsTableSparse class.
 '''
+import numpy as np
 import pytest
 
 
@@ -93,11 +94,70 @@ def test_xor(ct):
 
 
 def test_all(ct):
-    assert(ct.all() == False)
+    assert(bool(ct.all().data) is False)
 
 
 def test_any(ct):
-    assert(ct.any() == True)
+    assert(bool(ct.any().data) is True)
 
 
+def test_getitem(ct):
+    assert(ct[0, 0]._data.data == 188.0)
 
+
+def test_delitem(ct):
+    ct2 = ct.__copy__()
+    del ct2['gene name']
+    assert(list(ct2.coords.keys()) == ['sample name'])
+
+
+def test_radd(ct):
+    assert((ct.__radd__(ct)._data == 2 * ct._data).all())
+
+
+def test_rand(ct):
+    assert(((ct == 3).__rand__((ct == 3)))._data.data.sum() == 1278)
+
+
+def test_rmod(ct):
+    assert(ct.__rmod__(1) == ct)
+
+
+def test_rmul(ct):
+    assert(ct.__rmul__(1) == ct)
+
+
+def test_ror(ct):
+    assert(((ct == 3).__ror__((ct == 3)))._data.data.sum() == 1278)
+
+
+def test_rtruediv(ct):
+    assert(ct.__rtruediv__(1) == ct)
+
+
+def test_rxor(ct):
+    assert(((ct == 3).__rxor__((ct == 3)))._data.data.sum() == 0)
+
+
+def test_rsub(ct):
+    assert((ct.__rsub__(ct)._data == 0).all())
+
+
+def test_sub(ct):
+    assert((ct.__sub__(ct)._data == 0).all())
+
+
+def test_truediv(ct):
+    assert(ct.__truediv__(1) == ct)
+
+
+def test_dims(ct):
+    assert(ct.dims == ('gene name', 'sample name'))
+
+
+def test_dot(ct):
+    assert(np.isclose(float(ct.dot(ct)), 1.08029e+13))
+
+
+def test_dropna(ct):
+    assert(ct.dropna(dim='gene name') == ct)

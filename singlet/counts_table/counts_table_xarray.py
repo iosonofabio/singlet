@@ -93,7 +93,7 @@ class CountsTableXR(object):
         return c
 
     def __delitem__(self, key):
-        self._data.__delitem__(key)
+        return self._data.__delitem__(key)
 
     @unwrap_data1
     def __eq__(self, other):
