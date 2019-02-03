@@ -239,4 +239,14 @@ def test_distribution_spikeins_box_horizontal(ds, vs):
     assert(compare_images(fdn_base+fn, fdn_tmp+fn, tol=tol) is None)
 
 
-
+# FIXME: currently runs into infinite loop with agg backend (??)
+#@pytest.mark.xfail(True, reason='Clustermap is finnicky at the moment')
+#def test_clustermap(ds):
+#    g = ds.plot.clustermap(
+#            cluster_samples=False,
+#            cluster_features=False)
+#    fig = g.fig
+#    fn = 'test_clustermap_noclustering.png'
+#    fig.savefig(fdn_tmp+fn)
+#    plt.close(fig)
+#    assert(compare_images(fdn_base+fn, fdn_tmp+fn, tol=tol) is None)
