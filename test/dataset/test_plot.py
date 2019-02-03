@@ -20,6 +20,9 @@ if not miss_mpl:
     import matplotlib.pyplot as plt
 
 
+tol = 3
+
+
 @pytest.fixture(scope="module")
 def ds():
     from singlet.dataset import Dataset
@@ -34,6 +37,11 @@ def vs(ds):
             data=np.arange(2 * ds.n_samples).reshape((ds.n_samples, 2)),
             columns=['dim1', 'dim2'],
             index=ds.samplenames)
+
+
+def test_initialize():
+    from singlet.dataset.plot import Plot
+    return Plot(None)
 
 
 @pytest.fixture(scope='module')
@@ -69,7 +77,7 @@ def test_scatter_reduced(ds, vs):
     fn = 'test_scatter_reduced.png'
     fig.savefig(fdn_tmp+fn)
     plt.close(fig)
-    assert(compare_images(fdn_base+fn, fdn_tmp+fn, tol=5) is None)
+    assert(compare_images(fdn_base+fn, fdn_tmp+fn, tol=tol) is None)
 
 
 @pytest.mark.skipif(miss_mpl, reason='No maplotlib available')
@@ -83,4 +91,96 @@ def test_scatter_reduced_colorby(ds, vs):
     fn = 'test_scatter_reduced_colorby_qp.png'
     fig.savefig(fdn_tmp+fn)
     plt.close(fig)
-    assert(compare_images(fdn_base+fn, fdn_tmp+fn, tol=5) is None)
+    assert(compare_images(fdn_base+fn, fdn_tmp+fn, tol=tol) is None)
+
+
+@pytest.mark.skipif(miss_mpl, reason='No maplotlib available')
+def test_plot_coverage_total(ds, vs):
+    fig, ax = plt.subplots()
+    ds.plot.plot_coverage(
+            features='total',
+            ax=ax,
+            tight_layout=False,
+            legend=False,
+            )
+    fn = 'test_plot_coverage_total.png'
+    fig.savefig(fdn_tmp+fn)
+    plt.close(fig)
+    assert(compare_images(fdn_base+fn, fdn_tmp+fn, tol=tol) is None)
+
+
+@pytest.mark.skipif(miss_mpl, reason='No maplotlib available')
+def test_plot_coverage_mapped(ds, vs):
+    fig, ax = plt.subplots()
+    ds.plot.plot_coverage(
+            features='mapped',
+            ax=ax,
+            tight_layout=False,
+            legend=False,
+            )
+    fn = 'test_plot_coverage_mapped.png'
+    fig.savefig(fdn_tmp+fn)
+    plt.close(fig)
+    assert(compare_images(fdn_base+fn, fdn_tmp+fn, tol=tol) is None)
+
+
+@pytest.mark.skipif(miss_mpl, reason='No maplotlib available')
+def test_plot_coverage_spikeins(ds, vs):
+    fig, ax = plt.subplots()
+    ds.plot.plot_coverage(
+            features='spikeins',
+            ax=ax,
+            tight_layout=False,
+            legend=False,
+            )
+    fn = 'test_plot_coverage_spikeins.png'
+    fig.savefig(fdn_tmp+fn)
+    plt.close(fig)
+    assert(compare_images(fdn_base+fn, fdn_tmp+fn, tol=tol) is None)
+
+
+@pytest.mark.skipif(miss_mpl, reason='No maplotlib available')
+def test_plot_coverage_other(ds, vs):
+    fig, ax = plt.subplots()
+    ds.plot.plot_coverage(
+            features='other',
+            ax=ax,
+            tight_layout=False,
+            legend=False,
+            )
+    fn = 'test_plot_coverage_other.png'
+    fig.savefig(fdn_tmp+fn)
+    plt.close(fig)
+    assert(compare_images(fdn_base+fn, fdn_tmp+fn, tol=tol) is None)
+
+
+@pytest.mark.skipif(miss_mpl, reason='No maplotlib available')
+def test_plot_scatter_statistics(ds, vs):
+    fig, ax = plt.subplots()
+    ds.plot.scatter_statistics(
+            features='mapped',
+            ax=ax,
+            tight_layout=False,
+            legend=False,
+            grid=True,
+            )
+    fn = 'test_scatter_statistics_mapped.png'
+    fig.savefig(fdn_tmp+fn)
+    plt.close(fig)
+    assert(compare_images(fdn_base+fn, fdn_tmp+fn, tol=tol) is None)
+
+
+@pytest.mark.skipif(miss_mpl, reason='No maplotlib available')
+def test_distribution_spikeing(ds, vs):
+    fig, ax = plt.subplots()
+    ds.plot.plot_distributions(
+            features='spikeins',
+            ax=ax,
+            tight_layout=False,
+            legend=False,
+            grid=True,
+            )
+    fn = 'test_distribution_spikeins.png'
+    fig.savefig(fdn_tmp+fn)
+    plt.close(fig)
+    assert(compare_images(fdn_base+fn, fdn_tmp+fn, tol=tol) is None)
