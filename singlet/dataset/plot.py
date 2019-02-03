@@ -42,6 +42,7 @@ class Plot():
     @staticmethod
     def _update_properties(kwargs, defaults):
         Plot._sanitize_plot_properties(kwargs)
+        Plot._sanitize_plot_properties(defaults)
         for key, val in defaults.items():
             if key not in kwargs:
                 kwargs[key] = val

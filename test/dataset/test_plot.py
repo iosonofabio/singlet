@@ -36,6 +36,28 @@ def vs(ds):
             index=ds.samplenames)
 
 
+@pytest.fixture(scope='module')
+def plot_empty():
+    from singlet.dataset.plot import Plot
+    return Plot(None)
+
+
+def test_sanitize_props(plot_empty):
+    kwargs = {'lw': 1, 'kkk': 2}
+    plot_empty._sanitize_plot_properties(kwargs)
+    assert(kwargs['linewidth'] == 1)
+    assert(kwargs['kkk'] == 2)
+
+
+def test_update_props(plot_empty):
+    kwargs = {'lw': 1, 'kkk': 2}
+    defaults = {'ls': '-', 'linewidth': 3}
+    plot_empty._update_properties(kwargs, defaults)
+    assert(kwargs['linewidth'] == 1)
+    assert(kwargs['linestyle'] == '-')
+    assert(kwargs['kkk'] == 2)
+
+
 @pytest.mark.skipif(miss_mpl, reason='No maplotlib available')
 def test_scatter_reduced(ds, vs):
     fig, ax = plt.subplots()
