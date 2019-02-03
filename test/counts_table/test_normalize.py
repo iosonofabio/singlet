@@ -14,6 +14,21 @@ def ct():
     return CountsTable.from_tablename('example_table_tsv')
 
 
+def test_normalization(ct):
+    print('Test normalization of CountsTable')
+    ctn = ct.normalize('counts_per_million')
+    assert(int(ctn.iloc[0, 0]) == 147)
+    print('Done!')
+
+
+def test_normalization_inplace(ct):
+    print('Test inplace normalization of CountsTable')
+    ctn = ct.copy()
+    ctn.normalize('counts_per_million', inplace=True)
+    assert(int(ctn.iloc[0, 0]) == 147)
+    print('Done!')
+
+
 def test_normalize_withspikeins(ct):
     print('Normalize per 1,000 spikeins')
     assert(ct.normalize(method='counts_per_thousand_spikeins').iloc[0, 0] == 112.91291291291292)

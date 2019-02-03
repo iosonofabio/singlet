@@ -121,22 +121,27 @@ class CountsTableXR(object):
     @unwrap_data1
     def __iadd__(self, b):
         self._data.__iadd__(b)
+        return self
 
     @unwrap_data1
     def __iand__(self, b):
         self._data.__iand__(b)
+        return self
 
     @unwrap_data1
     def __ifloordiv__(self, b):
         self._data.__ifloordiv__(b)
+        return self
 
     @unwrap_data1
     def __imod__(self, b):
         self._data.__imod__(b)
+        return self
 
     @unwrap_data1
     def __imul__(self, b):
-        self._data.__imul__(self, b)
+        self._data.__imul__(b)
+        return self
 
     def __invert__(self):
         c = self.__class__(self._data.__invert__())
@@ -146,22 +151,27 @@ class CountsTableXR(object):
     @unwrap_data1
     def __ior__(self, b):
         self._data.__ior__(b)
+        return self
 
     @unwrap_data1
     def __ipow__(self, b):
         self._data.__ipow__(b)
+        return self
 
     @unwrap_data1
     def __isub__(self, b):
         self._data.__isub__(b)
+        return self
 
     @unwrap_data1
     def __itruediv__(self, b):
         self._data.__itruediv__(b)
+        return self
 
     @unwrap_data1
     def __ixor__(self, b):
         self._data.__ixor__(b)
+        return self
 
     @unwrap_data1
     def __le__(self, b):
@@ -282,6 +292,12 @@ class CountsTableXR(object):
     @unwrap_data1
     def __truediv__(self, b):
         c = self.__class__(self._data.__truediv__(b))
+        c._set_metadata_from_other(self)
+        return c
+
+    @unwrap_data1
+    def __floordiv__(self, b):
+        c = self.__class__(self._data.__floordiv__(b))
         c._set_metadata_from_other(self)
         return c
 

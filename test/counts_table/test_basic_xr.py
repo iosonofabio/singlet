@@ -135,6 +135,10 @@ def test_rtruediv(ct):
     assert(ct.__rtruediv__(1) == ct)
 
 
+def test_rfloordiv(ct):
+    assert(ct.__rfloordiv__(1) == ct)
+
+
 def test_rxor(ct):
     assert(((ct == 3).__rxor__((ct == 3)))._data.data.sum() == 0)
 
@@ -149,6 +153,46 @@ def test_sub(ct):
 
 def test_truediv(ct):
     assert(ct.__truediv__(1) == ct)
+
+
+def test_floordi(ct):
+    assert(ct.__floordiv__(1) == ct)
+
+
+def test_iadd(ct):
+    ct2 = ct.__deepcopy__()
+    ct2 += 1
+    assert(ct2.sum() == 60721 * 4 + ct.sum())
+
+
+def test_isub(ct):
+    ct2 = ct.__deepcopy__()
+    ct2 -= 1
+    assert(ct2.sum() == -60721 * 4 + ct.sum())
+
+
+def test_imul(ct):
+    ct2 = ct.__deepcopy__()
+    ct2 *= 2
+    assert(ct2.sum() == 2 * ct.sum())
+
+
+def test_itruediv(ct):
+    ct2 = ct.__deepcopy__()
+    ct2 /= 2
+    assert(ct2.sum() == 0.5 * ct.sum())
+
+
+def test_ifloordiv(ct):
+    ct2 = ct.__deepcopy__()
+    ct2 //= 2
+    assert(ct2.sum() == 5534256)
+
+
+def test_imod(ct):
+    ct2 = ct.__deepcopy__()
+    ct2 %= 2
+    assert(ct2.sum() == 17767.0)
 
 
 def test_dims(ct):
