@@ -171,10 +171,11 @@ def test_plot_scatter_statistics(ds, vs):
 
 
 @pytest.mark.skipif(miss_mpl, reason='No maplotlib available')
-def test_distribution_spikeing(ds, vs):
+def test_distribution_spikeins_violin(ds, vs):
     fig, ax = plt.subplots()
     ds.plot.plot_distributions(
             features='spikeins',
+            kind='violin',
             ax=ax,
             tight_layout=False,
             legend=False,
@@ -184,3 +185,58 @@ def test_distribution_spikeing(ds, vs):
     fig.savefig(fdn_tmp+fn)
     plt.close(fig)
     assert(compare_images(fdn_base+fn, fdn_tmp+fn, tol=tol) is None)
+
+
+@pytest.mark.skipif(miss_mpl, reason='No maplotlib available')
+def test_distribution_spikeins_box(ds, vs):
+    fig, ax = plt.subplots()
+    ds.plot.plot_distributions(
+            features='spikeins',
+            kind='box',
+            ax=ax,
+            tight_layout=False,
+            legend=False,
+            grid=True,
+            )
+    fn = 'test_distribution_spikeins_box.png'
+    fig.savefig(fdn_tmp+fn)
+    plt.close(fig)
+    assert(compare_images(fdn_base+fn, fdn_tmp+fn, tol=tol) is None)
+
+
+@pytest.mark.skipif(miss_mpl, reason='No maplotlib available')
+def test_distribution_spikeins_swarm(ds, vs):
+    fig, ax = plt.subplots()
+    ds.plot.plot_distributions(
+            features='spikeins',
+            kind='swarm',
+            ax=ax,
+            tight_layout=False,
+            legend=False,
+            grid=True,
+            )
+    fn = 'test_distribution_spikeins_swarm.png'
+    fig.savefig(fdn_tmp+fn)
+    plt.close(fig)
+    assert(compare_images(fdn_base+fn, fdn_tmp+fn, tol=tol) is None)
+
+
+@pytest.mark.skipif(miss_mpl, reason='No maplotlib available')
+def test_distribution_spikeins_box_horizontal(ds, vs):
+    fig, ax = plt.subplots()
+    ds.plot.plot_distributions(
+            features='spikeins',
+            kind='box',
+            orientation='horizontal',
+            ax=ax,
+            tight_layout=False,
+            legend=False,
+            grid=False,
+            )
+    fn = 'test_distribution_spikeins_box_horizontal.png'
+    fig.savefig(fdn_tmp+fn)
+    plt.close(fig)
+    assert(compare_images(fdn_base+fn, fdn_tmp+fn, tol=tol) is None)
+
+
+
