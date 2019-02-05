@@ -111,6 +111,18 @@ def test_plot_coverage_total(ds, vs):
 
 
 @pytest.mark.skipif(miss_mpl, reason='No maplotlib available')
+def test_plot_coverage_total(ds, vs):
+    ds.plot.plot_coverage(
+            features='total',
+            tight_layout=False,
+            legend=False,
+            )
+    fig = plt.gcf()
+    plt.close(fig)
+    # NOTE: we can't check the figure if the size has not been defined
+
+
+@pytest.mark.skipif(miss_mpl, reason='No maplotlib available')
 def test_plot_coverage_mapped(ds, vs):
     fig, ax = plt.subplots()
     ds.plot.plot_coverage(
