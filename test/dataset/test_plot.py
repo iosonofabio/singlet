@@ -289,14 +289,14 @@ def test_distribution_feas_box_sort_desc(ds, vs):
     assert(compare_images(fdn_base+fn, fdn_tmp+fn, tol=tol) is None)
 
 
-# FIXME: currently runs into infinite loop with agg backend (??)
-#@pytest.mark.xfail(True, reason='Clustermap is finnicky at the moment')
-#def test_clustermap(ds):
-#    g = ds.plot.clustermap(
-#            cluster_samples=False,
-#            cluster_features=False)
-#    fig = g.fig
-#    fn = 'test_clustermap_noclustering.png'
-#    fig.savefig(fdn_tmp+fn)
-#    plt.close(fig)
-#    assert(compare_images(fdn_base+fn, fdn_tmp+fn, tol=tol) is None)
+@pytest.mark.skipif(miss_mpl, reason='No maplotlib available')
+def test_clustermap_noclustering(ds):
+    ds2 = ds.query_features_by_name(['TSPAN6', 'ACTB', 'GAPDH'], inplace=False)
+    g = ds2.plot.clustermap(
+            cluster_samples=False,
+            cluster_features=False)
+    fig = g.fig
+    fn = 'test_clustermap_noclustering.png'
+    fig.savefig(fdn_tmp+fn)
+    plt.close(fig)
+    assert(compare_images(fdn_base+fn, fdn_tmp+fn, tol=tol) is None)
