@@ -23,7 +23,7 @@ def parse_samplesheet(dictionary):
     else:
         raise ValueError('Please specify a samplesheet or a dataset')
 
-    if sheet['format'] in csv_formats:
+    if ('format' in sheet) and (sheet['format'] in csv_formats):
         table = parse_csv(sheet['path'], sheet['format'])
     elif 'url' in sheet:
         table = parse_googleapi(sheet)
