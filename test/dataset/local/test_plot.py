@@ -81,6 +81,6 @@ if __name__ == '__main__':
     print('Done!')
 
     print('Gate features')
-    selected = ds.plot.gate_features_from_statistics(color='blue', lw=3)
+    selected = ds.feature_selection.gate_features_from_statistics(color='blue', lw=3)
     print(selected)
     print('Done!')
