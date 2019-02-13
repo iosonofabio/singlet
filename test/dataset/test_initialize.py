@@ -5,6 +5,7 @@ author:     Fabio Zanini
 date:       07/08/17
 content:    Test Dataset class.
 '''
+import sys
 import pytest
 
 
@@ -20,6 +21,8 @@ def test_initialize_fromdataset():
     return Dataset(dataset='example_dataset')
 
 
+@pytest.mark.skipif(sys.version_info < (3, 6),
+                    reason="requires python3.6 or higher")
 def test_initialize_fromdataset_integrated():
     from singlet.dataset import Dataset
     return Dataset(dataset='PBMC_loom')
@@ -28,11 +31,7 @@ def test_initialize_fromdataset_integrated():
 def test_plugins():
     from singlet.dataset import Dataset, Plugin
 
-    class TestPlugin():
-        def __init__(self, dataset):
-            self.dataset = dataset
-
     ds = Dataset(
             samplesheet='example_sheet_tsv',
-            plugins={'testplugin': TestPlugin})
+            plugins={'testplugin': Plugin})
     assert(ds.testplugin.dataset == ds)
