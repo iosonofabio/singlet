@@ -141,6 +141,8 @@ class Dataset():
                 else:
                     self.counts.loc[:, samplename] += counts_col_other
 
+        return self
+
     def _set_plugins(self, plugins=None):
         '''Set plugins according to user's request'''
         from .correlations import Correlation
@@ -691,6 +693,7 @@ class Dataset():
             self,
             axis,
             column,
+            drop=False,
             inplace=False):
         '''Reindex samples or features from a metadata column
 
@@ -699,6 +702,7 @@ class Dataset():
             column (string): Must be a column of the samplesheet (for
                 axis='samples') or of the featuresheet (for axis='features')
                 with unique names of samples or features.
+            drop (bool): Whether to drop the column from the metadata table.
             inplace (bool): Whether to change the Dataset in place or return a
                 new one.
         '''
@@ -709,14 +713,19 @@ class Dataset():
             if axis == 'samples':
                 self._samplesheet.index = self._samplesheet.loc[:, column]
                 self._counts.columns = self._samplesheet.loc[:, column]
+                if drop:
+                    del self._samplesheet[column]
             else:
                 self._featuresheet.index = self._featuresheet.loc[:, column]
                 self._counts.index = self._featuresheet.loc[:, column]
+                if drop:
+                    del self._featuresheet[column]
         else:
             other = self.copy()
-            other.rename(
+            other.reindex(
                     axis=axis,
                     column=column,
+                    drop=drop,
                     inplace=True)
             return other
 
