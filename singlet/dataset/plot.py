@@ -292,7 +292,8 @@ class Plot():
                     plotting. If it is a dict, pass it unpacked to that \
                     function.
             legend (bool or dict): If True, call ax.legend(). If a dict, \
-                    pass as **kwargs to ax.legend.
+                    pass as **kwargs to ax.legend. Notice that legend has a \
+                    special meaning in these kinds of seaborn plots.
             orientation (string): 'horizontal' or 'vertical'.
             sort (bool or string): True or 'ascending' sorts the features by \
                     median, 'descending' uses the reverse order.

@@ -252,6 +252,43 @@ def test_distribution_spikeins_box_horizontal(ds, vs):
     assert(compare_images(fdn_base+fn, fdn_tmp+fn, tol=tol) is None)
 
 
+@pytest.mark.skipif(miss_mpl, reason='No maplotlib available')
+def test_distribution_other_box_sort(ds, vs):
+    fig, ax = plt.subplots()
+    ds.plot.plot_distributions(
+            features='other',
+            kind='box',
+            sort='ascending',
+            ax=ax,
+            tight_layout=False,
+            legend=False,
+            grid=True,
+            )
+    fn = 'test_distribution_other_box_sort.png'
+    fig.savefig(fdn_tmp+fn)
+    plt.close(fig)
+    assert(compare_images(fdn_base+fn, fdn_tmp+fn, tol=tol) is None)
+
+
+@pytest.mark.skipif(miss_mpl, reason='No maplotlib available')
+def test_distribution_feas_box_sort_desc(ds, vs):
+    fig, ax = plt.subplots()
+    ds.plot.plot_distributions(
+            features=['ACTB', 'GAPDH'],
+            kind='box',
+            sort='descending',
+            bottom='pseudocount',
+            ax=ax,
+            tight_layout=False,
+            legend=True,
+            grid=True,
+            )
+    fn = 'test_distribution_feas_box_sort_desc.png'
+    fig.savefig(fdn_tmp+fn)
+    plt.close(fig)
+    assert(compare_images(fdn_base+fn, fdn_tmp+fn, tol=tol) is None)
+
+
 # FIXME: currently runs into infinite loop with agg backend (??)
 #@pytest.mark.xfail(True, reason='Clustermap is finnicky at the moment')
 #def test_clustermap(ds):
