@@ -5,19 +5,13 @@
 # Modules
 import numpy as np
 import pandas as pd
-import xarray as xr
+
+from .plugins import Plugin
 
 
 # Classes / functions
-class FeatureSelection():
+class FeatureSelection(Plugin):
     '''Plot gene expression and phenotype in single cells'''
-    def __init__(self, dataset):
-        '''Select features
-
-        Args:
-            dataset (Dataset): the dataset to analyze.
-        '''
-        self.dataset = dataset
 
     def unique(
             self,

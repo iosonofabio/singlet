@@ -39,6 +39,10 @@ def test_injection_count_table(ds):
     assert(dsp.counts.shape[0] == dsp.featuresheet.shape[0])
 
 
+def test_eq(ds):
+    assert(ds != 4)
+
+
 def test_add(ds):
     dsi = ds + ds
     assert(np.allclose(dsi.counts.values, 2 * ds.counts.values))

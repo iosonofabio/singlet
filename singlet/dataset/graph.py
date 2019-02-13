@@ -6,18 +6,12 @@
 import numpy as np
 import pandas as pd
 import xarray as xr
+from .plugins import Plugin
 
 
 # Classes / functions
-class Graph():
+class Graph(Plugin):
     '''Graph analysis of gene expression and phenotype in single cells'''
-    def __init__(self, dataset):
-        '''Graph analysis of gene expression and phenotype in single cells
-
-        Args:
-            dataset (Dataset): the dataset to analyze.
-        '''
-        self.dataset = dataset
 
     def knn(self,
             axis='samples',

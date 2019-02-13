@@ -6,19 +6,12 @@
 import numpy as np
 import pandas as pd
 
-from ..utils.cache import method_caches
+from .plugins import Plugin
 
 
 # Classes / functions
-class Cluster():
+class Cluster(Plugin):
     '''Cluster samples, features, and phenotypes'''
-    def __init__(self, dataset):
-        '''Cluster samples, features, and phenotypes
-
-        Args:
-            dataset (Dataset): the dataset to analyze.
-        '''
-        self.dataset = dataset
 
     def kmeans(
             self,

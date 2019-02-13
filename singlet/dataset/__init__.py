@@ -10,6 +10,7 @@ from ..samplesheet import SampleSheet
 from ..counts_table import CountsTable
 from ..counts_table import CountsTableSparse
 from ..featuresheet import FeatureSheet
+from .plugins import Plugin
 
 
 # Classes / functions
@@ -162,7 +163,7 @@ class Dataset():
         self.graph = Graph(self)
         if (plugins is not None) and len(plugins):
             self._plugins = dict(plugins)
-            for key, val in plugins:
+            for key, val in plugins.items():
                 setattr(self, key, val(self))
         else:
             self._plugins = {}
@@ -246,7 +247,7 @@ class Dataset():
             datasetname = ''
             dataset = _normalize_dataset(dataset)
 
-        if dataset['format'] in integrated_dataset_formats:
+        if ('format' in dataset) and (dataset['format'] in integrated_dataset_formats):
             d = parse_dataset({'datasetname': datasetname})
             self._counts = d['counts']
             self._samplesheet = d['samplesheet']

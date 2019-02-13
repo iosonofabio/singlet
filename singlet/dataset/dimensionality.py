@@ -7,19 +7,13 @@
 import numpy as np
 import pandas as pd
 
+from .plugins import Plugin
 from ..utils.cache import method_caches
 
 
 # Classes / functions
-class DimensionalityReduction():
+class DimensionalityReduction(Plugin):
     '''Reduce dimensionality of gene expression and phenotype in single cells'''
-    def __init__(self, dataset):
-        '''Reduce dimensionality of gene expression and phenotype in single cells
-
-        Args:
-            dataset (Dataset): the dataset to analyze.
-        '''
-        self.dataset = dataset
 
     @method_caches
     def pca(self,

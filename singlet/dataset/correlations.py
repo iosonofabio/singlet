@@ -6,18 +6,12 @@
 import numpy as np
 import pandas as pd
 from scipy.stats import rankdata
+from .plugins import Plugin
 
 
 # Classes / functions
-class Correlation():
+class Correlation(Plugin):
     '''Correlate gene expression and phenotype in single cells'''
-    def __init__(self, dataset):
-        '''Correlate gene expression and phenotype in single cells
-
-        Args:
-            dataset (Dataset): the dataset to analyze.
-        '''
-        self.dataset = dataset
 
     @staticmethod
     def _correlate(x, y, method):

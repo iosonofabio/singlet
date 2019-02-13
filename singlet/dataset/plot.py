@@ -8,6 +8,8 @@ import numpy as np
 import pandas as pd
 import matplotlib as mpl
 from matplotlib import cm
+
+from .plugins import Plugin
 from ..config import config
 
 
@@ -29,15 +31,8 @@ except (ImportError, RuntimeError):
 
 
 # Classes / functions
-class Plot():
+class Plot(Plugin):
     '''Plot gene expression and phenotype in single cells'''
-    def __init__(self, dataset):
-        '''Plot gene expression and phenotype in single cells
-
-        Args:
-            dataset (Dataset): the dataset to analyze.
-        '''
-        self.dataset = dataset
 
     @staticmethod
     def _update_properties(kwargs, defaults):
