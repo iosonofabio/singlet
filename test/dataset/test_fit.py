@@ -74,3 +74,17 @@ def test_nonlinear_fit_phenotypes(ds):
     # TODO: assert result!
     assert(0 == 1)
     print('Done!')
+
+
+def test_logistic_fit_phenotypes(ds):
+    ds2 = ds.copy()
+    ds2.samplesheet['name2'] = ['s1', 's2', 's3', 's4']
+    ds2.reindex(axis='samples', column='name2', drop=True, inplace=True)
+    ds2 = ds + ds2
+    res = ds2.fit.fit_single(
+            xs=['TSPAN6', 'DPM1'],
+            ys=['quantitative_phenotype_1_[A.U.]'],
+            model='logistic')
+    assert(np.allclose(res[0, 0], [1, 2.16666667, 1, 1, 5.77333333],
+                       rtol=1e-03, atol=1e-03))
+
