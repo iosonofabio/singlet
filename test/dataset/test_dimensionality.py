@@ -43,6 +43,32 @@ def test_pca_cache(ds):
     print('Done!')
 
 
+def test_pca_log2(ds):
+    # FIXME: these test assertions need to be checked!
+    print('Test Dataset PCA')
+    ds.counts = ds.counts.iloc[:200]
+    d = ds.dimensionality.pca(
+            n_dims=2,
+            transform='log2',
+            robust=False,
+            random_state=0)
+    assert(np.allclose(d['vs'].values[0], [-2.677194, -5.129792]))
+    print('Done!')
+
+
+def test_pca_logn(ds):
+    # FIXME: these test assertions need to be checked!
+    print('Test Dataset PCA')
+    ds.counts = ds.counts.iloc[:200]
+    d = ds.dimensionality.pca(
+            n_dims=2,
+            transform='log',
+            robust=False,
+            random_state=0)
+    assert(np.allclose(d['vs'].values[0], [-2.677194, -5.129792]))
+    print('Done!')
+
+
 def test_robust_pca(ds):
     print('Test Dataset robust PCA')
     ds.counts = ds.counts.iloc[:200]
