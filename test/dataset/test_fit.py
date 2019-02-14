@@ -18,14 +18,22 @@ def ds():
 
 
 def test_linear_fit_phenotypes(ds):
-    print('Test linear fit of phenotypes')
     res = ds.fit.fit_single(
             xs=['TSPAN6', 'DPM1'],
             ys=['quantitative_phenotype_1_[A.U.]'],
             model='linear')
     assert(np.allclose(res[0, 0], [-0.005082, 3.548869, 0.599427],
                        rtol=1e-03, atol=1e-03))
-    print('Done!')
+
+
+def test_linear_fit_phenotypes_mapped(ds):
+    ds2 = ds.query_features_by_name(['TSPAN6', 'DPM1'])
+    res = ds2.fit.fit_single(
+            xs='mapped',
+            ys=['quantitative_phenotype_1_[A.U.]'],
+            model='linear')
+    assert(np.allclose(res[0, 0], [-0.005082, 3.548869, 0.599427],
+                       rtol=1e-03, atol=1e-03))
 
 
 @pytest.mark.xfail(True, reason='Nonlinear fit: assert non implemented yet')
