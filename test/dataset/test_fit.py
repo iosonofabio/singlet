@@ -26,10 +26,38 @@ def test_linear_fit_phenotypes(ds):
                        rtol=1e-03, atol=1e-03))
 
 
+def test_linear_fit_phenotypes_spikeins(ds):
+    res = ds.fit.fit_single(
+            xs='spikeins',
+            ys=['quantitative_phenotype_1_[A.U.]'],
+            model='linear')
+    assert(np.allclose(res[0, 0], [-1.890637e-03,  2.581346,  2.655694],
+                       rtol=1e-03, atol=1e-03))
+
+
+def test_linear_fit_phenotypes_other(ds):
+    res = ds.fit.fit_single(
+            xs='other',
+            ys=['quantitative_phenotype_1_[A.U.]'],
+            model='linear')
+    assert(np.allclose(res[-1, 0], [-1.127875e-06,  3.664309,  9.685498e-01],
+                       rtol=1e-03, atol=1e-03))
+
+
 def test_linear_fit_phenotypes_mapped(ds):
     ds2 = ds.query_features_by_name(['TSPAN6', 'DPM1'])
     res = ds2.fit.fit_single(
             xs='mapped',
+            ys=['quantitative_phenotype_1_[A.U.]'],
+            model='linear')
+    assert(np.allclose(res[0, 0], [-0.005082, 3.548869, 0.599427],
+                       rtol=1e-03, atol=1e-03))
+
+
+def test_linear_fit_phenotypes_total(ds):
+    ds2 = ds.query_features_by_name(['TSPAN6', 'DPM1'])
+    res = ds2.fit.fit_single(
+            xs='total',
             ys=['quantitative_phenotype_1_[A.U.]'],
             model='linear')
     assert(np.allclose(res[0, 0], [-0.005082, 3.548869, 0.599427],
