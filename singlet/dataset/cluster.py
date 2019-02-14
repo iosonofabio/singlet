@@ -92,6 +92,7 @@ class Cluster(Plugin):
         else:
             raise ValueError('axis must be "samples" or "features"')
 
+
         model = DBSCAN(**kwargs).fit(data.values)
         labels = pd.Series(model.labels_, index=data.index, dtype='category')
         return labels

@@ -22,25 +22,24 @@ class SampleSheet(object):
 
     def __init__(self, sheet):
         self.sheetname = sheet['sheet']
-
-        spreadsheetId = sheet['google_id']
         client_id_filename = sheet['client_id_filename']
         client_secret_filename = sheet['client_secret_filename']
         self.client_id_filename = client_id_filename
         self.client_secret_filename = client_secret_filename
-        self.spreadsheetId = spreadsheetId
+        self.spreadsheetId = sheet['google_id']
         self.set_service()
 
-    def get_table(self, fmt='pandas'):
-        values = self.get_data(self.sheetname)
-        if fmt == 'pandas':
-            return pd.DataFrame(values[1:], columns=values[0])
-        elif fmt == 'numpy':
-            return np.array(values)
-        elif fmt == 'raw':
-            return values
-        else:
-            raise ValueError('Format not understood')
+    def set_service(self):
+        import httplib2
+        from apiclient import discovery
+
+        credentials = self.get_credentials()
+        http = credentials.authorize(httplib2.Http())
+        discoveryUrl = ('https://sheets.googleapis.com/$discovery/rest?'
+                        'version=v4')
+        self.service = discovery.build(
+                'sheets', 'v4', http=http,
+                discoveryServiceUrl=discoveryUrl)
 
     def get_credentials(self):
         """Gets valid user credentials from storage.
@@ -71,17 +70,16 @@ class SampleSheet(object):
             print('Stored credentials into:', self.client_secret_filename)
         return credentials
 
-    def set_service(self):
-        import httplib2
-        from apiclient import discovery
-
-        credentials = self.get_credentials()
-        http = credentials.authorize(httplib2.Http())
-        discoveryUrl = ('https://sheets.googleapis.com/$discovery/rest?'
-                        'version=v4')
-        self.service = discovery.build(
-                'sheets', 'v4', http=http,
-                discoveryServiceUrl=discoveryUrl)
+    def get_table(self, fmt='pandas'):
+        values = self.get_data(self.sheetname)
+        if fmt == 'pandas':
+            return pd.DataFrame(values[1:], columns=values[0])
+        elif fmt == 'numpy':
+            return np.array(values)
+        elif fmt == 'raw':
+            return values
+        else:
+            raise ValueError('Format not understood')
 
     def get_sheet_shape(self, sheetname):
         '''Get the data range of the sheet'''
