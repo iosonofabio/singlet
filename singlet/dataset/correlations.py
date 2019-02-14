@@ -77,12 +77,12 @@ class Correlation(Plugin):
             exp = exp_all.loc[[samples]]
 
         if samples2 is None:
-            samples = exp.index
+            samples2 = samples
             exp2 = exp
         elif not isinstance(samples2, str):
             exp2 = exp_all.loc[samples2]
         elif samples2 == 'all':
-            samples = exp_all.index
+            samples2 = exp_all.index
             exp2 = exp_all
         else:
             exp2 = exp_all.loc[[samples2]]
@@ -98,13 +98,13 @@ class Correlation(Plugin):
                     index=exp.index,
                     columns=exp2.index,
                     dtype=float)
-        elif isinstance(samples, str) and (not isinstance(samples, str)):
+        elif isinstance(samples, str) and (not isinstance(samples2, str)):
             return pd.Series(
                     data=r[0],
                     index=exp2.index,
                     name='correlation',
                     dtype=float)
-        elif (not isinstance(samples, str)) and isinstance(samples, str):
+        elif (not isinstance(samples, str)) and isinstance(samples2, str):
             return pd.Series(
                     data=r[:, 0],
                     index=exp.index,
