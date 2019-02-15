@@ -8,6 +8,14 @@ import numpy as np
 import pytest
 
 
+try:
+    import lshknn
+    miss_lshknn = False
+except ImportError:
+    miss_lshknn = True
+
+
+
 @pytest.fixture(scope="module")
 def ds():
     from singlet.dataset import Dataset
@@ -25,4 +33,12 @@ def test_knn_sparse(ds):
     print('KNN graph')
     knn = ds.graph.knn(n_neighbors=2, return_sparse=True)
     assert(knn.row[0] == 0)
+    print('Done')
+
+
+@pytest.mark.skipif(miss_lshknn, reason='No lshknn available')
+def test_lshknn(ds):
+    print('KNN graph')
+    (knn, similarity, neighbors) = ds.graph.lshknn(n_neighbors=2, return_sparse=False)
+    assert(list(neighbors) == [2, 2, 2, 2])
     print('Done')
