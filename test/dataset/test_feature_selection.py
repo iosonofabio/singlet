@@ -24,7 +24,7 @@ def ds():
 def test_unique(ds):
     print('Test feature selection by expression')
     res = ds.feature_selection.unique()
-    assert(res[0] == 'TSPAN6')
+    assert('TSPAN6' in res[0])
     print('Done!')
 
 
