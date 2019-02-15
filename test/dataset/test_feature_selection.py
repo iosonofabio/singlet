@@ -21,6 +21,13 @@ def ds():
     return dset
 
 
+def test_unique(ds):
+    print('Test feature selection by expression')
+    res = ds.feature_selection.unique()
+    assert(res[0] == 'TSPAN6')
+    print('Done!')
+
+
 def test_expression(ds):
     print('Test feature selection by expression')
     res = ds.feature_selection.expressed(n_samples=1, exp_min=1)
