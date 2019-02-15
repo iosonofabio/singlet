@@ -5,6 +5,7 @@ author:     Fabio Zanini
 date:       07/08/17
 content:    Test Dataset class.
 '''
+import sys
 import numpy as np
 import pytest
 
