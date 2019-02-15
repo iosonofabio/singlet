@@ -318,3 +318,16 @@ def test_clustermap_noclustering_annosamples(dssmall):
     fig.savefig(fdn_tmp+fn)
     plt.close(fig)
     assert(compare_images(fdn_base+fn, fdn_tmp+fn, tol=tol) is None)
+
+
+@pytest.mark.skipif(miss_mpl, reason='No maplotlib available')
+def test_clustermap_noclustering_vertical(dssmall):
+    g = dssmall.plot.clustermap(
+            cluster_samples=False,
+            cluster_features=False,
+            orientation='vertical')
+    fig = g.fig
+    fn = 'test_clustermap_noclustering_vertical.png'
+    fig.savefig(fdn_tmp+fn)
+    plt.close(fig)
+    assert(compare_images(fdn_base+fn, fdn_tmp+fn, tol=tol) is None)
