@@ -23,7 +23,7 @@ def ds():
 
 def test_unique(ds):
     res = ds.feature_selection.unique()
-    assert('TSPAN6' in res[0])
+    assert('TSPAN6' in res)
 
 
 def test_expression(ds):
