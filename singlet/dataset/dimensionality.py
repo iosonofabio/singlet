@@ -13,7 +13,7 @@ from ..utils.cache import method_caches
 
 # Classes / functions
 class DimensionalityReduction(Plugin):
-    '''Reduce dimensionality of gene expression and phenotype in single cells'''
+    '''Reduce dimensionality of gene expression and phenotype'''
 
     @method_caches
     def pca(self,
@@ -117,7 +117,8 @@ class DimensionalityReduction(Plugin):
 
         n = self.dataset.n_samples
         if(n - 1 < 3 * perplexity):
-            raise ValueError('Perplexity too high, reduce to <= {:}'.format((n - 1.)/3))
+            raise ValueError('Perplexity too high, reduce to <= {:}'.format(
+                (n - 1.)/3))
 
         X = self.dataset.counts.copy()
 
@@ -234,35 +235,11 @@ class _RPCA:
             ite += 1
             if iter_print is None:
                 continue
-            if (ite % iter_print) == 0 or ite == 1 or ite > max_iter or err <= _tol:
+            if (((ite % iter_print) == 0) or
+               (ite == 1) or (ite > max_iter) or
+               (err <= _tol)):
                 print('iteration: {0}, error: {1}'.format(ite, err))
 
         self.L = Lk
         self.S = Sk
         return Lk, Sk
-
-    def plot_fit(self, size=None, tol=0.1, axis_on=True):
-        import matplotlib.pyplot as plt
-        n, d = self.D.shape
-
-        if size:
-            nrows, ncols = size
-        else:
-            sq = np.ceil(np.sqrt(n))
-            nrows = int(sq)
-            ncols = int(sq)
-
-        ymin = np.nanmin(self.D)
-        ymax = np.nanmax(self.D)
-        print('ymin: {0}, ymax: {1}'.format(ymin, ymax))
-
-        numplots = np.min([n, nrows * ncols])
-        plt.figure()
-
-        for n in range(numplots):
-            plt.subplot(nrows, ncols, n + 1)
-            plt.ylim((ymin - tol, ymax + tol))
-            plt.plot(self.L[n, :] + self.S[n, :], 'r')
-            plt.plot(self.L[n, :], 'b')
-            if not axis_on:
-                plt.axis('off')
