@@ -32,12 +32,17 @@ def test_average_features(ds):
 
 
 def test_query_samples_meta(ds):
-    print('Query samples by metadata')
     ds_tmp = ds.query_samples_by_metadata(
             'experiment == "test_pipeline"',
             inplace=False)
     assert(tuple(ds_tmp.samplenames) == ('test_pipeline',))
-    print('Done!')
+
+
+def test_query_samples_name(ds):
+    ds_tmp = ds.query_samples_by_name(
+            ds.samplenames[1:3],
+            inplace=False)
+    assert(tuple(ds_tmp.samplenames) == tuple(ds.samplenames[1:3]))
 
 
 def test_query_sample_counts_onegene(ds):
