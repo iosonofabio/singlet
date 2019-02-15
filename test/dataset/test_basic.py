@@ -58,5 +58,7 @@ def test_add_renamed(ds):
     assert(np.allclose(dsi.counts.values[:, n:], ds.counts.values))
 
 
+@pytest.mark.skipif(sys.version_info < (3, 6),
+                    reason="requires python3.6 or higher")
 def test_to_dataset_file(ds):
     ds.to_dataset_file('/tmp/test_dataset.loom')
