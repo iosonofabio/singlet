@@ -56,3 +56,7 @@ def test_add_renamed(ds):
     dsi = ds + ds2
     assert(np.allclose(dsi.counts.values[:, :n], ds.counts.values))
     assert(np.allclose(dsi.counts.values[:, n:], ds.counts.values))
+
+
+def test_to_dataset_file(ds):
+    ds.to_dataset_file('/tmp/test_dataset.loom')
