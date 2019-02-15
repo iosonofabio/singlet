@@ -1,4 +1,5 @@
 #!/bin/bash
+echo "Prepare interpreter"
 if [ $TRAVIS_OS_NAME == 'linux' ]; then
   echo "Installing deps for linux"
   #sudo add-apt-repository ppa:nschloe/swig-backports -y
@@ -26,3 +27,39 @@ else
   echo "OS not recognized: $TRAVIS_OS_NAME"
   exit 1
 fi
+
+echo "Installing dependencies"
+## setuptools < 18.0 has issues with Cython as a dependency
+#pip install Cython
+#if [ $? != 0 ]; then
+#    exit 1
+#fi
+
+# deps #FIXME: do better
+pip install pytest
+pip install pytest-cov
+pip install coveralls
+
+pip install pyyaml
+pip install numpy
+pip install scipy
+pip install pandas
+pip install xarray
+pip install loompy
+pip install scikit-learn
+pip install matplotlib
+pip install seaborn
+# NOTE: one day they shall fix this (sigh!)
+pip install Cython
+#pip install bhtsne
+# Google API tests are only local anyway
+#pip install google-api-python-client
+#pip install numba
+#pip install umap-learn
+pip install sam-algorithm
+
+# NOTE: lshknn requires eigen which is purely headers. It finds the headers via pkgconfig
+# which is the Python wrapper of pkg-config. Let's see how far we get with this on OSX
+pip install pkgconfig
+pip install pybind11
+pip install lshknn
