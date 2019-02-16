@@ -55,3 +55,13 @@ def test_lshknn_sparse(ds):
         n_neighbors=2,
         return_sparse=True)
     assert(knn.row[0] == 0)
+
+
+@pytest.mark.skipif(miss_lshknn, reason='No lshknn available')
+def test_lshknn_features(ds):
+    ds2 = ds.query_features_by_name(ds.featurenames[:50])
+    (knn, similarity, neighbors) = ds2.graph.lshknn(
+        n_neighbors=2,
+        return_sparse=False,
+        axis='features')
+    assert(neighbors.tolist()[:4] == [[2], [2], [2], [2]])
