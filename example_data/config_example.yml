@@ -205,6 +205,11 @@
       'path': 'example_data/example_sample_table - sequenced.tsv'
       'cells': 'rows'
 
+    'example_sheet_csv':
+      'description': 'Example CSV file for cell metadata'
+      'path': 'example_data/example_sample_table - sequenced.csv'
+      'cells': 'rows'
+
     'example_PBMC2':
       'description': 'Just some blood cells'
       'path': 'example_data/samplesheet_PBMC_2.tsv.gz'

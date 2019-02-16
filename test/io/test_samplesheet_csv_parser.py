@@ -10,3 +10,10 @@ def test_parse_samplesheet_tsv():
     print('Parsing example TSV sample sheet')
     table = parse_samplesheet({'sheetname': 'example_sheet_tsv'})
     print('Done!')
+
+
+def test_parse_samplesheet_csv():
+    from singlet.io import parse_samplesheet
+    print('Parsing example CSV sample sheet')
+    table = parse_samplesheet({'sheetname': 'example_sheet_csv'})
+    print('Done!')
