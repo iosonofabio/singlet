@@ -33,7 +33,7 @@ The vision is to let you **explore** your data **your way** while providing supp
 - support for custom plugins to expand the list of features at runtime
 
 ## Requirements
-Python 3.4+ is required. Moreover, you will need:
+Python 3.5+ is required. Moreover, you will need:
 - [pyyaml](https://pyyaml.org/)
 - [numpy](http://www.numpy.org/)
 - [scipy](https://www.scipy.org/)
