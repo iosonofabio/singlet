@@ -23,22 +23,35 @@ def ds():
 
 
 def test_knn(ds):
-    print('KNN graph')
     (knn, similarity, neighbors) = ds.graph.knn(n_neighbors=2, return_sparse=False)
     assert(neighbors == [2, 2, 2, 2])
-    print('Done')
 
 
 def test_knn_sparse(ds):
-    print('KNN graph')
     knn = ds.graph.knn(n_neighbors=2, return_sparse=True)
     assert(knn.row[0] == 0)
-    print('Done')
+
+
+def test_knn_features(ds):
+    ds2 = ds.query_features_by_name(ds.featurenames[:50])
+    (knn, similarity, neighbors) = ds2.graph.knn(
+            n_neighbors=2,
+            return_sparse=False,
+            axis='features')
+    assert(neighbors[:4] == [0, 0, 0, 0])
 
 
 @pytest.mark.skipif(miss_lshknn, reason='No lshknn available')
 def test_lshknn(ds):
-    print('KNN graph')
-    (knn, similarity, neighbors) = ds.graph.lshknn(n_neighbors=2, return_sparse=False)
+    (knn, similarity, neighbors) = ds.graph.lshknn(
+        n_neighbors=2,
+        return_sparse=False)
     assert(list(neighbors) == [2, 2, 2, 2])
-    print('Done')
+
+
+@pytest.mark.skipif(miss_lshknn, reason='No lshknn available')
+def test_lshknn_sparse(ds):
+    knn = ds.graph.lshknn(
+        n_neighbors=2,
+        return_sparse=True)
+    assert(knn.row[0] == 0)

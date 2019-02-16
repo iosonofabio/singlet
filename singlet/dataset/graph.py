@@ -50,7 +50,7 @@ class Graph(Plugin):
 
         if (axis == 'samples') and (n_neighbors >= self.dataset.n_samples):
             raise ValueError('n_neighbors must be less than the number of samples')
-        if (axis == 'features') and (n_neighbors >= self.dataset.n_featuers):
+        if (axis == 'features') and (n_neighbors >= self.dataset.n_features):
             raise ValueError('n_neighbors must be less than the number of features')
 
         # Get full similarity matrix
