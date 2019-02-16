@@ -185,6 +185,11 @@
       'path': 'example_data/example_featuresheet.tsv'
       'index': 'gene name'
 
+    'example_sheet_csv':
+      'description': 'Example CSV file for feature metadata'
+      'path': 'example_data/example_featuresheet.csv'
+      'index': 'gene name'
+
     'example_PBMC2':
       'description': 'Just some blood cells'
       'path': 'example_data/featuresheet_PBMC_2.tsv.gz'
