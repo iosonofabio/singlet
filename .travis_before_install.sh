@@ -60,6 +60,7 @@ pip install sam-algorithm
 
 # NOTE: lshknn requires eigen which is purely headers. It finds the headers via pkgconfig
 # which is the Python wrapper of pkg-config. Let's see how far we get with this on OSX
+# TODO: install eigen happens in the .travis.yml
 pip install pkgconfig
 pip install pybind11
 pip install lshknn

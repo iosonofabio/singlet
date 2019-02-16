@@ -6,6 +6,13 @@ notifications:
 
 language: python
 
+addons:
+  apt:
+    packages:
+    - libeigen3-dev
+  homebrew:
+    packages:
+    - eigen
 
 matrix:
   include:
