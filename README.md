@@ -52,7 +52,7 @@ Optional dependencies:
 - **I/O of loom files**:
   - [loompy](http://loompy.org/)
 
-Get those from your Linux distribution, `pip`, `conda`, or whatever other source of poison.
+Get those from your Linux distribution, `pip`, `conda`, or any other source.
 
 Singlet is pure Python for the time being. So it should work on any platform supported by its dependencies, in particular various Linux distributions, recent-ish OSX, and Windows. It is *tested* on Linux and OSX, but if you are a Windows user and know how to use AppVeyor let's set it up!
 

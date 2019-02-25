@@ -11,24 +11,32 @@ singlet
 =======
 Single cell RNA-Seq analysis with quantitative phenotypes.
 
+Tutorial
+--------
+Please follow this link_ to learn how to use singlet.
+
+
 Requirements
 ------------
 Python 3.4+ is required. Moreover, you will need:
 
-- pyyaml
-- numpy
-- scipy
-- pandas
-- xarray
-- scikit-learn
-- matplotlib
-- seaborn
+- `pyyaml <https://pyyaml.org/>`_
+- `numpy <http://www.numpy.org/>`_
+- `scipy <https://www.scipy.org/>`_
+- `pandas <http://pandas.pydata.org/>`_
+- `xarray <http://xarray.pydata.org/en/stable/>`_
+- `scikit-learn <http://scikit-learn.org>`_
 
 Optional requirements
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-- umap (for UMAP dimensionality reduction)
+- `matplotlib <https://matplotlib.org/>`_
+- `seaborn <https://seaborn.pydata.org/>`_
+- `numba <https://numba.pydata.org/>`_
+- `umap <https://github.com/lmcinnes/umap>`_
+- `lshknn <https://github.com/iosonofabio/lshknn>`_
+- `loompy <http://loompy.org/>`_
 
-Get those from pip or conda.
+Get those from pip, conda, or any other source.
 
 Install
 -------
@@ -90,3 +98,5 @@ Indices and tables
 * :ref:`genindex`
 * :ref:`modindex`
 * :ref:`search`
+
+.. _link: tutorial
