@@ -4,6 +4,7 @@
 # content:    Main singlet module.
 # Module exporting
 from .samplesheet import SampleSheet
+from .featuresheet import FeatureSheet
 from .counts_table import CountsTable, CountsTableSparse, CountsTableXR
 from .dataset import Dataset
 from ._version import version

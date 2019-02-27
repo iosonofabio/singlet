@@ -9,6 +9,11 @@
 # Singlet
 Single cell RNA-Seq analysis with quantitative phenotypes.
 
+Examples:
+- [oligo-barcoded antibodies](https://doi.org/10.1038/nmeth.4380)
+- [electrophysiology](https://doi.org/10.1101/555110)
+- [intracellular pathogen abundance](https://doi.org/10.7554/eLife.32942)
+
 ## Documentation
 Hosted on [readthedocs](https://singlet.readthedocs.io/en/master).
 
