@@ -146,6 +146,7 @@ class FeatureSelection(Plugin):
         '''
         import matplotlib as mpl
         import matplotlib.pyplot as plt
+        from .plot import Plot
 
         is_interactive = mpl.is_interactive()
         plt.ioff()
