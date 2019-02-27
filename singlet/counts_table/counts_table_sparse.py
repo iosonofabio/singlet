@@ -229,22 +229,30 @@ class CountsTableSparse(pd.SparseDataFrame):
         counts_norm._normalized = method
         return counts_norm
 
-    def get_statistics(self, metrics=('mean', 'cv')):
+    def get_statistics(self, axis='features', metrics=('mean', 'cv')):
         '''Get statistics of the counts.
 
         Args:
+            axis (str): 'features' or 'samples'
             metrics (sequence of strings): any of 'mean', 'var', 'std', 'cv',
                 'fano', 'min', 'max'.
 
         Returns:
             pandas.DataFrame with features as rows and metrics as columns.
         '''
+        if axis == 'features':
+            axn = 1
+        elif axis == 'samples':
+            axn = 0
+        else:
+            raise ValueError('axis must be features or samples')
+
         st = {}
         if 'mean' in metrics or 'cv' in metrics or 'fano' in metrics:
-            st['mean'] = self.mean(axis=1)
+            st['mean'] = self.mean(axis=axn)
         if ('std' in metrics or 'cv' in metrics or 'fano' in metrics or
            'var' in metrics):
-            st['std'] = self.std(axis=1)
+            st['std'] = self.std(axis=axn)
         if 'var' in metrics:
             st['var'] = st['std'] ** 2
         if 'cv' in metrics:
@@ -252,9 +260,9 @@ class CountsTableSparse(pd.SparseDataFrame):
         if 'fano' in metrics:
             st['fano'] = st['std'] ** 2 / np.maximum(st['mean'], 1e-10)
         if 'min' in metrics:
-            st['min'] = self.min(axis=1)
+            st['min'] = self.min(axis=axn)
         if 'max' in metrics:
-            st['max'] = self.max(axis=1)
+            st['max'] = self.max(axis=axn)
 
         df = pd.concat([st[m] for m in metrics], axis=1)
         df.columns = pd.Index(list(metrics), name='metrics')

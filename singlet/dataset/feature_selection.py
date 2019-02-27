@@ -148,6 +148,8 @@ class FeatureSelection(Plugin):
         import matplotlib.pyplot as plt
         from .plot import Plot
 
+        print('Left click to draw gates. Right click to reset. Close the plot to get the features.')
+
         is_interactive = mpl.is_interactive()
         plt.ioff()
 
