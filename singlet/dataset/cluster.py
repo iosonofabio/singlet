@@ -136,8 +136,7 @@ class Cluster(Plugin):
             phenotypes=(),
             metric='correlation',
             log_features=False,
-            **kwargs,
-            ):
+            **kwargs):
         '''Affinity/label/message propagation.
 
         Args:
@@ -184,8 +183,7 @@ class Cluster(Plugin):
         np.nan_to_num(Y, copy=False)
         model = AffinityPropagation(
                 affinity='precomputed',
-                **kwargs,
-                )
+                **kwargs)
         model.fit(Y)
         labels = pd.Series(model.labels_, index=data.index, dtype='category')
         return labels
@@ -200,8 +198,7 @@ class Cluster(Plugin):
             kernel='knn',
             n_neighbors=7,
             log_features=False,
-            **kwargs,
-            ):
+            **kwargs):
         '''Affinity/label/message propagation with some existing labels.
 
         Args:
@@ -263,8 +260,7 @@ class Cluster(Plugin):
         model = clustering(
                 kernel=kernel,
                 n_neighbors=n_neighbors,
-                **kwargs,
-                )
+                **kwargs)
         model.fit(data.values, y=labels)
         labels = pd.Series(
                 model.transduction_,
