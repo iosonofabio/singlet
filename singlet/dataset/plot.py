@@ -455,6 +455,8 @@ class Plot(Plugin):
                 color_by_phenotype = True
             elif color_by in self.dataset.counts.index:
                 color_data = self.dataset.counts.loc[color_by]
+                if isinstance(color_data, pd.SparseSeries):
+                    color_data = color_data.fillna(0).to_dense()
                 is_numeric = True
                 color_by_phenotype = False
             else:
@@ -466,6 +468,8 @@ class Plot(Plugin):
                 cd_unique = list(np.unique(color_data.values))
                 c_unique = cmap(np.linspace(0, 1, len(cd_unique)))
                 c = c_unique[[cd_unique.index(x) for x in color_data.values]]
+                # For categories, we have to tell the user about the mapping
+                ax._singlet_cmap = dict(zip(cd_unique, c_unique))
 
             # Non-categorical numeric types are more tricky: check for NaNs
             else:
@@ -527,56 +531,56 @@ class Plot(Plugin):
         '''Samples versus features / phenotypes.
 
         Args:
-            cluster_samples (bool or linkage): Whether to cluster samples and \
-                    show the dendrogram. Can be either, False, True, or a \
+            cluster_samples (bool or linkage): Whether to cluster samples and
+                    show the dendrogram. Can be either, False, True, or a
                     linkage from scipy.cluster.hierarchy.linkage.
-            cluster_features (bool or linkage): Whether to cluster features \
-                    and show the dendrogram. Can be either, False, True, or a \
+            cluster_features (bool or linkage): Whether to cluster features
+                    and show the dendrogram. Can be either, False, True, or a
                     linkage from scipy.cluster.hierarchy.linkage.
-            phenotypes_cluster_samples (iterable of strings): Phenotypes to \
-                    add to the features for joint clustering of the samples. \
-                    If the clustering has been \
-                    precomputed including phenotypes and the linkage matrix \
-                    is explicitely set as cluster_samples, the *same* \
+            phenotypes_cluster_samples (iterable of strings): Phenotypes to
+                    add to the features for joint clustering of the samples.
+                    If the clustering has been
+                    precomputed including phenotypes and the linkage matrix
+                    is explicitely set as cluster_samples, the *same*
                     phenotypes must be specified here, in the same order.
-            phenotypes_cluster_features (iterable of strings): Phenotypes to \
-                    add to the features for joint clustering of the features \
-                    and phenotypes. If the clustering has been \
-                    precomputed including phenotypes and the linkage matrix \
-                    is explicitely set as cluster_features, the *same* \
+            phenotypes_cluster_features (iterable of strings): Phenotypes to
+                    add to the features for joint clustering of the features
+                    and phenotypes. If the clustering has been
+                    precomputed including phenotypes and the linkage matrix
+                    is explicitely set as cluster_features, the *same*
                     phenotypes must be specified here, in the same order.
-            annotate_samples (dict, or False): Whether and how to \
-                    annotate the samples with separate colorbars. The \
-                    dictionary must have phenotypes or features as keys. For \
-                    qualitative phenotypes, the values can be palette names \
-                    or palettes (with at least as many colors as there are \
-                    categories). For quantitative phenotypes and features, \
+            annotate_samples (dict, or False): Whether and how to
+                    annotate the samples with separate colorbars. The
+                    dictionary must have phenotypes or features as keys. For
+                    qualitative phenotypes, the values can be palette names
+                    or palettes (with at least as many colors as there are
+                    categories). For quantitative phenotypes and features,
                     they can be colormap names or colormaps.
-            annotate_features (dict, or False): Whether and how to \
-                    annotate the featues with separate colorbars. The \
-                    dictionary must have features metadata as keys. For \
-                    qualitative annotations, the values can be palette names \
-                    or palettes (with at least  as many colors as there are \
-                    categories). For quantitative annotatoins, the values \
-                    can be colormap names or colormaps. Keys must be columns \
-                    of the Dataset.featuresheet, except for the key 'mean \
-                    expression' which is interpreted to mean the average of \
+            annotate_features (dict, or False): Whether and how to
+                    annotate the featues with separate colorbars. The
+                    dictionary must have features metadata as keys. For
+                    qualitative annotations, the values can be palette names
+                    or palettes (with at least  as many colors as there are
+                    categories). For quantitative annotatoins, the values
+                    can be colormap names or colormaps. Keys must be columns
+                    of the Dataset.featuresheet, except for the key 'mean
+                    expression' which is interpreted to mean the average of
                     the counts for that feature.
-            labels_samples (bool): Whether to show the sample labels. If you \
-                    have hundreds or more samples, you may want to turn this \
+            labels_samples (bool): Whether to show the sample labels. If you
+                    have hundreds or more samples, you may want to turn this
                     off to make the plot tidier.
-            labels_features (bool): Whether to show the feature labels. If you \
-                    have hundreds or more features, you may want to turn this \
+            labels_features (bool): Whether to show the feature labels. If you
+                    have hundreds or more features, you may want to turn this
                     off to make the plot tidier.
-            orientation (string): Whether the samples are on the abscissa \
+            orientation (string): Whether the samples are on the abscissa
                     ('horizontal') or on the ordinate ('vertical').
-            tight_layout (bool or dict): Whether to call \
-                    matplotlib.pyplot.tight_layout at the end of the \
-                    plotting. If it is a dict, pass it unpacked to that \
+            tight_layout (bool or dict): Whether to call
+                    matplotlib.pyplot.tight_layout at the end of the
+                    plotting. If it is a dict, pass it unpacked to that
                     function.
-            colorbars (bool): Whether to add colorbars. One colorbar refers \
-                    to the heatmap. Moreover, if annotations for samples or \
-                    features are shown, a colorbar for each of them will be \
+            colorbars (bool): Whether to add colorbars. One colorbar refers
+                    to the heatmap. Moreover, if annotations for samples or
+                    features are shown, a colorbar for each of them will be
                     shown as well.
             **kwargs: named arguments passed to seaborn.clustermap.
 
