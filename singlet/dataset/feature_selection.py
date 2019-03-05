@@ -19,7 +19,7 @@ class FeatureSelection(Plugin):
         '''Select features with unique ids
 
         Args:
-            inplace (bool): Whether to change the feature list in place.
+            inplace (bool): Whether to change the Dataset in place.
 
         Returns:
             pd.Index of selected features if not inplace, else None.
@@ -44,7 +44,7 @@ class FeatureSelection(Plugin):
             n_samples (int): Minimum number of samples the features should be
                 expressed in.
             exp_min (float): Minimum level of expression of the features.
-            inplace (bool): Whether to change the feature list in place.
+            inplace (bool): Whether to change the Dataset in place.
 
         Returns:
             pd.Index of selected features if not inplace, else None.
@@ -54,6 +54,66 @@ class FeatureSelection(Plugin):
             self.dataset.counts = self.dataset.counts.loc[ind]
         else:
             return self.dataset.featurenames[ind]
+
+    def overdispersed(
+            self,
+            n_features=500,
+            inplace=False):
+        '''Select overdispersed features (Fano factor)
+
+        Args:
+            n_features (int): Number of features to select.
+            inplace (bool): Whether to change the Dataset in place.
+
+        Returns:
+            pd.Index of selected features if not inplace, else None.
+        '''
+        stats = self.dataset.counts.get_statistics(metrics=('fano',))['fano']
+        features = stats.nlargest(n_features).index
+        features = pd.Index(features, name=stats.index.name)
+
+        if inplace:
+            self.dataset.counts = self.dataset.counts.loc[features]
+        else:
+            return features
+
+    def overdispersed_within_groups(
+            self,
+            groupby,
+            n_features=500,
+            inplace=False):
+        '''Select overdispersed features (Fano factor) within groups
+
+        Args:
+            groupby (str): samplesheet columns to group samples by
+            n_features (int): Number of features to select.
+            inplace (bool): Whether to change the Dataset in place.
+
+        Returns:
+            pd.Index of selected features if not inplace, else None.
+
+        This method is like overdispersed, but takes the top features within
+        groups of samples (e.g. experiment, replicate). It then ranks this
+        shortlist by the number of shortlists that have them and takes the top.
+        '''
+        from collections import Counter
+
+        groupnames = np.unique(self.dataset.samplesheet[groupby])
+        fea_ngroups = Counter()
+        for gn in groupnames:
+            # Get the index of the samples in this group
+            ind = self.dataset.samplesheet[groupby] == gn
+            sti = self.dataset.counts.loc[ind].get_statistics(
+                    axis='features', metrics=['fano'])['fano']
+            for fea in sti.nlargest(n_features).index:
+                fea_ngroups[fea] += 1
+        features = [x[0] for x in fea_ngroups.most_common(n_features)]
+        features = pd.Index(features, name=self.dataset.counts.index.name)
+
+        if inplace:
+            self.dataset.counts = self.dataset.counts.loc[features]
+        else:
+            return features
 
     def overdispersed_strata(
             self, bins=10,
@@ -67,6 +127,7 @@ class FeatureSelection(Plugin):
                 between minimal and maximal expression.
             n_features_per_stratum (int): Number of features per stratum to
                 select.
+            inplace (bool): Whether to change the Dataset in place.
 
         Returns:
             pd.Index of selected features if not inplace, else None.
@@ -87,9 +148,10 @@ class FeatureSelection(Plugin):
         features = []
         for i in range(len(bins) - 1):
             if i == len(bins) - 2:
-                cvi = stats.loc[mean >= bins[i], 'cv']
+                ind = mean >= bins[i]
             else:
-                cvi = stats.loc[(mean >= bins[i]) & (mean < bins[i+1]), 'cv']
+                ind = (mean >= bins[i]) & (mean < bins[i+1])
+            cvi = stats.loc[ind, 'cv']
             features.append(cvi.nlargest(n_features_per_stratum).index)
         features = pd.Index(np.concatenate(features), name=cvi.index.name)
 
@@ -129,14 +191,14 @@ class FeatureSelection(Plugin):
             **kwargs):
         '''Select features for downstream analysis with a gate.
 
-        Usage: Click with the left mouse button to set the vertices of a \
-                polygon. Double left-click closes the shape. Right click \
+        Usage: Click with the left mouse button to set the vertices of a
+                polygon. Double left-click closes the shape. Right click
                 resets the plot.
 
         Args:
-            features (list or string): List of features to plot. The string \
-                    'mapped' means everything excluding spikeins and other, \
-                    'all' means everything including spikeins and other.
+            features (list or string): List of features to plot. The string
+                'mapped' means everything excluding spikeins and other,
+                'all' means everything including spikeins and other.
             x (string): Statistics to plot on the x axis.
             y (string): Statistics to plot on the y axis.
             **kwargs: named arguments passed to the plot function.
