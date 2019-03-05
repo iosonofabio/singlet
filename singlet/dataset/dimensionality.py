@@ -120,12 +120,14 @@ class DimensionalityReduction(Plugin):
             raise ValueError('Perplexity too high, reduce to <= {:}'.format(
                 (n - 1.)/3))
 
-        X = self.dataset.counts.copy()
+        X = self.dataset.counts.values
+        if isinstance(self.dataset.counts, pd.SparseDataFrame):
+            X[np.isnan(X)] = 0
 
         if use_bhtsne:
             # this version does not require pre-whitening
             Y = tsne(
-                    data=X.values.T,
+                    data=X.T,
                     dimensions=n_dims,
                     perplexity=perplexity,
                     theta=theta,
@@ -139,12 +141,12 @@ class DimensionalityReduction(Plugin):
                     angle=theta,
                     random_state=rand_seed,
                     ).fit_transform(
-                    X.values.T
+                    X.T
                     )
 
         vs = pd.DataFrame(
                 Y,
-                index=X.columns,
+                index=self.dataset.counts.columns,
                 columns=['dimension '+str(i+1) for i in range(n_dims)])
         return vs
 
