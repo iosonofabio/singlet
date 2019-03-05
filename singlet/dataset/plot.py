@@ -405,25 +405,26 @@ class Plot(Plugin):
         '''Scatter samples after dimensionality reduction.
 
         Args:
-            vectors_reduced (pandas.Dataframe): matrix of coordinates of the \
-                    samples after dimensionality reduction. Rows are samples, \
-                    columns (typically 2 or 3) are the component in the \
-                    low-dimensional embedding.
-            color_by (string or None): color sample dots by phenotype or \
-                    expression of a certain feature.
-            color_log (bool or None): use log of phenotype/expression in the \
-                    colormap. Default None only logs expression, but not \
-                    phenotypes.
-            cmap (string or matplotlib colormap): color map to use for the \
-                    sample dots.
-            ax (matplotlib.axes.Axes): The axes to plot into. If None \
-                    (default), a new figure with one axes is created. ax must \
-                    not strictly be a matplotlib class, but it must have \
-                    common methods such as 'plot' and 'set'.
-            tight_layout (bool or dict): Whether to call \
-                    matplotlib.pyplot.tight_layout at the end of the \
-                    plotting. If it is a dict, pass it unpacked to that \
-                    function.
+            vectors_reduced (pandas.Dataframe): matrix of coordinates of the
+                samples after dimensionality reduction. Rows are samples,
+                columns (typically 2 or 3) are the component in the
+                low-dimensional embedding.
+            color_by (string or None): color sample dots by phenotype or
+                expression of a certain feature.
+            color_log (bool or None): use log of phenotype/expression in the
+                colormap. Default None only logs expression, but not
+                phenotypes.
+            cmap (string or matplotlib colormap): color map to use for the
+                sample dots. For categorical coloring, a palette with the
+                right number of colors or more can be passed.
+            ax (matplotlib.axes.Axes): The axes to plot into. If None
+                (default), a new figure with one axes is created. ax must
+                not strictly be a matplotlib class, but it must have
+                common methods such as 'plot' and 'set'.
+            tight_layout (bool or dict): Whether to call
+                matplotlib.pyplot.tight_layout at the end of the
+                plotting. If it is a dict, pass it unpacked to that
+                function.
             **kwargs: named arguments passed to the plot function.
 
         Returns:
@@ -466,7 +467,10 @@ class Plot(Plugin):
             # Categorical columns get just a list of colors
             if (hasattr(color_data, 'cat')) or (not is_numeric):
                 cd_unique = list(np.unique(color_data.values))
-                c_unique = cmap(np.linspace(0, 1, len(cd_unique)))
+                if callable(cmap):
+                    c_unique = cmap(np.linspace(0, 1, len(cd_unique)))
+                else:
+                    c_unique = np.asarray(cmap)
                 c = c_unique[[cd_unique.index(x) for x in color_data.values]]
                 # For categories, we have to tell the user about the mapping
                 ax._singlet_cmap = dict(zip(cd_unique, c_unique))
@@ -936,3 +940,121 @@ class Plot(Plugin):
         # TODO: reimplement some heuristic tight_layout
 
         return g
+
+    def dot_plot(
+            self,
+            group_axis='samples',
+            group_by=None,
+            plot_list=None,
+            color_log=None,
+            threshold=10,
+            layout='horizontal',
+            cmap='plasma',
+            ax=None,
+            tight_layout=True,
+            **kwargs):
+        '''Scatter samples after dimensionality reduction.
+
+        Args:
+            group_axis (str): It must be 'samples' or 'features'. The former
+                looks at feature counts within sample groups, the latter at
+                sample counts within feature groups.
+            group_by (string or None): group samples/features by metadata.
+            plot_list (list of str): the features/samples to plot.
+            color_log (bool or None): use log of phenotype/expression in the
+                colormap. Default None only logs expression, but not
+                phenotypes.
+            threshold (float): a features/sample is considered if >= this
+                value.
+            layout (str): 'horizontal' or 'vertical'. The former has groups as
+                rows, the latter as columns.
+            cmap (string or matplotlib colormap): color map to use for the
+                sample dots. For categorical coloring, a palette with the
+                right number of colors or more can be passed.
+            ax (matplotlib.axes.Axes): The axes to plot into. If None
+                (default), a new figure with one axes is created. ax must
+                not strictly be a matplotlib class, but it must have
+                common methods such as 'plot' and 'set'.
+            tight_layout (bool or dict): Whether to call
+                matplotlib.pyplot.tight_layout at the end of the
+                plotting. If it is a dict, pass it unpacked to that
+                function.
+            **kwargs: named arguments passed to the plot function.
+
+        Returns:
+            matplotlib.axes.Axes with the axes containing the plot.
+        '''
+
+        if ax is None:
+            new_axes = True
+            fig, ax = plt.subplots(nrows=1, ncols=1, figsize=(10, 8))
+        else:
+            new_axes = False
+
+        defaults = {}
+        Plot._update_properties(kwargs, defaults)
+
+        if group_axis == 'samples':
+            data = self.dataset.counts.loc[plot_list].to_dense().fillna(0).T
+            data[group_by] = self.dataset.samplesheet[group_by]
+        else:
+            data = self.dataset.counts.loc[:, plot_list].to_dense().fillna(0)
+            data[group_by] = self.dataset.featuresheet[group_by]
+
+        groups = list(set(data[group_by]))
+        points = []
+        for ig, count in enumerate(plot_list):
+            for ct, dfi in data[[count, group_by]].groupby(group_by):
+                frac_exp = (dfi[count] >= threshold).mean()
+                if color_log:
+                    mean_exp = np.log10(dfi[count].values + self.dataset.counts.pseudocount).mean()
+                else:
+                    mean_exp = dfi[count].values.mean()
+                size = 2 + (frac_exp * 11)**2
+                shade = (1. + mean_exp) / (7.05)
+                point = {
+                    's': size,
+                    'c': shade,
+                    }
+                if layout == 'horizontal':
+                    point['x'] = ig
+                    point['y'] = groups.index(ct)
+                elif layout == 'vertical':
+                    point['x'] = groups.index(ct)
+                    point['y'] = ig
+                else:
+                    raise ValueError(
+                            'Layout must be "horizontal" or "vertical"')
+                points.append(point)
+
+        if isinstance(cmap, str):
+            cmap = cm.get_cmap(cmap)
+
+        ax.scatter(
+            [p['x'] for p in points],
+            [p['y'] for p in points],
+            s=[p['s'] for p in points],
+            c=cmap([p['c'] for p in points]),
+            )
+        if layout == 'horizontal':
+            ax.set_xticks(np.arange(len(plot_list)))
+            ax.set_xticklabels(plot_list)
+            ax.set_yticks(np.arange(len(groups)))
+            ax.set_yticklabels(groups)
+            ax.set_xlim(-0.5, len(plot_list) - 0.5)
+            ax.set_ylim(-0.5, len(groups) - 0.5)
+        else:
+            ax.set_yticks(np.arange(len(plot_list)))
+            ax.set_yticklabels(plot_list)
+            ax.set_xticks(np.arange(len(groups)))
+            ax.set_xticklabels(groups)
+            ax.set_ylim(-0.5, len(plot_list) - 0.5)
+            ax.set_xlim(-0.5, len(groups) - 0.5)
+
+        if tight_layout:
+            if isinstance(tight_layout, dict):
+                plt.tight_layout(**tight_layout)
+            else:
+                plt.tight_layout()
+
+        return ax
