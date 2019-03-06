@@ -263,7 +263,7 @@ class Cluster(Plugin):
                 **kwargs)
         model.fit(data.values, y=labels)
         labels = pd.Series(
-                model.transduction_,
+                labels_unique.index[model.transduction_ + 1],
                 index=data.index,
                 dtype='category')
         return labels
