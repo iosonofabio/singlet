@@ -151,8 +151,9 @@ class Cluster(Plugin):
             log_features (bool): Whether to add pseudocounts and take a log
                 of the feature counts before calculating distances.
             **kwargs: arguments passed to sklearn.cluster.AffinityPropagation.
+
         Returns:
-            dict with the linkage, distance matrix, and ordering.
+            pd.Series with the labels of the clusters.
         '''
         from scipy.spatial.distance import pdist, squareform
         from sklearn.cluster import AffinityPropagation
@@ -216,9 +217,11 @@ class Cluster(Plugin):
             n_neighborts (int): Number of neighbors for the knn kernel
             log_features (bool): Whether to add pseudocounts and take a log
                 of the feature counts before calculating distances.
-            **kwargs: arguments passed to sklearn.cluster.AffinityPropagation.
+            **kwargs: arguments passed to sklearn.cluster.LabelSpreading or
+                sklearn.cluster.LabelPropagation.
+
         Returns:
-            dict with the linkage, distance matrix, and ordering.
+            pd.Series with the labels of the clusters.
 
         Unlike 'affinity_propagation', this method starts with a column of the
         samplesheet or featuresheet that has labels for part of the dataset and
@@ -267,6 +270,93 @@ class Cluster(Plugin):
                 index=data.index,
                 dtype='category')
         return labels
+
+    def random_forest(
+            self,
+            axis,
+            label_column,
+            unlabeled_key,
+            phenotypes=(),
+            n_estimators=100,
+            log_features=False,
+            return_model=False,
+            **kwargs):
+        '''Random Forest Classifier learned from some existing labels.
+
+        Args:
+            axis (string): It must be 'samples' or 'features'. The
+                Dataset.counts matrix is used and either samples or features
+                are clustered.
+            label_column (string): name of the column in the samplesheet or
+                featuresheet with the partial labels.
+            unlabeled_key: samples/features with this value in the label_column
+                are considered unlabeled.
+            phenotypes (iterable of strings): Phenotypes to add to the
+                features for joint clustering.
+            n_estimators (int): Number of trees in the forest.
+            log_features (bool): Whether to add pseudocounts and take a log
+                of the feature counts before calculating distances.
+            return_model (bool): Whether to also return the trained model
+            **kwargs: arguments passed to
+                sklearn.ensemble.RandomForestClassifier.
+
+        Returns:
+            pd.Series with the labels of the clusters. If return_model is True,
+            return a pair (labels, model).
+        '''
+        from sklearn.ensemble import RandomForestClassifier
+
+        data = self._prepare_data(
+            phenotypes=phenotypes,
+            log_features=log_features,
+            )
+
+        if axis == 'samples':
+            data = data.T
+            labels = self.dataset.samplesheet[label_column]
+        elif axis == 'features':
+            labels = self.dataset.featuresheet[label_column]
+        else:
+            raise ValueError('axis must be "samples" or "features"')
+
+        if axis == 'samples':
+            labels = self.dataset.samplesheet[label_column].values
+        else:
+            labels = self.dataset.featuresheet[label_column].values
+        labels_unique = set(labels) - set([unlabeled_key])
+        labels_unique = [unlabeled_key] + list(labels_unique)
+        labels_unique = pd.Series(
+            np.arange(len(labels_unique)) - 1,
+            index=labels_unique)
+        labels = labels_unique.loc[labels].values
+        index = data.index
+        data = data.values
+
+        # Split into train/test data
+        ind_train = labels != -1
+        data_train = data[ind_train]
+        labels_train = labels[ind_train]
+        data_test = data[~ind_train]
+
+        # Train model
+        model = RandomForestClassifier(
+                n_estimators=n_estimators,
+                **kwargs)
+        model.fit(data_train, y=labels_train)
+
+        # Predict missing labels
+        labels_test = model.predict(data_test)
+        labels[~ind_train] = labels_test
+
+        labels = pd.Series(
+                labels_unique.index[labels + 1],
+                index=index,
+                dtype='category')
+
+        if return_model:
+            return (labels, model)
+        else:
+            return labels
 
     # NOTE: caching this one is tricky because it has non-kwargs AND it would
     # need a double cache, one for cells and one for features/phenotypes
