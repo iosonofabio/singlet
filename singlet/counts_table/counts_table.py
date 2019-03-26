@@ -336,22 +336,36 @@ class CountsTable(pd.DataFrame):
             counts_norm._normalized = method
             return counts_norm
 
-    def get_statistics(self, metrics=('mean', 'cv')):
+    def get_statistics(self, axis='features', metrics=('mean', 'cv')):
         '''Get statistics of the counts.
 
         Args:
-            metrics (sequence of strings): any of 'mean', 'var', 'std', 'cv', \
-                    'fano', 'min', 'max'.
+            axis (string): The axis to keep, has to be 'samples' or
+                'features'. The other axis will be computed over.
+            metrics (sequence of strings): any of 'mean', 'var', 'std', 'cv',
+                'fano', 'min', 'max'.
 
         Returns:
             pandas.DataFrame with features as rows and metrics as columns.
+
+        For instance, if you want to calculate the average expression of each
+        feature, use:
+
+        counts.get_statistics(axis='features' and metrics=['mean'])
         '''
+        if axis == 'samples':
+            axisn = 0
+        elif axis == 'features':
+            axisn = 1
+        else:
+            raise ValueError('Axis not found')
+
         st = {}
         if 'mean' in metrics or 'cv' in metrics or 'fano' in metrics:
-            st['mean'] = self.mean(axis=1)
+            st['mean'] = self.mean(axis=axisn)
         if ('std' in metrics or 'cv' in metrics or 'fano' in metrics or
            'var' in metrics):
-            st['std'] = self.std(axis=1)
+            st['std'] = self.std(axis=axisn)
         if 'var' in metrics:
             st['var'] = st['std'] ** 2
         if 'cv' in metrics:
@@ -359,9 +373,9 @@ class CountsTable(pd.DataFrame):
         if 'fano' in metrics:
             st['fano'] = st['std'] ** 2 / np.maximum(st['mean'], 1e-10)
         if 'min' in metrics:
-            st['min'] = self.min(axis=1)
+            st['min'] = self.min(axis=axisn)
         if 'max' in metrics:
-            st['max'] = self.max(axis=1)
+            st['max'] = self.max(axis=axisn)
 
         df = pd.concat([st[m] for m in metrics], axis=1)
         df.columns = pd.Index(list(metrics), name='metrics')

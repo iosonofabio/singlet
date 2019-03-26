@@ -751,14 +751,13 @@ class Dataset():
                 comparison. If a string it must be one of
                 'kolmogorov-smirnov' or 'mann-whitney'. If a function, it
                 must accept two arrays as arguments (one for each
-                dataset, running over the samples) and return a P-value
-                for the comparison.
+                dataset, running over the samples) and return a pair
+                (statistic, P-value) for the comparison.
         Return:
-            A pandas.DataFrame containing the P-values of the comparisons for
-                all features and phenotypes.
+            A pandas.DataFrame containing the statistic and P-values of the
+            comparisons for all features and phenotypes.
         '''
-
-        pvalues = []
+        res = []
         if features:
             counts = self.counts
             counts_other = other.counts
@@ -784,7 +783,8 @@ class Dataset():
                 for (fea, co1), (_, co2) in zip(
                         counts.iterrows(),
                         counts_other.iterrows()):
-                    pvalues.append([fea, ks_2samp(co1.values, co2.values)[1]])
+                    tmp = ks_2samp(co1.values, co2.values)
+                    res.append([fea, tmp[0], tmp[1]])
 
             elif method == 'mann-whitney':
                 from scipy.stats import mannwhitneyu
@@ -808,15 +808,17 @@ class Dataset():
                           (np.sort(co1.values) == np.sort(co2.values)).all()):
                         is_degenerate = True
                     if is_degenerate:
-                        pvalues.append([fea, 1])
+                        res.append([fea, 0, 1])
                         continue
-                    pvalues.append([fea, mannwhitneyu(
+                    tmp = mannwhitneyu(
                         co1.values, co2.values,
-                        alternative='two-sided')[1]])
+                        alternative='two-sided')
+                    res.append([fea, tmp[0], tmp[1]])
             else:
                 for (fea, co1) in counts.iterrows():
                     co2 = counts_other.loc[fea]
-                    pvalues.append([fea, method(co1.values, co2.values)])
+                    tmp = method(co1.values, co2.values)
+                    res.append([fea, tmp[0], tmp[1]])
 
         if phenotypes:
             pheno = self.samplesheet.loc[:, phenotypes].T
@@ -826,7 +828,8 @@ class Dataset():
                 from scipy.stats import ks_2samp
                 for phe, val1 in pheno.iterrows():
                     val2 = pheno_other.loc[phe]
-                    pvalues.append([phe, ks_2samp(val1.values, val2.values)[1]])
+                    tmp = ks_2samp(val1.values, val2.values)
+                    res.append([phe, tmp[0], tmp[1]])
             elif method == 'mann-whitney':
                 from scipy.stats import mannwhitneyu
                 for phe, val1 in pheno.iterrows():
@@ -840,17 +843,19 @@ class Dataset():
                           (np.sort(val1.values) == np.sort(val2.values)).all()):
                         is_degenerate = True
                     if is_degenerate:
-                        pvalues.append([phe, 1])
+                        res.append([phe, 0, 1])
                         continue
-                    pvalues.append([phe, mannwhitneyu(
+                    tmp = mannwhitneyu(
                         val1.values, val2.values,
-                        alternative='two-sided')[1]])
+                        alternative='two-sided')
+                    res.append([phe, tmp[0], tmp[1]])
             else:
                 for phe, val1 in pheno.iterrows():
                     val2 = pheno_other.loc[phe]
-                    pvalues.append([phe, method(val1.values, val2.values)])
+                    tmp = method(val1.values, val2.values)
+                    res.append([phe, tmp[0], tmp[1]])
 
-        df = pd.DataFrame(pvalues, columns=['name', 'P-value'])
+        df = pd.DataFrame(res, columns=['name', 'statistic', 'P-value'])
         df.set_index('name', drop=True, inplace=True)
         return df
 

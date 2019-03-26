@@ -102,7 +102,7 @@ class FeatureSelection(Plugin):
         fea_ngroups = Counter()
         for gn in groupnames:
             # Get the index of the samples in this group
-            ind = self.dataset.samplesheet[groupby] == gn
+            ind = (self.dataset.samplesheet[groupby] == gn).values
             sti = self.dataset.counts.loc[ind].get_statistics(
                     axis='features', metrics=['fano'])['fano']
             for fea in sti.nlargest(n_features).index:
