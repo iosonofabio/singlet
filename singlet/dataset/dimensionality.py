@@ -9,6 +9,9 @@ import pandas as pd
 
 from .plugins import Plugin
 from ..utils.cache import method_caches
+from ..counts_table.counts_table import CountsTable
+from ..samplesheet import SampleSheet
+from ..featuresheet import FeatureSheet
 
 
 # Classes / functions
@@ -19,8 +22,9 @@ class DimensionalityReduction(Plugin):
     def pca(self,
             n_dims=2,
             transform='log10',
-            robust=True,
-            random_state=None):
+            robust=False,
+            random_state=None,
+            return_dataset=False):
         '''Principal component analysis
 
         Args:
@@ -28,12 +32,22 @@ class DimensionalityReduction(Plugin):
             transform (string or None): Whether to preprocess the data.
             robust (bool): Whether to use Principal Component Pursuit to
                 exclude outliers.
+            random_state (int): seed for the random number generator
+            return_dataset (False or 'samples' or 'features'): if 'samples',
+                return a Dataset with the PCs as features and the samples as
+                samples. If 'features', return a Dataset with the PCs as samples
+                and the features as features.
 
         Returns:
-            dict of the left eigenvectors (vs), right eigenvectors (us)
-                of the singular value decomposition, eigenvalues
-                (lambdas), the transform, and the whiten function (for
-                plotting).
+            if return_dataset is False, dict of the left eigenvectors (vs),
+            right eigenvectors (us) of the singular value decomposition,
+            eigenvalues (lambdas), the transform, and the whiten function (for
+            plotting). Else, a Dataset as described above.
+
+        NOTE: return_dataset='samples' is useful for subsequent sample
+        clustering via the Dataset.cluster plugin, as PCA space with around 20
+        dimensions is often a good compromise between information richness and
+        low noise.
         '''
         from sklearn.decomposition import PCA
 
@@ -77,7 +91,18 @@ class DimensionalityReduction(Plugin):
                 index=vs.columns,
                 columns=X.index).T
 
-        return {
+        if return_dataset == 'samples':
+            return self.dataset.__class__(
+                    counts_table=CountsTable(vs.T),
+                    samplesheet=self.dataset.samplesheet.copy(),
+                    )
+        elif return_dataset == 'features':
+            return self.dataset.__class__(
+                    counts_table=CountsTable(us),
+                    featuresheet=self.dataset.featuresheet.copy(),
+                    )
+        else:
+            return {
                 'vs': vs,
                 'us': us,
                 'eigenvalues': pca.explained_variance_ * Xnorm.shape[1],
