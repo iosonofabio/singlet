@@ -1009,3 +1009,72 @@ class Dataset():
             return Dataset(
                     counts_table=counts,
                     samplesheet=samplesheet)
+
+    def subsample(
+            self,
+            n,
+            axis='samples',
+            with_replacement=False,
+            inplace=False):
+        '''Average samples or features based on metadata
+
+        Args:
+            n (int): number of samples or features to take in the subsample.
+            axis (string): Must be 'samples' or 'features'.
+            with_replacement (bool): whether to sample with replacement or not.
+            inplace (bool): Whether to change the Dataset in place or return a
+                new one.
+        Returns:
+            If inplace is True, None. Else, a Dataset with the subsample.
+        '''
+        if axis not in ('samples', 'features'):
+            raise ValueError('axis must be "samples" or "features"')
+
+        if axis == 'samples':
+            if with_replacement is False:
+                ind = np.arange(self.n_samples)
+                np.random.shuffle(ind)
+                ind = ind[:n]
+                samplenames_new = self.samplenames[ind]
+            else:
+                ind = np.random.randint(self.n_samples, size=n)
+                samplenames_new = [sn+'_'+str(i+1) for i, sn in enumerate(self.samplenames[ind])]
+
+            counts = self.counts.iloc[:, ind].copy()
+            counts.colunms = samplenames_new
+            samplesheet = self.samplesheet.iloc[ind].copy()
+            samplesheet.index = samplenames_new
+            if inplace:
+                featuresheet = self.featuresheet
+            else:
+                featuresheet = self.featuresheet.copy()
+
+        elif axis == 'features':
+            if with_replacement is False:
+                ind = np.arange(self.n_features)
+                np.random.shuffle(ind)
+                ind = ind[:n]
+                samplenames_new = self.samplenames[ind]
+            else:
+                ind = np.random.randint(self.n_features, size=n)
+                featurenames_new = [sn+'_'+str(i+1) for i, sn in enumerate(self.featurenames[ind])]
+
+            counts = self.counts.iloc[ind].copy()
+            counts.index = featurenames_new
+            featuresheet = self.featuresheet.iloc[ind].copy()
+            featuresheet.index = featurenames_new
+            if inplace:
+                samplesheet = self.samplesheet
+            else:
+                samplesheet = self.samplesheet.copy()
+
+        if inplace:
+            self._counts = counts
+            self._samplesheet = samplesheet
+            self._featuresheet = featuresheet
+        else:
+            return Dataset(
+                    counts_table=counts,
+                    samplesheet=samplesheet,
+                    featuresheet=featuresheet,
+                    )
