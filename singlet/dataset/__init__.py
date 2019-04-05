@@ -671,6 +671,29 @@ class Dataset():
                     counts_table=counts_table,
                     featuresheet=featuresheet)
 
+    def exclude_samples_by_name(
+            self,
+            samplenames,
+            inplace=False):
+        '''Exclude samples
+
+        Args:
+            samplenames (list): Names of samples to exclude
+            inplace (bool): Whether to change the Dataset in place or return a
+                new one.
+
+        Returns:
+            If `inplace` is True, None. Else, a Dataset.
+        '''
+        if inplace:
+            ind = ~self._samplesheet.index.isin(samplenames)
+            self._counts = self._counts.loc[:, ind]
+            self._samplesheet = self._samplesheet.loc[ind]
+        else:
+            ds = self.cop()
+            ds.exclude_samples_by_name(samplenames, inplace=True)
+            return ds
+
     def rename(
             self,
             axis,
