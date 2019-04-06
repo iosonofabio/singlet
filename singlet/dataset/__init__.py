@@ -1035,14 +1035,16 @@ class Dataset():
                 ind = np.arange(self.n_samples)
                 np.random.shuffle(ind)
                 ind = ind[:n]
+                samplenames = self.samplenames[ind]
                 samplenames_new = self.samplenames[ind]
             else:
                 ind = np.random.randint(self.n_samples, size=n)
+                samplenames = self.samplenames[ind]
                 samplenames_new = [sn+'_'+str(i+1) for i, sn in enumerate(self.samplenames[ind])]
 
-            counts = self.counts.iloc[:, ind].copy()
+            counts = self.counts.loc[:, samplenames].copy()
             counts.colunms = samplenames_new
-            samplesheet = self.samplesheet.iloc[ind].copy()
+            samplesheet = self.samplesheet.loc[samplenames].copy()
             samplesheet.index = samplenames_new
             if inplace:
                 featuresheet = self.featuresheet
@@ -1054,14 +1056,16 @@ class Dataset():
                 ind = np.arange(self.n_features)
                 np.random.shuffle(ind)
                 ind = ind[:n]
-                samplenames_new = self.samplenames[ind]
+                featurenames = self.featurenames[ind]
+                featurenames_new = self.featurenames[ind]
             else:
                 ind = np.random.randint(self.n_features, size=n)
+                featurenames = self.featurenames[ind]
                 featurenames_new = [sn+'_'+str(i+1) for i, sn in enumerate(self.featurenames[ind])]
 
-            counts = self.counts.iloc[ind].copy()
+            counts = self.counts.loc[featurenames].copy()
             counts.index = featurenames_new
-            featuresheet = self.featuresheet.iloc[ind].copy()
+            featuresheet = self.featuresheet.loc[featurenames].copy()
             featuresheet.index = featurenames_new
             if inplace:
                 samplesheet = self.samplesheet

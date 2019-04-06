@@ -67,6 +67,7 @@ class Graph(Plugin):
                         )
             else:
                 raise ValueError('axis not understood')
+            similarity_matrix = similarity_matrix.values
         else:
             data = self.dataset.counts.values
             if axis == 'samples':
@@ -82,7 +83,7 @@ class Graph(Plugin):
         knn = []
         similarity = []
         nn_neighbors = []
-        for irow, row in enumerate(similarity_matrix.values):
+        for irow, row in enumerate(similarity_matrix):
             knn.append([])
             similarity.append([])
             row[irow] = -np.inf
