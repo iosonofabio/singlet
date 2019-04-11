@@ -393,7 +393,7 @@ class Plot(Plugin):
 
         return ax
 
-    def scatter_reduced_samples(
+    def scatter_reduced(
             self,
             vectors_reduced,
             color_by=None,
@@ -402,11 +402,11 @@ class Plot(Plugin):
             ax=None,
             tight_layout=True,
             **kwargs):
-        '''Scatter samples after dimensionality reduction.
+        '''Scatter samples or features after dimensionality reduction.
 
         Args:
             vectors_reduced (pandas.Dataframe): matrix of coordinates of the
-                samples after dimensionality reduction. Rows are samples,
+                samples/features in low dimensions. Rows are samples/features,
                 columns (typically 2 or 3) are the component in the
                 low-dimensional embedding.
             color_by (string or None): color sample dots by phenotype or
@@ -430,12 +430,17 @@ class Plot(Plugin):
         Returns:
             matplotlib.axes.Axes with the axes containing the plot.
         '''
+        if (vectors_reduced.index == self.dataset.samplesheet.index).all():
+            data = self.dataset.counts
+            metadata = self.dataset.samplesheet
+        elif (vectors_reduced.index == self.dataset.featuresheet.index).all():
+            data = self.dataset.counts.T
+            metadata = self.dataset.featuresheet
+        else:
+            raise ValueError('reduced_vectors is not consistent with samples nor features')
 
         if ax is None:
-            new_axes = True
             fig, ax = plt.subplots(nrows=1, ncols=1, figsize=(13, 8))
-        else:
-            new_axes = False
 
         defaults = {
                 's': 90,
@@ -447,15 +452,15 @@ class Plot(Plugin):
         else:
             if isinstance(cmap, str):
                 cmap = cm.get_cmap(cmap)
-            if color_by in self.dataset.samplesheet.columns:
-                color_data = self.dataset.samplesheet.loc[:, color_by]
+            if color_by in metadata.columns:
+                color_data = metadata.loc[:, color_by]
                 if hasattr(color_data, 'cat'):
                     is_numeric = False
                 else:
                     is_numeric = np.issubdtype(color_data.dtype, np.number)
                 color_by_phenotype = True
-            elif color_by in self.dataset.counts.index:
-                color_data = self.dataset.counts.loc[color_by]
+            elif color_by in data.index:
+                color_data = data.loc[color_by]
                 if isinstance(color_data, pd.SparseSeries):
                     color_data = color_data.fillna(0).to_dense()
                 is_numeric = True
@@ -518,6 +523,53 @@ class Plot(Plugin):
                 plt.tight_layout()
 
         return ax
+
+    def scatter_reduced_samples(
+            self,
+            vectors_reduced,
+            color_by=None,
+            color_log=None,
+            cmap='viridis',
+            ax=None,
+            tight_layout=True,
+            **kwargs):
+        '''Scatter samples after dimensionality reduction.
+
+        Args:
+            vectors_reduced (pandas.Dataframe): matrix of coordinates of the
+                samples after dimensionality reduction. Rows are samples,
+                columns (typically 2 or 3) are the component in the
+                low-dimensional embedding.
+            color_by (string or None): color sample dots by phenotype or
+                expression of a certain feature.
+            color_log (bool or None): use log of phenotype/expression in the
+                colormap. Default None only logs expression, but not
+                phenotypes.
+            cmap (string or matplotlib colormap): color map to use for the
+                sample dots. For categorical coloring, a palette with the
+                right number of colors or more can be passed.
+            ax (matplotlib.axes.Axes): The axes to plot into. If None
+                (default), a new figure with one axes is created. ax must
+                not strictly be a matplotlib class, but it must have
+                common methods such as 'plot' and 'set'.
+            tight_layout (bool or dict): Whether to call
+                matplotlib.pyplot.tight_layout at the end of the
+                plotting. If it is a dict, pass it unpacked to that
+                function.
+            **kwargs: named arguments passed to the plot function.
+
+        Returns:
+            matplotlib.axes.Axes with the axes containing the plot.
+        '''
+        return self.scatter_reduced(
+            vectors_reduced=vectors_reduced,
+            color_by=color_by,
+            color_log=color_log,
+            cmap=cmap,
+            ax=ax,
+            tight_layout=tight_layout,
+            **kwargs,
+            )
 
     def clustermap(
             self,

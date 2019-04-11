@@ -1043,6 +1043,8 @@ class Dataset():
                 samplenames_new = [sn+'_'+str(i+1) for i, sn in enumerate(self.samplenames[ind])]
 
             counts = self.counts.loc[:, samplenames].copy()
+            # FIXME: the following line seems to be slightly illegal
+            #import ipdb; ipdb.set_trace()
             counts.colunms = samplenames_new
             samplesheet = self.samplesheet.loc[samplenames].copy()
             samplesheet.index = samplenames_new
