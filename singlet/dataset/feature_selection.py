@@ -103,10 +103,11 @@ class FeatureSelection(Plugin):
         for gn in groupnames:
             # Get the index of the samples in this group
             ind = (self.dataset.samplesheet[groupby] == gn).values
-            sti = self.dataset.counts.loc[ind].get_statistics(
+            sti = self.dataset.counts.loc[:, ind].get_statistics(
                     axis='features', metrics=['fano'])['fano']
             for fea in sti.nlargest(n_features).index:
                 fea_ngroups[fea] += 1
+
         features = [x[0] for x in fea_ngroups.most_common(n_features)]
         features = pd.Index(features, name=self.dataset.counts.index.name)
 
