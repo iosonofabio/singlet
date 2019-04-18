@@ -27,9 +27,6 @@ class Graph(Plugin):
             axis (str): 'samples' or 'features'
             n_neighbors (int): number of neighbors to include
             threshold (float): similarity threshold to cut neighbors at
-            n_planes (int): number of random hyperplanes to use for signature
-            slice_length (int or None): number of bits to use for the LSH. If
-                None, perform all n^2 comparisons of signatures
             return_sparse (bool): return sparse matrix instead of raw lshknn
                 output.
             metric (str): metric to use to calculate the distance matrix. If
