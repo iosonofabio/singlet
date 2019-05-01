@@ -70,20 +70,23 @@ class Fit(Plugin):
 
         for key, dic in datad.items():
             args = dic['names']
-            if args == 'total':
-                counts_k = counts
-                pheno_k = []
-            elif args == 'mapped':
-                counts_k = counts.exclude_features(
-                        spikeins=True, other=True,
-                        errors='ignore')
-                pheno_k = []
-            elif args == 'spikeins':
-                counts_k = counts.get_spikeins()
-                pheno_k = []
-            elif args == 'other':
-                counts_k = counts.get_other_features()
-                pheno_k = []
+            if isinstance(args, str):
+                if args == 'total':
+                    counts_k = counts
+                    pheno_k = []
+                elif args == 'mapped':
+                    counts_k = counts.exclude_features(
+                            spikeins=True, other=True,
+                            errors='ignore')
+                    pheno_k = []
+                elif args == 'spikeins':
+                    counts_k = counts.get_spikeins()
+                    pheno_k = []
+                elif args == 'other':
+                    counts_k = counts.get_other_features()
+                    pheno_k = []
+                else:
+                    raise ValueError('Argument not understood')
             else:
                 counts_k = counts.loc[counts.index.isin(args)]
                 pheno_k = sheet.loc[sheet.index.isin(args)]
