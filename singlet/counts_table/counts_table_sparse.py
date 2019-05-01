@@ -184,11 +184,11 @@ class CountsTableSparse(pd.SparseDataFrame):
         Args:
             method (string or function): The method to use for normalization.
                 One of 'counts_per_million', 'counts_per_thousand_spikeins',
-                'counts_per_thousand_features'. If this argument is a
-                function, its signature depends on the inplace argument.
-                It must take the CountsTable as input and return the normalized
-                one as output. You can end your function by
-                self[:] = <normalized counts>.
+                'counts_per_thousand_features'm 'counts_per_million_column'.
+                If this argument is a function, its signature depends on the
+                inplace argument. It must take the CountsTable as input and
+                return the normalized one as output. You can end your function
+                by self[:] = <normalized counts>.
             include_spikeins (bool): Whether to include spike-ins in the
                 normalization and result.
             inplace (bool): Whether to modify the CountsTable in place or
@@ -196,6 +196,18 @@ class CountsTableSparse(pd.SparseDataFrame):
 
         Returns:
             A new, normalized CountsTableSparse.
+
+        NOTE: if method == 'counts_per_million_column', you have to use an
+        additional keyword argument called 'column' that specifies the column
+        of the samplesheet containing the normalization baseline. For instance,
+        if your samplesheet has a column called 'total_counts' that you want to
+        use for normalization, call:
+
+        CountsTableSparse.normalize(
+            method='counts_per_million_column',
+            column='total_counts')
+
+        This requires the count table to be linked to a Dataset.
         '''
         import copy
 
@@ -213,6 +225,12 @@ class CountsTableSparse(pd.SparseDataFrame):
             counts = self.exclude_features(spikeins=(not include_spikeins), other=True)
             norm = self.loc[kwargs['features']].sum(axis=0)
             counts_norm = 1e3 * counts / norm
+        elif method == 'counts_per_million_column':
+            if 'column' not in kwargs:
+                raise ValueError('Specify a samplesheet column with column=<mycolumn>')
+            counts = self.exclude_features(spikeins=(not include_spikeins), other=True)
+            norm = self.dataset[kwargs['column']].values
+            counts_norm = 1e6 * counts / norm
         elif callable(method):
             counts_norm = method(self)
             method = 'custom'
