@@ -1,0 +1,12 @@
+package:
+  name: singlet
+  version: 0.5
+
+build:
+  number: 1
+
+requirements:
+  run:
+    - python
+about:
+summary: Test for conda build of singlet
