@@ -194,7 +194,9 @@ class Correlation(Plugin):
             self,
             features='all',
             features2=None,
-            method='spearman'):
+            method='spearman',
+            zero_identity=False,
+            ):
         '''Correlate feature expression with one or more phenotypes.
 
         Args:
@@ -207,6 +209,7 @@ class Correlation(Plugin):
                 list as features, returning a square matrix.
             method (string): type of correlation. Must be one of 'pearson' or
                 'spearman'.
+            zero_identity (bool): if True, put zeroes on self-correlations.
 
         Returns:
             pandas.DataFrame with the correlation coefficients. If either
@@ -238,6 +241,12 @@ class Correlation(Plugin):
         y = exp2.values
 
         r = self._correlate(x, y, method=method)
+
+        if zero_identity:
+            for ix, xi in enumerate(exp.index):
+                for iy, yi in enumerate(exp2.index):
+                    if xi == yi:
+                        r[ix, iy] = 0
 
         if (not isinstance(features, str)) and (not isinstance(features2, str)):
             return pd.DataFrame(

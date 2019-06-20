@@ -317,7 +317,7 @@ class CountsTable(pd.DataFrame):
                         spikeins=(not include_spikeins),
                         other=True,
                         inplace=True)
-                self[:] *= 1e6 / self.dataset[kwargs['column']].values
+                self[:] *= 1e6 / self.dataset.samplesheet[kwargs['column']].values
             elif callable(method):
                 method(self)
                 method = 'custom'
