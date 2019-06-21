@@ -435,3 +435,64 @@ class Cluster(Plugin):
                 'linkage': Z,
                 'leaves': ids,
                 }
+
+    def leiden(
+            self,
+            axis,
+            edges,
+            edge_weights=None,
+            metric='cpm',
+            resolution_parameter=0.001,
+            ):
+        '''Graph-based Leiden clustering
+
+        Args:
+            axis (string): It must be 'samples' or 'features'.
+                The Dataset.counts matrix is used and
+                either samples or features are clustered.
+            edges (list of pairs): list of edges to make a graph used to
+            cluster. Each member of a pair is an int referring to the index
+            of the sample or feature in the sample/featuresheet.
+            edge_weights (list of float or None): edge weights to use for
+            clustering. If None, all edge weights are 1.
+            metric (str): What metric to optimize. Can be 'modularity' or
+            'cpm'.
+            resolution_parameter (float): A number between 0 and 1 that sets
+            how easy it is to call new clusters.
+
+        Returns:
+            pd.Series with the labels of the clusters.
+        '''
+        import igraph as ig
+        import leidenalg
+
+        if axis == 'samples':
+            n_nodes = self.dataset.n_samples
+            index = self.dataset.samplenames
+        elif axis == 'features':
+            n_nodes = self.dataset.n_features
+            index = self.dataset.featurenames
+
+        g = ig.Graph(n=n_nodes, edges=edges, directed=False)
+        if edge_weights is not None:
+            g.es['weight'] = edge_weights
+
+        if metric == 'cpm':
+            partition = leidenalg.CPMVertexPartition(
+                    g,
+                    resolution_parameter=resolution_parameter)
+        elif metric == 'modularity':
+            partition = leidenalg.ModularityVertexPartition(
+                    g,
+                    resolution_parameter=resolution_parameter)
+        else:
+            raise ValueError(
+                'clustering_metric not understood: {:}'.format(metric))
+
+        opt = leidenalg.Optimiser()
+        opt.optimise_partition(partition)
+        communities = partition.membership
+
+        labels = pd.Series(communities, index=index)
+
+        return labels
