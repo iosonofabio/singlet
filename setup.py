@@ -26,12 +26,14 @@ try:
             'PyYAML',
             'numpy',
             'pandas',
+            'xarray',
             'matplotlib',
         ],
         install_requires=[
             'PyYAML',
             'numpy',
             'pandas',
+            'xarray',
             'matplotlib',
         ],
       )
@@ -46,6 +48,7 @@ except ImportError:
             'PyYAML',
             'numpy',
             'pandas',
+            'xarray',
             'matplotlib',
             ]
     )
