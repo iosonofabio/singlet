@@ -469,16 +469,20 @@ class Plot(Plugin):
                 raise ValueError(
                     'The label '+color_by+' is neither a phenotype nor a feature')
 
-            # Categorical columns get just a list of colors
+            # Categorical columns get just a list or a dict of colors
             if (hasattr(color_data, 'cat')) or (not is_numeric):
                 cd_unique = list(np.unique(color_data.values))
                 if callable(cmap):
                     c_unique = cmap(np.linspace(0, 1, len(cd_unique)))
+                elif isinstance(cmap, dict):
+                    c_unique = np.asarray([cmap[x] for x in cd_unique])
                 else:
                     c_unique = np.asarray(cmap)
                 c = c_unique[[cd_unique.index(x) for x in color_data.values]]
                 # For categories, we have to tell the user about the mapping
-                ax._singlet_cmap = dict(zip(cd_unique, c_unique))
+                if not hasattr(ax, '_singlet_cmap'):
+                    ax._singlet_cmap = {}
+                ax._singlet_cmap.update(dict(zip(cd_unique, c_unique)))
 
             # Non-categorical numeric types are more tricky: check for NaNs
             else:
@@ -997,6 +1001,7 @@ class Plot(Plugin):
             self,
             group_axis='samples',
             group_by=None,
+            group_order=None,
             plot_list=None,
             color_log=None,
             threshold=10,
@@ -1012,6 +1017,8 @@ class Plot(Plugin):
                 looks at feature counts within sample groups, the latter at
                 sample counts within feature groups.
             group_by (string or None): group samples/features by metadata.
+            group_order (list or None): an optional order of the groups. If
+                None, an automatic order will be used.
             plot_list (list of str): the features/samples to plot.
             color_log (bool or None): use log of phenotype/expression in the
                 colormap. Default None only logs expression, but not
@@ -1053,10 +1060,15 @@ class Plot(Plugin):
             data = self.dataset.counts.loc[:, plot_list].to_dense().fillna(0)
             data[group_by] = self.dataset.featuresheet[group_by]
 
-        groups = list(set(data[group_by]))
+        if group_order is None:
+            groups = list(set(data[group_by]))
+        else:
+            groups = list(group_order)
         points = []
         for ig, count in enumerate(plot_list):
-            for ct, dfi in data[[count, group_by]].groupby(group_by):
+            gby = data[[count, group_by]].groupby(group_by)
+            for ct in groups:
+                dfi = gby.get_group(ct)
                 frac_exp = (dfi[count] >= threshold).mean()
                 if color_log:
                     mean_exp = np.log10(dfi[count].values + self.dataset.counts.pseudocount).mean()
