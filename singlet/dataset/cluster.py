@@ -443,6 +443,8 @@ class Cluster(Plugin):
             edge_weights=None,
             metric='cpm',
             resolution_parameter=0.001,
+            initial_membership=None,
+            fixed_nodes=None,
             ):
         '''Graph-based Leiden clustering
 
@@ -457,8 +459,15 @@ class Cluster(Plugin):
             clustering. If None, all edge weights are 1.
             metric (str): What metric to optimize. Can be 'modularity' or
             'cpm'.
-            resolution_parameter (float): A number between 0 and 1 that sets
+            resolution_parameter (float): a number between 0 and 1 that sets
             how easy it is to call new clusters.
+            initial_membership (str or None): name of a metadata column
+            containing the initial membership vector for the clustering. If
+            None (default), each samples starts as a singleton
+            fixed_nodes (str or None): name of a metadata column containing
+            a boolean vector for which nodes are not allowed to change
+            cluster membership during the Leiden algorithm. Your version of
+            leidenalg must support fixed nodes for this feature to work.
 
         Returns:
             pd.Series with the labels of the clusters.
@@ -477,20 +486,44 @@ class Cluster(Plugin):
         if edge_weights is not None:
             g.es['weight'] = edge_weights
 
+        if initial_membership is not None:
+            if axis == 'samples':
+                im = self.dataset.samplesheet[initial_membership].values.astype(int)
+            else:
+                im = self.dataset.featuresheet[initial_membership].values.astype(int)
+        else:
+            im = np.arange(n_nodes)
+        im = list(im)
+
         if metric == 'cpm':
             partition = leidenalg.CPMVertexPartition(
                     g,
-                    resolution_parameter=resolution_parameter)
+                    resolution_parameter=resolution_parameter,
+                    initial_membership=im,
+                    )
         elif metric == 'modularity':
             partition = leidenalg.ModularityVertexPartition(
                     g,
-                    resolution_parameter=resolution_parameter)
+                    resolution_parameter=resolution_parameter,
+                    initial_membership=im,
+                    )
         else:
             raise ValueError(
                 'clustering_metric not understood: {:}'.format(metric))
 
         opt = leidenalg.Optimiser()
-        opt.optimise_partition(partition)
+
+        if fixed_nodes is not None:
+            if axis == 'samples':
+                fxn = self.dataset.samplesheet[fixed_nodes].values.astype(int)
+            else:
+                fxn = self.dataset.featuresheet[fixed_nodes].values.astype(int)
+            fxn = list(fxn)
+
+            opt.optimise_partition(partition, fixed_nodes=fxn)
+        else:
+            opt.optimise_partition(partition)
+
         communities = partition.membership
 
         labels = pd.Series(communities, index=index)
