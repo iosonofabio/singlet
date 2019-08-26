@@ -1004,13 +1004,20 @@ class Plot(Plugin):
             group_order=None,
             plot_list=None,
             color_log=None,
+            vmin='min',
+            vmax='max',
             threshold=10,
+            min_size=2,
             layout='horizontal',
             cmap='plasma',
             ax=None,
             tight_layout=True,
             **kwargs):
-        '''Scatter samples after dimensionality reduction.
+        '''Group samples and plot fraction and levels of counts.
+
+        For every group, the size of the dot indicates the fraction of samples
+        in that group with counts above threshold, while the color indicates
+        the average counts within the group.
 
         Args:
             group_axis (str): It must be 'samples' or 'features'. The former
@@ -1023,8 +1030,17 @@ class Plot(Plugin):
             color_log (bool or None): use log of phenotype/expression in the
                 colormap. Default None only logs expression, but not
                 phenotypes.
+            vmin (str or float): minimum value to scale the coloring
+                with. If this is a string, it must be one of 'min' (minimum
+                across plot_list), 'min_single' (minimum for each element of
+                plot_list). If a float, it is used as the minimum.
+            vmax (str or float): maximum value to scale the coloring
+                with. If this is a string, it must be one of 'max' (maximum
+                across plot_list), 'max_single' (maximum for each element of
+                plot_list). If a float, it is used as the maximum.
             threshold (float): a features/sample is considered if >= this
                 value.
+            min_size (float): the minimal size of a dot in the plot.
             layout (str): 'horizontal' or 'vertical'. The former has groups as
                 rows, the latter as columns.
             cmap (string or matplotlib colormap): color map to use for the
@@ -1054,10 +1070,22 @@ class Plot(Plugin):
         Plot._update_properties(kwargs, defaults)
 
         if group_axis == 'samples':
-            data = self.dataset.counts.loc[plot_list].to_dense().fillna(0).T
+            countnames = self.dataset.featurenames
+            plot_listc = [p for p in plot_list if p in countnames]
+            data = self.dataset.counts.loc[plot_listc].to_dense().fillna(0).T
+            for count in plot_list:
+                if count not in data.columns:
+                    data[count] = self.dataset.samplesheet[count]
+            data = data.loc[:, plot_list]
             data[group_by] = self.dataset.samplesheet[group_by]
         else:
-            data = self.dataset.counts.loc[:, plot_list].to_dense().fillna(0)
+            countnames = self.dataset.samplenames
+            plot_listc = [p for p in plot_list if p in countnames]
+            data = self.dataset.counts.loc[:, plot_listc].to_dense().fillna(0)
+            for count in plot_list:
+                if count not in data.columns:
+                    data[count] = self.dataset.featuresheet[count]
+            data = data.loc[:, plot_list]
             data[group_by] = self.dataset.featuresheet[group_by]
 
         if group_order is None:
@@ -1067,18 +1095,19 @@ class Plot(Plugin):
         points = []
         for ig, count in enumerate(plot_list):
             gby = data[[count, group_by]].groupby(group_by)
+            clog = color_log or ((color_log is None) and (count in plot_listc))
             for ct in groups:
                 dfi = gby.get_group(ct)
                 frac_exp = (dfi[count] >= threshold).mean()
-                if color_log:
+                if clog:
                     mean_exp = np.log10(dfi[count].values + self.dataset.counts.pseudocount).mean()
                 else:
                     mean_exp = dfi[count].values.mean()
-                size = 2 + (frac_exp * 11)**2
-                shade = (1. + mean_exp) / (7.05)
                 point = {
-                    's': size,
-                    'c': shade,
+                    'fraction': frac_exp,
+                    'level': mean_exp,
+                    'group': ct,
+                    'count': count,
                     }
                 if layout == 'horizontal':
                     point['x'] = ig
@@ -1091,14 +1120,43 @@ class Plot(Plugin):
                             'Layout must be "horizontal" or "vertical"')
                 points.append(point)
 
+        points = pd.DataFrame(points)
+        points.set_index(['count', 'group'], inplace=True, drop=False)
+
+        # Set size and color based on fraction and level
+        points['s'] = 0.0
+        points['c'] = 0.0
+        for count in plot_list:
+            if vmin == 'min':
+                vm = points['level'].values.min()
+            elif vmin == 'min_single':
+                vm = points.loc[points['count'] == count, 'level'].values.min()
+            else:
+                vm = vmin
+
+            if vmax == 'max':
+                vM = points['level'].values.max()
+            elif vmax == 'max_single':
+                vM = points.loc[points['count'] == count, 'level'].values.max()
+            else:
+                vM = vmax
+
+            import ipdb; ipdb.set_trace()
+
+            for gr in groups:
+                size = min_size + (points.at[(count, gr), 'fraction'] * 11)**2
+                shade = (points.at[(count, gr), 'level'] - vm) / (vM - vm)
+                points.at[(count, gr), 's'] = size
+                points.at[(count, gr), 'c'] = shade
+
         if isinstance(cmap, str):
             cmap = cm.get_cmap(cmap)
 
         ax.scatter(
-            [p['x'] for p in points],
-            [p['y'] for p in points],
-            s=[p['s'] for p in points],
-            c=cmap([p['c'] for p in points]),
+            points['x'].values,
+            points['y'].values,
+            s=points['s'].values,
+            c=cmap(points['c'].values),
             )
         if layout == 'horizontal':
             ax.set_xticks(np.arange(len(plot_list)))
