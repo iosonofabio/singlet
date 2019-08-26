@@ -240,18 +240,19 @@ class Dataset():
         from ..config import config, _normalize_dataset
         from ..io import parse_dataset, integrated_dataset_formats
 
+        datasetname = None
         if isinstance(dataset, str):
             datasetname = dataset
             dataset = config['io']['datasets'][datasetname]
+            dataset['datasetname'] = datasetname
         else:
-            datasetname = ''
             dataset = _normalize_dataset(dataset)
 
         if ('format' in dataset) and (dataset['format'] in integrated_dataset_formats):
-            d = parse_dataset({'datasetname': datasetname})
-            self._counts = d['counts']
-            self._samplesheet = d['samplesheet']
-            self._featuresheet = d['featuresheet']
+            d = parse_dataset(dataset)
+            self._counts = CountsTable(d['counts'])
+            self._samplesheet = SampleSheet(d['samplesheet'])
+            self._featuresheet = FeatureSheet(d['featuresheet'])
         else:
             if ('samplesheet' not in dataset) and ('counts_table' not in dataset):
                 raise ValueError('Your dataset config must include a counts_table or a samplesheet')
@@ -385,6 +386,10 @@ class Dataset():
             return self._counts.shape[0]
         else:
             return 0
+
+    @property
+    def shape(self):
+        return (self.n_features, self.n_samples)
 
     @property
     def samplenames(self):
@@ -758,7 +763,8 @@ class Dataset():
             other,
             features='mapped',
             phenotypes=(),
-            method='kolmogorov-smirnov'):
+            method='kolmogorov-smirnov',
+            additional_attributes=('log2_fold_change',)):
         '''Statistically compare with another Dataset.
 
         Args:
@@ -776,6 +782,9 @@ class Dataset():
                 must accept two arrays as arguments (one for each
                 dataset, running over the samples) and return a pair
                 (statistic, P-value) for the comparison.
+            attitional_attributes (list/tuple of str): a list of additional
+                attributes about the comparison. At the moment thse can be:
+                'log2_fold_change', 'avg_self', 'avg_other'.
         Return:
             A pandas.DataFrame containing the statistic and P-values of the
             comparisons for all features and phenotypes.
@@ -880,6 +889,11 @@ class Dataset():
 
         df = pd.DataFrame(res, columns=['name', 'statistic', 'P-value'])
         df.set_index('name', drop=True, inplace=True)
+
+        if len(additional_attributes):
+            # FIXME
+            pass
+
         return df
 
     def bootstrap(self, groupby=None):
@@ -1027,6 +1041,8 @@ class Dataset():
         Returns:
             If inplace is True, None. Else, a Dataset with the subsample.
         '''
+        import copy
+
         if axis not in ('samples', 'features'):
             raise ValueError('axis must be "samples" or "features"')
 
@@ -1042,12 +1058,27 @@ class Dataset():
                 samplenames = self.samplenames[ind]
                 samplenames_new = [sn+'_'+str(i+1) for i, sn in enumerate(self.samplenames[ind])]
 
-            counts = self.counts.loc[:, samplenames].copy()
-            # FIXME: the following line seems to be slightly illegal
-            #import ipdb; ipdb.set_trace()
-            counts.colunms = samplenames_new
+            # Set counts
+            counts = self.counts.__class__(
+                self.counts.loc[:, samplenames].values,
+                index=self.counts.index,
+                columns=samplenames_new,
+                )
+            # Shallow copy of metadata
+            for prop in counts._metadata:
+                # dataset if special, to avoid infinite loops
+                if prop == 'dataset':
+                    counts.dataset = None
+                else:
+                    setattr(counts, prop,
+                            copy.copy(getattr(self.counts, prop)))
+            counts._normalized = self.counts._normalized
+
+            # Set samplesheet
             samplesheet = self.samplesheet.loc[samplenames].copy()
             samplesheet.index = samplenames_new
+
+            # Set featuresheet
             if inplace:
                 featuresheet = self.featuresheet
             else:

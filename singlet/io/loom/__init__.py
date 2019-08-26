@@ -18,26 +18,15 @@ def parse_dataset(
     import loompy
 
     with loompy.connect(path) as ds:
-        if axis_samples == 'columns':
-            n_features, n_samples = ds.shape
+        n_features, n_samples = ds.shape
 
-            samplesheet = pd.DataFrame(data=[])
-            for key, val in ds.ca.items():
-                samplesheet[key] = val
+        samplesheet = pd.DataFrame(data=[])
+        for key, val in ds.ca.items():
+            samplesheet[key] = val
 
-            featuresheet = pd.DataFrame(data=[])
-            for key, val in ds.ra.items():
-                featuresheet[key] = val
-        else:
-            n_samples, n_features = ds.shape
-
-            samplesheet = pd.DataFrame(data=[])
-            for key, val in ds.ra.items():
-                samplesheet[key] = val
-
-            featuresheet = pd.DataFrame(data=[])
-            for key, val in ds.ca.items():
-                featuresheet[key] = val
+        featuresheet = pd.DataFrame(data=[])
+        for key, val in ds.ra.items():
+            featuresheet[key] = val
 
         if index_samples is not None:
             samplesheet.set_index(index_samples, drop=False, inplace=True)

@@ -172,10 +172,25 @@ def parse_counts_table_sparse(dictionary):
 
 
 def parse_dataset(dictionary):
+    '''Parse dataset from file or dict
+
+    Args:
+        dictionary (dict): a dict containing either a single key 'datasetname'
+        with the name of the dataset as of the configuration file, or a full
+        set of keys and values for parsing. The required keys are: 'format',
+        'path', 'axis_samples', 'index_samples', 'index_features', and
+        'bit_precition'.
+
+    Returns:
+        dict with the parsed dataset.
+
+    '''
     from .loom import parse_dataset as parse_loom
 
     if 'datasetname' in dictionary:
         dataset = config['io']['datasets'][dictionary['datasetname']]
+    elif isinstance(dictionary, dict):
+        dataset = dictionary
     else:
         raise ValueError('A datasetname is required')
 

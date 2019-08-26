@@ -52,6 +52,10 @@ def _normalize_dataset(dataset):
         path = dataset['path']
         dataset['format'] = path.split('.')[-1].lower()
 
+    # Loom files are always samples = columns
+    if dataset['format'] == 'loom':
+        dataset['axis_samples'] = 'columns'
+
     if ('bit_precision' not in dataset):
         dataset['bit_precision'] = 64
     elif dataset['bit_precision'] not in (16, 32, 64, 128):
