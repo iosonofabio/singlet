@@ -429,6 +429,9 @@ class Plot(Plugin):
 
         Returns:
             matplotlib.axes.Axes with the axes containing the plot.
+
+        NOTE: if a categorical colormap is used, the mapping of category to
+        color is stored into ax._singlet_cmap.
         '''
         if (vectors_reduced.index == self.dataset.samplesheet.index).all():
             data = self.dataset.counts
@@ -1058,6 +1061,9 @@ class Plot(Plugin):
 
         Returns:
             matplotlib.axes.Axes with the axes containing the plot.
+
+        NOTE: the mappings of fraction to size and count level to color are
+        stored into ax._singlet_dotmap.
         '''
 
         if ax is None:
@@ -1068,6 +1074,9 @@ class Plot(Plugin):
 
         defaults = {}
         Plot._update_properties(kwargs, defaults)
+
+        def size_fun(fraction):
+            return min_size + (fraction * 11)**2
 
         if group_axis == 'samples':
             countnames = self.dataset.featurenames
@@ -1141,10 +1150,8 @@ class Plot(Plugin):
             else:
                 vM = vmax
 
-            import ipdb; ipdb.set_trace()
-
             for gr in groups:
-                size = min_size + (points.at[(count, gr), 'fraction'] * 11)**2
+                size = size_fun(points.at[(count, gr), 'fraction'])
                 shade = (points.at[(count, gr), 'level'] - vm) / (vM - vm)
                 points.at[(count, gr), 's'] = size
                 points.at[(count, gr), 'c'] = shade
@@ -1178,5 +1185,11 @@ class Plot(Plugin):
                 plt.tight_layout(**tight_layout)
             else:
                 plt.tight_layout()
+
+        if not hasattr(ax, '_singlet_dotmap'):
+            ax._singlet_dotmap = {
+                'fraction_size_map': size_fun,
+                'level_color_map': cmap,
+                }
 
         return ax
