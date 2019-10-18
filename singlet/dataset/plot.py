@@ -401,6 +401,7 @@ class Plot(Plugin):
             cmap='viridis',
             ax=None,
             tight_layout=True,
+            high_on_top=False,
             **kwargs):
         '''Scatter samples or features after dimensionality reduction.
 
@@ -425,6 +426,8 @@ class Plot(Plugin):
                 matplotlib.pyplot.tight_layout at the end of the
                 plotting. If it is a dict, pass it unpacked to that
                 function.
+            high_on_top (bool): Plot high expression/phenotype values on top.
+                This argument is ignored for categorical phenotypes.
             **kwargs: named arguments passed to the plot function.
 
         Returns:
@@ -449,6 +452,7 @@ class Plot(Plugin):
                 's': 90,
                 }
         Plot._update_properties(kwargs, defaults)
+        tiers = np.ones(vectors_reduced.shape[0])
 
         if color_by is None:
             kwargs['color'] = 'darkgrey'
@@ -507,6 +511,15 @@ class Plot(Plugin):
                     cd_max = np.log10(cd_max + pc)
 
                 cd_norm = (color_data.values - cd_min) / (cd_max - cd_min)
+
+                if high_on_top:
+                    tiers = pd.qcut(
+                            cd_norm, np.linspace(0, 1, 5),
+                            retbins=False, labels=False,
+                            duplicates='drop',
+                            )
+
+
                 c = np.zeros((len(color_data), 4), float)
                 c[unmask] = cmap(cd_norm[unmask])
                 # Grey-ish semitransparency for NaNs
@@ -514,12 +527,21 @@ class Plot(Plugin):
 
             kwargs['c'] = c
 
-        vectors_reduced.plot(
-                x=vectors_reduced.columns[0],
-                y=vectors_reduced.columns[1],
-                kind='scatter',
-                ax=ax,
-                **kwargs)
+        tiers_unique = np.sort(np.unique(tiers))
+        for t in tiers_unique:
+            ind = tiers == t
+            vec = vectors_reduced.loc[ind]
+            kw = dict(kwargs)
+            if (not isinstance(kw['c'], str)) and (len(kw['c']) == len(vec)):
+                kw['c'] = kw['c'][ind]
+            if not np.isscalar(kw['s']):
+                kw['s'] = kw['s'][ind]
+            vectors_reduced.plot(
+                    x=vectors_reduced.columns[0],
+                    y=vectors_reduced.columns[1],
+                    kind='scatter',
+                    ax=ax,
+                    **kw)
 
         ax.grid(True)
 
