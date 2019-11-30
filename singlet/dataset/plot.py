@@ -532,8 +532,9 @@ class Plot(Plugin):
             ind = tiers == t
             vec = vectors_reduced.loc[ind]
             kw = dict(kwargs)
-            if (not isinstance(kw['c'], str)) and (len(kw['c']) == len(vec)):
-                kw['c'] = kw['c'][ind]
+            if 'c' in kw:
+                if (not isinstance(kw['c'], str)) and (len(kw['c']) == len(vec)):
+                    kw['c'] = kw['c'][ind]
             if not np.isscalar(kw['s']):
                 kw['s'] = kw['s'][ind]
             vectors_reduced.plot(
@@ -1125,9 +1126,12 @@ class Plot(Plugin):
             groups = list(group_order)
         points = []
         for ig, count in enumerate(plot_list):
+            gexist = data[group_by].unique()
             gby = data[[count, group_by]].groupby(group_by)
             clog = color_log or ((color_log is None) and (count in plot_listc))
             for ct in groups:
+                if ct not in gexist:
+                    continue
                 dfi = gby.get_group(ct)
                 frac_exp = (dfi[count] >= threshold).mean()
                 if clog:
@@ -1173,6 +1177,8 @@ class Plot(Plugin):
                 vM = vmax
 
             for gr in groups:
+                if gr not in gexist:
+                    continue
                 size = size_fun(points.at[(count, gr), 'fraction'])
                 shade = (points.at[(count, gr), 'level'] - vm) / (vM - vm)
                 points.at[(count, gr), 's'] = size
