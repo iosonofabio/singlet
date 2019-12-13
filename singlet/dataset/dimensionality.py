@@ -132,7 +132,8 @@ class DimensionalityReduction(Plugin):
         '''
         # scikit-learn's <0.19 has a bug
         import sklearn
-        vmaj, vmin, vrel = sklearn.__version__.split('.')
+        vers = sklearn.__version__.split('.')
+        vmaj, vmin = vers[:2]
         if (int(vmaj) == 0) and (int(vmin) < 19):
             from bhtsne import tsne
             use_bhtsne = True
