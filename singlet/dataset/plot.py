@@ -1104,7 +1104,7 @@ class Plot(Plugin):
         if group_axis == 'samples':
             countnames = self.dataset.featurenames
             plot_listc = [p for p in plot_list if p in countnames]
-            data = self.dataset.counts.loc[plot_listc].to_dense().fillna(0).T
+            data = self.dataset.counts.loc[plot_listc].fillna(0).T
             for count in plot_list:
                 if count not in data.columns:
                     data[count] = self.dataset.samplesheet[count]
@@ -1113,7 +1113,7 @@ class Plot(Plugin):
         else:
             countnames = self.dataset.samplenames
             plot_listc = [p for p in plot_list if p in countnames]
-            data = self.dataset.counts.loc[:, plot_listc].to_dense().fillna(0)
+            data = self.dataset.counts.loc[:, plot_listc].fillna(0)
             for count in plot_list:
                 if count not in data.columns:
                     data[count] = self.dataset.featuresheet[count]

@@ -12,7 +12,7 @@ singlet
 Single cell RNA-Seq analysis with quantitative phenotypes.
 
 Rationale
----------
+------------
 Singlet's specialty is dealing with single cell **quantitative phenotypes**: these are numerical properties of the single cells that enrich the usual transcript abundances. A few examples:
 
 - pathogen abundance in infected cells (`link1 <https://doi.org/10.7554/eLife.32942>`_, `link2 <https://doi.org/10.7554/eLife.32303>`_, `link3 <https://doi.org/10.1128/JVI.01778-18>`_)

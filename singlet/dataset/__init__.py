@@ -764,7 +764,8 @@ class Dataset():
             features='mapped',
             phenotypes=(),
             method='kolmogorov-smirnov',
-            additional_attributes=('log2_fold_change',)):
+            additional_attributes=('log2_fold_change', 'avg_self', 'avg_other'),
+            ):
         '''Statistically compare with another Dataset.
 
         Args:
@@ -790,6 +791,15 @@ class Dataset():
             comparisons for all features and phenotypes.
         '''
         res = []
+
+        additional_ordered = []
+        if 'log2_fold_change' in additional_attributes:
+            additional_ordered.append('log2_fold_change')
+        if 'avg_self' in additional_attributes:
+            additional_ordered.append('avg_self')
+        if 'avg_other' in additional_attributes:
+            additional_ordered.append('avg_other')
+
         if features:
             counts = self.counts
             counts_other = other.counts
@@ -852,9 +862,36 @@ class Dataset():
                     tmp = method(co1.values, co2.values)
                     res.append([fea, tmp[0], tmp[1]])
 
+            if len(additional_attributes):
+                i = 0
+                for (fea, co1), (_, co2) in zip(
+                        counts.iterrows(),
+                        counts_other.iterrows()):
+
+                    avg_self, avg_other = None, None
+                    if 'log2_fold_change' in additional_attributes:
+                        avg_self = co1.values.mean()
+                        avg_other = co2.values.mean()
+                        log2fc = np.log2(0.1 + avg_self) - np.log2(0.1 + avg_other)
+                        res[i].append(log2fc)
+
+                    if 'avg_self' in additional_attributes:
+                        if avg_self is None:
+                            avg_self = co1.values.mean()
+                        res[i].append(avg_self)
+
+                    if 'avg_other' in additional_attributes:
+                        if avg_other is None:
+                            avg_other = co1.values.mean()
+                        res[i].append(avg_other)
+
+                    i += 1
+
         if phenotypes:
             pheno = self.samplesheet.loc[:, phenotypes].T
             pheno_other = other.samplesheet.loc[:, phenotypes].T
+
+            i_pheno = len(res)
 
             if method == 'kolmogorov-smirnov':
                 from scipy.stats import ks_2samp
@@ -887,12 +924,32 @@ class Dataset():
                     tmp = method(val1.values, val2.values)
                     res.append([phe, tmp[0], tmp[1]])
 
-        df = pd.DataFrame(res, columns=['name', 'statistic', 'P-value'])
-        df.set_index('name', drop=True, inplace=True)
+            if len(additional_attributes):
+                for (fea, co1), (_, co2) in zip(
+                        counts.iterrows(),
+                        counts_other.iterrows()):
 
-        if len(additional_attributes):
-            # FIXME
-            pass
+                    avg_self, avg_other = None, None
+                    if 'log2_fold_change' in additional_attributes:
+                        avg_self = co1.values.mean()
+                        avg_other = co2.values.mean()
+                        log2fc = np.log2(0.1 + avg_self) - np.log2(0.1 + avg_other)
+                        res[i_pheno].append(log2fc)
+
+                    if 'avg_self' in additional_attributes:
+                        if avg_self is None:
+                            avg_self = co1.values.mean()
+                        res[i_pheno].append(avg_self)
+
+                    if 'avg_other' in additional_attributes:
+                        if avg_other is None:
+                            avg_other = co1.values.mean()
+                        res[i_pheno].append(avg_other)
+
+                    i_pheno += 1
+
+        df = pd.DataFrame(res, columns=['name', 'statistic', 'P-value'] + additional_ordered)
+        df.set_index('name', drop=True, inplace=True)
 
         return df
 
@@ -1028,6 +1085,7 @@ class Dataset():
             self,
             n,
             axis='samples',
+            within_metadata=None,
             with_replacement=False,
             inplace=False):
         '''Average samples or features based on metadata
@@ -1035,6 +1093,9 @@ class Dataset():
         Args:
             n (int): number of samples or features to take in the subsample.
             axis (string): Must be 'samples' or 'features'.
+            within_metadata (None or str): if None, subsample from the whole
+                dataset. If a column of sample/featuresheet, subsample n within
+                each unique value of that column.
             with_replacement (bool): whether to sample with replacement or not.
             inplace (bool): Whether to change the Dataset in place or return a
                 new one.
@@ -1047,16 +1108,34 @@ class Dataset():
             raise ValueError('axis must be "samples" or "features"')
 
         if axis == 'samples':
-            if with_replacement is False:
-                ind = np.arange(self.n_samples)
-                np.random.shuffle(ind)
-                ind = ind[:n]
-                samplenames = self.samplenames[ind]
-                samplenames_new = self.samplenames[ind]
+            if within_metadata is None:
+                if with_replacement is False:
+                    ind = np.arange(self.n_samples)
+                    np.random.shuffle(ind)
+                    ind = ind[:n]
+                    samplenames = self.samplenames[ind]
+                else:
+                    ind = np.random.randint(self.n_samples, size=n)
+                    samplenames = self.samplenames[ind]
             else:
-                ind = np.random.randint(self.n_samples, size=n)
-                samplenames = self.samplenames[ind]
-                samplenames_new = [sn+'_'+str(i+1) for i, sn in enumerate(self.samplenames[ind])]
+                samplenames = []
+                meta = self.samplesheet[[within_metadata]].copy()
+                meta['ind'] = np.arange(len(meta))
+                metau = np.unique(meta[within_metadata])
+                for mu in metau:
+                    ind = meta.loc[meta[within_metadata] == mu, 'ind'].values
+                    if with_replacement is False:
+                        np.random.shuffle(ind)
+                        ind = ind[:n]
+                        samplenames.extend(self.samplenames[ind].tolist())
+                    else:
+                        ii = np.random.randint(len(ind), size=n)
+                        samplenames.extend(self.samplenames[ind[ii]].tolist())
+
+            if with_replacement is False:
+                samplenames_new = list(samplenames)
+            else:
+                samplenames_new = [sn+'_'+str(i+1) for i, sn in enumerate(samplenames)]
 
             # Set counts
             counts = self.counts.__class__(
@@ -1085,16 +1164,19 @@ class Dataset():
                 featuresheet = self.featuresheet.copy()
 
         elif axis == 'features':
-            if with_replacement is False:
-                ind = np.arange(self.n_features)
-                np.random.shuffle(ind)
-                ind = ind[:n]
-                featurenames = self.featurenames[ind]
-                featurenames_new = self.featurenames[ind]
+            if within_metadata is None:
+                if with_replacement is False:
+                    ind = np.arange(self.n_features)
+                    np.random.shuffle(ind)
+                    ind = ind[:n]
+                    featurenames = self.featurenames[ind]
+                    featurenames_new = self.featurenames[ind]
+                else:
+                    ind = np.random.randint(self.n_features, size=n)
+                    featurenames = self.featurenames[ind]
+                    featurenames_new = [sn+'_'+str(i+1) for i, sn in enumerate(self.featurenames[ind])]
             else:
-                ind = np.random.randint(self.n_features, size=n)
-                featurenames = self.featurenames[ind]
-                featurenames_new = [sn+'_'+str(i+1) for i, sn in enumerate(self.featurenames[ind])]
+                raise NotImplementedError('Subsampling within groups of features not implemented yet!')
 
             counts = self.counts.loc[featurenames].copy()
             counts.index = featurenames_new
