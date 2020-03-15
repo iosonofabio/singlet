@@ -11,6 +11,7 @@ from ..counts_table import CountsTable
 from ..counts_table import CountsTableSparse
 from ..featuresheet import FeatureSheet
 from .plugins import Plugin
+from .utils import concatenate
 
 
 # Classes / functions
@@ -106,9 +107,7 @@ class Dataset():
             succeed. If one of the two Datasets has more metadata or
             features than the other, they cannot be added.
         '''
-        selfcopy = self.copy()
-        selfcopy += other
-        return selfcopy
+        return concatenate([self, other])
 
     def __iadd__(self, other):
         '''Merge two Datasets.
@@ -121,27 +120,9 @@ class Dataset():
             succeed. If one of the two Datasets has more metadata or
             features than the other, they cannot be added.
         '''
-        if set(self.samplemetadatanames) != set(other.samplemetadatanames):
-            raise IndexError('The Datasets have different sample metadata')
-        if set(self.featurenames) != set(other.featurenames):
-            raise IndexError('The Datasets have different features')
-        if set(self.featuremetadatanames) != set(other.featuremetadatanames):
-            raise IndexError('The Datasets have different feature metadata')
-
-        snames = self.samplenames
-        for samplename, meta in other.samplesheet.iterrows():
-            if samplename not in snames:
-                self.samplesheet.loc[samplename] = meta
-                self.counts.loc[:, samplename] = other.counts.loc[:, samplename]
-            else:
-                counts_col_other = other.counts.loc[:, samplename]
-                if isinstance(other._counts, CountsTableSparse):
-                    counts_col_other = counts_col_other.to_dense()
-                if isinstance(self._counts, CountsTableSparse):
-                    self.counts.loc[:, samplename] = (self.counts.loc[:, samplename].to_dense() + counts_col_other).to_sparse()
-                else:
-                    self.counts.loc[:, samplename] += counts_col_other
-
+        newself = concatenate([self, other])
+        self._counts = newself._counts
+        self._samplesheet = newself._samplesheet
         return self
 
     def _set_plugins(self, plugins=None):
@@ -226,7 +207,10 @@ class Dataset():
             self._featuresheet = FeatureSheet.from_sheetname(featuresheet)
 
         # Uniform axes across data and metadata
-        self._samplesheet = self._samplesheet.loc[self._counts.columns]
+        # TODO: this runs into a bug if cell names are boolean (e.g. after
+        # averaging), hence we make a patchup catch
+        if set(self._counts.columns) != set([False, True]):
+            self._samplesheet = self._samplesheet.loc[self._counts.columns]
         #self._featuresheet = self._featuresheet.loc[self._counts.index]
 
     def _from_dataset(self, dataset):
@@ -1054,7 +1038,8 @@ class Dataset():
 
             return Dataset(
                     counts_table=counts,
-                    featuresheet=featuresheet)
+                    featuresheet=featuresheet,
+                    )
 
         elif axis == 'features':
             if column not in self.featuresheet.columns:
@@ -1148,6 +1133,8 @@ class Dataset():
                 # dataset if special, to avoid infinite loops
                 if prop == 'dataset':
                     counts.dataset = None
+                elif not hasattr(self.counts, prop):
+                    continue
                 else:
                     setattr(counts, prop,
                             copy.copy(getattr(self.counts, prop)))

@@ -147,8 +147,6 @@ class DimensionalityReduction(Plugin):
                 (n - 1.)/3))
 
         X = self.dataset.counts.values
-        if isinstance(self.dataset.counts, pd.SparseDataFrame):
-            X[np.isnan(X)] = 0
 
         if use_bhtsne:
             # this version does not require pre-whitening

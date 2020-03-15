@@ -17,7 +17,7 @@ class Graph(Plugin):
             axis='samples',
             n_neighbors=20,
             threshold=0.2,
-            return_sparse=True,
+            return_kind='sparse',
             metric='pearson',
             metric_kwargs=None,
             ):
@@ -27,8 +27,9 @@ class Graph(Plugin):
             axis (str): 'samples' or 'features'
             n_neighbors (int): number of neighbors to include
             threshold (float): similarity threshold to cut neighbors at
-            return_sparse (bool): return sparse matrix instead of raw lshknn
-                output.
+            return_kind (str): if 'sparse', return sparse matrix; if 'knn',
+                return (neighbors, similarities, n_neighbors); if 'edges',
+                return list of edges of the knn graph.
             metric (str): metric to use to calculate the distance matrix. If
                 this is a distance metric, similarity is -distance.
             metric_kwargs (dict or None): dictionary of keyword arguments for
@@ -91,8 +92,16 @@ class Graph(Plugin):
                 similarity[-1].append(row[i])
             nn_neighbors.append(len(indi))
 
-        if not return_sparse:
+        if return_kind == 'knn':
             return (knn, similarity, nn_neighbors)
+
+        elif return_kind == 'edges':
+            edges = set()
+            for nei in knn:
+                for edge in nei:
+                    edges.add(frozenset(edge))
+            edges = list(map(list, edges))
+            return edges
 
         data = []
         i = []
@@ -156,7 +165,7 @@ class Graph(Plugin):
                 )
         (knn, similarity, n_neighbors) = c()
 
-        if not return_sparse:
+        if return_sparse:
             return (knn, similarity, n_neighbors)
 
         data = []

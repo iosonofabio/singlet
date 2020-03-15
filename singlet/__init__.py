@@ -6,5 +6,5 @@
 from .samplesheet import SampleSheet
 from .featuresheet import FeatureSheet
 from .counts_table import CountsTable, CountsTableSparse, CountsTableXR
-from .dataset import Dataset
+from .dataset import Dataset, concatenate
 from ._version import version

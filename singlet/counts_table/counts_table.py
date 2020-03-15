@@ -254,14 +254,14 @@ class CountsTable(pd.DataFrame):
         Args:
             method (string or function): The method to use for normalization.
             One of 'counts_per_million', 'counts_per_thousand_spikeins',
-            'counts_per_thousand_features', 'counts_per_million_column'.
-            If this argument is a function, its signature depends on the
-            inplace argument. If inplace=False, it must take the CountsTable
-            as input and return the normalized one as output. If inplace=True,
-            it must take the CountsTableXR as input and modify it in place.
-            Notice that if inplace=True and you do non-inplace operations you
-            might lose the _metadata properties. You can end your function by
-            self[:] = <normalized counts>.
+            'counts_per_thousand_features', 'counts_per_million_column',
+            'counts_per_ten_thousand'. If this argument is a function, its
+            signature depends on the inplace argument. If inplace=False, it
+            must take the CountsTable as input and return the normalized one
+            as output. If inplace=True, it must take the CountsTable as input
+            and modify it in place. Notice that if inplace=True and you do
+            non-inplace operations you might lose the _metadata properties. You
+            can end your function by self[:] = <normalized counts>.
             include_spikeins (bool): Whether to include spike-ins in the
             normalization and result.
             inplace (bool): Whether to modify the CountsTableXR in place or
@@ -288,12 +288,15 @@ class CountsTable(pd.DataFrame):
             raise ValueError('CountsTable is already normalized')
 
         if inplace:
-            if method == 'counts_per_million':
+            if method in ('counts_per_million', 'counts_per_ten_thousand'):
                 self.exclude_features(
                         spikeins=(not include_spikeins),
                         other=True,
                         inplace=True)
-                self[:] *= 1e6 / self.sum(axis=0)
+                if method == 'counts_per_million':
+                    self[:] *= 1e6 / self.sum(axis=0)
+                else:
+                    self[:] *= 1e4 / self.sum(axis=0)
             elif method == 'counts_per_thousand_spikeins':
                 spikeins = self.get_spikeins().sum(axis=0)
                 self.exclude_features(
@@ -327,10 +330,13 @@ class CountsTable(pd.DataFrame):
             self._normalized = method
 
         else:
-            if method == 'counts_per_million':
+            if method in ('counts_per_million', 'counts_per_ten_thousand'):
                 counts = self.exclude_features(spikeins=(not include_spikeins), other=True)
                 norm = counts.sum(axis=0)
-                counts_norm = 1e6 * counts / norm
+                if method == 'counts_per_million':
+                    counts_norm = 1e6 * counts / norm
+                else:
+                    counts_norm = 1e4 * counts / norm
             elif method == 'counts_per_thousand_spikeins':
                 counts = self.exclude_features(spikeins=(not include_spikeins), other=True)
                 norm = self.get_spikeins().sum(axis=0)
@@ -358,6 +364,8 @@ class CountsTable(pd.DataFrame):
                 # dataset if special, to avoid infinite loops
                 if prop == 'dataset':
                     counts_norm.dataset = None
+                elif not hasattr(self.counts, prop):
+                    continue
                 else:
                     setattr(counts_norm, prop, copy.copy(getattr(self, prop)))
             counts_norm._normalized = method
@@ -483,3 +491,75 @@ class CountsTable(pd.DataFrame):
             counts = self.copy()
             counts.loc[:] = out
             return counts
+
+    def smoothen_neighbors(
+            self,
+            edges,
+            axis='samples',
+            inplace=False,
+            ):
+        '''Smoothen feature counts with the neighbors from an edge list
+
+        Args:
+            edges (list): a list of pairs with integer indices of the
+                neighboring samples. Each edge should be there once, e.g.
+                avoid listing both [0, 1] and [1, 0]. Self-edges should also
+                be avoided
+            axis (str): 'samples' or 'features'
+            inplace (bool): Whether to modify the CountsTableXR in place or
+            return a new one.
+
+        Returns:
+            CountsTable with the smoothened counts.
+
+        NOTE: each pair should be there once
+        '''
+        import copy
+
+        if axis == 'samples':
+            axisn = 1
+        elif axis == 'features':
+            axisn = 0
+        else:
+            raise ValueError('Axis not found')
+
+        mat = self.values
+        out = mat.copy()
+        n_neighbors = np.ones(out.shape[axisn], dtype=out.dtype)
+
+        for i0, i1 in edges:
+            if axis == 'samples':
+                out[:, i0] += mat[:, i1]
+                out[:, i1] += mat[:, i0]
+            else:
+                out[i0] += mat[i1]
+                out[i1] += mat[i0]
+
+            n_neighbors[i0] += 1
+            n_neighbors[i1] += 1
+
+        if axis == 'samples':
+            out /= n_neighbors
+        else:
+            out = (out.T / n_neighbors).T
+
+        if inplace:
+            self[:] = out
+        else:
+            out = CountsTable(
+                out,
+                index=self.index,
+                columns=self.columns,
+                )
+
+            # Shallow copy of metadata
+            for prop in self._metadata:
+                # dataset if special, to avoid infinite loops
+                if prop == 'dataset':
+                    out.dataset = None
+                elif not hasattr(self.counts, prop):
+                    continue
+                else:
+                    setattr(out, prop, copy.copy(getattr(self, prop)))
+
+            return out
