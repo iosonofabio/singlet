@@ -399,6 +399,7 @@ class Plot(Plugin):
             color_by=None,
             color_log=None,
             cmap='viridis',
+            default_color='darkgrey',
             ax=None,
             tight_layout=True,
             high_on_top=False,
@@ -406,10 +407,12 @@ class Plot(Plugin):
         '''Scatter samples or features after dimensionality reduction.
 
         Args:
-            vectors_reduced (pandas.Dataframe): matrix of coordinates of the
-                samples/features in low dimensions. Rows are samples/features,
-                columns (typically 2 or 3) are the component in the
-                low-dimensional embedding.
+            vectors_reduced (tuple of str or pandas.Dataframe): if a tuple of
+                str, the names of the columns with the coordinates in the
+                samplesheet or featuresheet. If a pandas.Dataframe, the matrix
+                of coordinates of the samples/features in low dimensions. Rows
+                are samples/features, columns (typically 2 or 3) are the
+                component in the low-dimensional embedding.
             color_by (string or None): color sample dots by phenotype or
                 expression of a certain feature.
             color_log (bool or None): use log of phenotype/expression in the
@@ -422,6 +425,8 @@ class Plot(Plugin):
                 (default), a new figure with one axes is created. ax must
                 not strictly be a matplotlib class, but it must have
                 common methods such as 'plot' and 'set'.
+            default_color (str or matplotlib color): default color for missing
+                categories, NaNs, and no coloring at all
             tight_layout (bool or dict): Whether to call
                 matplotlib.pyplot.tight_layout at the end of the
                 plotting. If it is a dict, pass it unpacked to that
@@ -436,14 +441,26 @@ class Plot(Plugin):
         NOTE: if a categorical colormap is used, the mapping of category to
         color is stored into ax._singlet_cmap.
         '''
-        if (vectors_reduced.index == self.dataset.samplesheet.index).all():
-            data = self.dataset.counts
-            metadata = self.dataset.samplesheet
-        elif (vectors_reduced.index == self.dataset.featuresheet.index).all():
-            data = self.dataset.counts.T
-            metadata = self.dataset.featuresheet
+        if isinstance(vectors_reduced, tuple):
+            if pd.Index(vectors_reduced).isin(self.dataset.samplesheet.columns).all():
+                vectors_reduced = self.dataset.samplesheet[list(vectors_reduced)]
+                data = self.dataset.counts
+                metadata = self.dataset.samplesheet
+            elif pd.Index(vectors_reduced).isin(self.dataset.featuresheet.columns).all():
+                vectors_reduced = self.dataset.featuresheet[list(vectors_reduced)]
+                data = self.dataset.counts.T
+                metadata = self.dataset.featuresheet
+            else:
+                raise ValueError('reduced_vectors is not consistent with samples nor features')
         else:
-            raise ValueError('reduced_vectors is not consistent with samples nor features')
+            if (vectors_reduced.index == self.dataset.samplesheet.index).all():
+                data = self.dataset.counts
+                metadata = self.dataset.samplesheet
+            elif (vectors_reduced.index == self.dataset.featuresheet.index).all():
+                data = self.dataset.counts.T
+                metadata = self.dataset.featuresheet
+            else:
+                raise ValueError('reduced_vectors is not consistent with samples nor features')
 
         if ax is None:
             fig, ax = plt.subplots(nrows=1, ncols=1, figsize=(13, 8))
@@ -455,7 +472,7 @@ class Plot(Plugin):
         tiers = np.ones(vectors_reduced.shape[0])
 
         if color_by is None:
-            kwargs['color'] = 'darkgrey'
+            kwargs['color'] = default_color
         else:
             if isinstance(cmap, str):
                 cmap = cm.get_cmap(cmap)
@@ -468,8 +485,6 @@ class Plot(Plugin):
                 color_by_phenotype = True
             elif color_by in data.index:
                 color_data = data.loc[color_by]
-                if isinstance(color_data, pd.SparseSeries):
-                    color_data = color_data.fillna(0).to_dense()
                 is_numeric = True
                 color_by_phenotype = False
             else:
@@ -482,10 +497,13 @@ class Plot(Plugin):
                 if callable(cmap):
                     c_unique = cmap(np.linspace(0, 1, len(cd_unique)))
                 elif isinstance(cmap, dict):
-                    c_unique = np.asarray([cmap[x] for x in cd_unique])
+                    c_unique = np.asarray([cmap.get(x, default_color) for x in cd_unique])
                 else:
                     c_unique = np.asarray(cmap)
+
+                # Assign the actual colors to categories. Missing ones default
                 c = c_unique[[cd_unique.index(x) for x in color_data.values]]
+
                 # For categories, we have to tell the user about the mapping
                 if not hasattr(ax, '_singlet_cmap'):
                     ax._singlet_cmap = {}
@@ -523,7 +541,7 @@ class Plot(Plugin):
                 c = np.zeros((len(color_data), 4), float)
                 c[unmask] = cmap(cd_norm[unmask])
                 # Grey-ish semitransparency for NaNs
-                c[~unmask] = [0.75] * 3 + [0.3]
+                c[~unmask] = mpl.colors.to_rgba(default_color, alpha=0.3)
 
             kwargs['c'] = c
 
@@ -537,9 +555,9 @@ class Plot(Plugin):
                     kw['c'] = kw['c'][ind]
             if not np.isscalar(kw['s']):
                 kw['s'] = kw['s'][ind]
-            vectors_reduced.plot(
-                    x=vectors_reduced.columns[0],
-                    y=vectors_reduced.columns[1],
+            vec.plot(
+                    x=vec.columns[0],
+                    y=vec.columns[1],
                     kind='scatter',
                     ax=ax,
                     **kw)
@@ -1219,5 +1237,142 @@ class Plot(Plugin):
                 'fraction_size_map': size_fun,
                 'level_color_map': cmap,
                 }
+
+        return ax
+
+    def plot_group_abundance_changes(
+            self,
+            groupby,
+            along,
+            kind='number',
+            group_order=None,
+            along_order=None,
+            scatter=True,
+            interpolate=False,
+            cmap=None,
+            scatter_kwargs=None,
+            interpolate_kwargs=None,
+            ax=None,
+            log=False,
+            ymin=0,
+            tight_layout=True,
+            legend=False,
+            ):
+        '''Plot changes in sample abundance groups (e.g. in time)
+
+        Args:
+            groupby (string): column of the SampleSheet to group samples by
+            along (string): column of the SampleSheet to plot abundances along
+            kind (string): 'number', 'fraction', or 'percent' based on what
+                kind of normalization across groups is requested
+            group_order (sequence or None): optional sequence of values found
+                within the "groupby" column to decide the order of the legend
+            along_order (sequence or None): optional sequence of values found
+                within the "along" column to decide the order of the dots
+            scatter (bool): whether to show the scatter plot
+            interpolate (bool): whether to show a monotonic spline
+                interpolation between subsequent values in the "along" column
+            cmap (dict, list, or None): a dictionary or a list of colors to
+                plot the different groups. If a list, colors are paired to
+                groups in the same order (see "group_order" argument)
+            scatter_kwargs (dict or None): additional keyword arguments for the
+                scatter plot
+            interpolate_kwargs (dict or None): additional keyword arguments for
+                the line plot of the interpolation
+            ax (matplotlib.axes.Axes): The axes to plot into. If None
+                (default), a new figure with one axes is created. ax must
+                not strictly be a matplotlib class, but it must have
+                common methods such as 'plot' and 'set'.
+            log (False or float): whether to log the abundances. If not False,
+                sets the base of the logarithm
+            ymin (float): pseudocount to enable logarithmic plots of abundance
+                as opposed to the default 0
+            tight_layout (bool or dict): Whether to call
+                matplotlib.pyplot.tight_layout at the end of the
+                plotting. If it is a dict, pass it unpacked to that function.
+            legend (bool or dict): If True, call ax.legend(). If a dict, pass
+                as **kwargs to ax.legend.
+        Returns:
+            matplotlib.pyplot axes with the abundance changes
+        '''
+        from scipy import interpolate
+
+        data = self.dataset.samplesheet[[groupby, along]].copy()
+        data['__count__'] = 1
+        data = (data.groupby([groupby, along])
+                    .count()
+                    .loc[:, '__count__']
+                    .unstack(fill_value=0))
+
+        if kind == 'fraction':
+            data = 1.0 * data / data.sum(axis=0)
+        elif kind == 'percent':
+            data = 100.0 * data / data.sum(axis=0)
+        elif kind != 'number':
+            raise ValueError('kind not supported')
+
+        data = np.maximum(data, ymin)
+
+        if log:
+            data = np.log(data) / np.log(log)
+
+        if ax is None:
+            fig, ax = plt.subplots(nrows=1, ncols=1, figsize=(13, 8))
+
+        if group_order is not None:
+            data = data.loc[group_order]
+
+        if along_order is not None:
+            data = data.loc[:, along_order]
+
+        x = np.arange(data.shape[1])
+        xorder = data.columns
+        gorder = data.index
+
+        for ig, go in enumerate(gorder):
+            y = data.loc[go]
+
+            kwargs = {}
+            if isinstance(cmap, dict):
+                kwargs['color'] = cmap[go]
+            elif cmap is not None:
+                kwargs['color'] = cmap[ig]
+
+            sc_kwargs = kwargs.copy()
+            sc_kwargs.update(scatter_kwargs)
+
+            ax.scatter(
+                    x, y,
+                    label=go,
+                    **sc_kwargs,
+                    )
+
+            if interpolate:
+                outx = np.linspace(x[0], x[-1], 100)
+                outy = interpolate.pchip_interpolate(x, y, outx)
+
+                in_kwargs = kwargs.copy()
+                in_kwargs.update(interpolate_kwargs)
+
+                ax.plot(outx, outy,
+                        **in_kwargs,
+                        )
+
+        ax.set_xticks(x)
+        ax.set_xticklabels(xorder)
+        ax.set_xlabel(along)
+        ax.set_ylabel('{:} of samples'.format(kind.capitalize()))
+
+        if legend:
+            if np.isscalar(legend):
+                ax.legend()
+            else:
+                ax.legend(**legend)
+
+        if tight_layout:
+            if isinstance(tight_layout, dict):
+                plt.tight_layout(**tight_layout)
+            else:
+                plt.tight_layout()
 
         return ax

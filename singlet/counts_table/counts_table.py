@@ -130,7 +130,7 @@ class CountsTable(pd.DataFrame):
         '''
         clog = np.log(self.pseudocount + self) / np.log(base)
         if inplace:
-            self[:] = clog.values
+            self.values[:] = clog.values
         else:
             return clog
 
@@ -147,7 +147,7 @@ class CountsTable(pd.DataFrame):
         '''
         cunlog = base**self - self.pseudocount
         if inplace:
-            self[:] = cunlog.values
+            self.values[:] = cunlog.values
         else:
             return cunlog
 
@@ -248,6 +248,7 @@ class CountsTable(pd.DataFrame):
             method='counts_per_million',
             include_spikeins=False,
             inplace=False,
+            fillna=None,
             **kwargs):
         '''Normalize counts and return new CountsTable.
 
@@ -264,7 +265,7 @@ class CountsTable(pd.DataFrame):
             can end your function by self[:] = <normalized counts>.
             include_spikeins (bool): Whether to include spike-ins in the
             normalization and result.
-            inplace (bool): Whether to modify the CountsTableXR in place or
+            inplace (bool): Whether to modify the CountsTable in place or
             return a new one.
 
         Returns:
@@ -294,16 +295,16 @@ class CountsTable(pd.DataFrame):
                         other=True,
                         inplace=True)
                 if method == 'counts_per_million':
-                    self[:] *= 1e6 / self.sum(axis=0)
+                    self.values[:] *= 1e6 / self.sum(axis=0)
                 else:
-                    self[:] *= 1e4 / self.sum(axis=0)
+                    self.values[:] *= 1e4 / self.sum(axis=0)
             elif method == 'counts_per_thousand_spikeins':
                 spikeins = self.get_spikeins().sum(axis=0)
                 self.exclude_features(
                         spikeins=(not include_spikeins),
                         other=True,
                         inplace=True)
-                self[:] *= 1e3 / spikeins
+                self.values[:] *= 1e3 / spikeins
             elif method == 'counts_per_thousand_features':
                 if 'features' not in kwargs:
                     raise ValueError('Set features=<list of normalization features>')
@@ -312,7 +313,7 @@ class CountsTable(pd.DataFrame):
                         spikeins=(not include_spikeins),
                         other=True,
                         inplace=True)
-                self[:] *= 1e3 / features
+                self.values[:] *= 1e3 / features
             elif method == 'counts_per_million_column':
                 if 'column' not in kwargs:
                     raise ValueError('Specify a samplesheet column with column=<mycolumn>')
@@ -320,12 +321,15 @@ class CountsTable(pd.DataFrame):
                         spikeins=(not include_spikeins),
                         other=True,
                         inplace=True)
-                self[:] *= 1e6 / self.dataset.samplesheet[kwargs['column']].values
+                self.values[:] *= 1e6 / self.dataset.samplesheet[kwargs['column']].values
             elif callable(method):
                 method(self)
                 method = 'custom'
             else:
                 raise ValueError('Method not understood')
+
+            if fillna is not None:
+                self.values[np.isnan(self.values)] = fillna
 
             self._normalized = method
 
@@ -364,10 +368,14 @@ class CountsTable(pd.DataFrame):
                 # dataset if special, to avoid infinite loops
                 if prop == 'dataset':
                     counts_norm.dataset = None
-                elif not hasattr(self.counts, prop):
+                elif not hasattr(self, prop):
                     continue
                 else:
                     setattr(counts_norm, prop, copy.copy(getattr(self, prop)))
+
+            if fillna is not None:
+                counts_norm.values[np.isnan(counts_norm.values)] = fillna
+
             counts_norm._normalized = method
             return counts_norm
 
@@ -496,6 +504,7 @@ class CountsTable(pd.DataFrame):
             self,
             edges,
             axis='samples',
+            n_iterations=1,
             inplace=False,
             ):
         '''Smoothen feature counts with the neighbors from an edge list
@@ -506,7 +515,9 @@ class CountsTable(pd.DataFrame):
                 avoid listing both [0, 1] and [1, 0]. Self-edges should also
                 be avoided
             axis (str): 'samples' or 'features'
-            inplace (bool): Whether to modify the CountsTableXR in place or
+            n_iterations (int): the number of times to smoothen over the
+                same edge list
+            inplace (bool): Whether to modify the CountsTable in place or
             return a new one.
 
         Returns:
@@ -525,26 +536,38 @@ class CountsTable(pd.DataFrame):
 
         mat = self.values
         out = mat.copy()
-        n_neighbors = np.ones(out.shape[axisn], dtype=out.dtype)
 
-        for i0, i1 in edges:
-            if axis == 'samples':
-                out[:, i0] += mat[:, i1]
-                out[:, i1] += mat[:, i0]
-            else:
-                out[i0] += mat[i1]
-                out[i1] += mat[i0]
-
-            n_neighbors[i0] += 1
-            n_neighbors[i1] += 1
-
+        # Make lists of neighbors
         if axis == 'samples':
-            out /= n_neighbors
+            knn = [[] for x in mat.T]
         else:
-            out = (out.T / n_neighbors).T
+            knn = [[] for x in mat]
+        for i0, i1 in edges:
+            knn[i0].append(i1)
+            knn[i1].append(i0)
+
+        # Smoothen
+        for i0, kn in enumerate(knn):
+            if not kn:
+                continue
+            kn = np.sort(kn)
+            if axis == 'samples':
+                out[:, i0] += mat[:, kn].sum(axis=1)
+                out[:, i0] /= len(kn) + 1
+            else:
+                out[i0] += mat[kn].sum(axis=0)
+                out[i0] /= len(kn) + 1
 
         if inplace:
-            self[:] = out
+            self.values[:] = out
+
+            if n_iterations > 1:
+                self.smoothen_neighbors(
+                    edges,
+                    axis=axis,
+                    n_iterations=n_iterations - 1,
+                    inplace=True
+                )
         else:
             out = CountsTable(
                 out,
@@ -557,7 +580,76 @@ class CountsTable(pd.DataFrame):
                 # dataset if special, to avoid infinite loops
                 if prop == 'dataset':
                     out.dataset = None
-                elif not hasattr(self.counts, prop):
+                elif not hasattr(self, prop):
+                    continue
+                else:
+                    setattr(out, prop, copy.copy(getattr(self, prop)))
+
+            if n_iterations > 1:
+                out.smoothen_neighbors(
+                    edges,
+                    axis=axis,
+                    n_iterations=n_iterations - 1,
+                    inplace=True
+                )
+
+            return out
+
+    def smoothen(
+            self,
+            window_size,
+            axis='samples',
+            inplace=False,
+            ):
+        '''Smoothen counts with the surroundings (convolution)
+
+        Args:
+            window_size (int): the number of neighbors to use for the
+                convolution
+            axis (str): 'samples' or 'features'
+            inplace (bool): Whether to modify the CountsTable in place or
+            return a new one.
+
+        Returns:
+            CountsTable with the smoothened counts.
+
+        This method is often called after sorting the samples along a 1
+        dimensional axis (e.g. pseudotime, quantitative phenotype), e.g.:
+
+        ds = Dataset(...)
+        ds.sort_by_metadata('samples', 'pseudotime', inplace=True)
+        ds.counts.smoothen(5, inplace=True)
+        '''
+        import copy
+        from scipy.signal import convolve2d
+
+        if axis == 'samples':
+            kernel = np.ones((1, window_size)) / window_size
+        elif axis == 'features':
+            kernel = np.ones((window_size, 1)) / window_size
+        else:
+            raise ValueError('Axis not found')
+
+        out = convolve2d(
+                self.values,
+                kernel,
+                mode='same',
+                )
+        if inplace:
+            self.values[:] = out
+        else:
+            out = CountsTable(
+                out,
+                index=self.index,
+                columns=self.columns,
+                )
+
+            # Shallow copy of metadata
+            for prop in self._metadata:
+                # dataset if special, to avoid infinite loops
+                if prop == 'dataset':
+                    out.dataset = None
+                elif not hasattr(self, prop):
                     continue
                 else:
                     setattr(out, prop, copy.copy(getattr(self, prop)))

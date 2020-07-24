@@ -76,34 +76,34 @@ def reload_config():
     config_filename = os.getenv(
             'SINGLET_CONFIG_FILENAME',
             os.getenv('HOME') + '/.singlet/config.yml')
+
+    config = {'io': {}}
+
     try:
         with open(config_filename) as stream:
-            config = yaml.load(stream)
-        if config is None:
-            config = {}
+            config.update(yaml.safe_load(stream))
     except IOError:
-        config = {}
+        pass
 
     # Warnings that should be seen only once
     config['_once_warnings'] = []
 
     # Process config
-    if 'io' in config:
-        if 'count_tables' in config['io']:
-            for tablename, sheet in config['io']['count_tables'].items():
-                config['io']['count_tables'][tablename] = _normalize_count_table(sheet)
+    if 'count_tables' in config['io']:
+        for tablename, sheet in config['io']['count_tables'].items():
+            config['io']['count_tables'][tablename] = _normalize_count_table(sheet)
 
-        if 'samplesheets' in config['io']:
-            for sheetname, sheet in config['io']['samplesheets'].items():
-                config['io']['samplesheets'][sheetname] = _normalize_samplesheet(sheet)
+    if 'samplesheets' in config['io']:
+        for sheetname, sheet in config['io']['samplesheets'].items():
+            config['io']['samplesheets'][sheetname] = _normalize_samplesheet(sheet)
 
-        if 'featuresheets' in config['io']:
-            for sheetname, sheet in config['io']['featuresheets'].items():
-                config['io']['featuresheets'][sheetname] = _normalize_featuresheet(sheet)
+    if 'featuresheets' in config['io']:
+        for sheetname, sheet in config['io']['featuresheets'].items():
+            config['io']['featuresheets'][sheetname] = _normalize_featuresheet(sheet)
 
-        if 'datasets' in config['io']:
-            for datasetname, dataset in config['io']['datasets'].items():
-                config['io']['datasets'][datasetname] = _normalize_dataset(dataset)
+    if 'datasets' in config['io']:
+        for datasetname, dataset in config['io']['datasets'].items():
+            config['io']['datasets'][datasetname] = _normalize_dataset(dataset)
 
     return config
 

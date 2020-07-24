@@ -22,11 +22,25 @@ def parse_dataset(
 
         samplesheet = pd.DataFrame(data=[])
         for key, val in ds.ca.items():
-            samplesheet[key] = val
+            # 2D tables can be a single ds.ca/ra object
+            if val.ndim == 2:
+                for i in range(val.shape[1]):
+                    samplesheet[key+'-'+str(i+1)] = val[:, i]
+            elif val.ndim == 1:
+                samplesheet[key] = val
+            else:
+                print('WARNING: 3+D metadata, skipped: {:}'.format(key))
 
         featuresheet = pd.DataFrame(data=[])
         for key, val in ds.ra.items():
-            featuresheet[key] = val
+            # 2D tables can be a single ds.ca/ra object
+            if val.ndim == 2:
+                for i in range(val.shape[1]):
+                    featuresheet[key+'-'+str(i+1)] = val[:, i]
+            elif val.ndim == 1:
+                featuresheet[key] = val
+            else:
+                print('WARNING: 3+D metadata, skipped: {:}'.format(key))
 
         if index_samples is not None:
             samplesheet.set_index(index_samples, drop=False, inplace=True)

@@ -718,6 +718,9 @@ class Dataset():
             drop (bool): Whether to drop the column from the metadata table.
             inplace (bool): Whether to change the Dataset in place or return a
                 new one.
+
+        Returns:
+            If inplace==True, None. Otherwise, a new Dataset.
         '''
         if axis not in ('samples', 'features'):
             raise ValueError('axis must be "samples" or "features"')
@@ -741,6 +744,145 @@ class Dataset():
                     drop=drop,
                     inplace=True)
             return other
+
+    def merge_duplicates(
+            self,
+            axis,
+            column,
+            keep='first',
+            inplace=False,
+            ):
+        '''Merge duplicate features or samples, adding together their counts
+
+        Args:
+            axis (string): Must be 'samples' or 'features'.
+            column (string): Must be a column of the samplesheet (for
+                axis='samples') or of the featuresheet (for axis='features')
+                with potentially duplicate names of samples or features.
+            keep (str): Which of the metadata rows to keep. Must be 'first',
+                'last', or 'random'.
+            inplace (bool): Whether to change the Dataset in place or return a
+                new one.
+
+        Returns:
+            If inplace==True, None. Otherwise, a new Dataset.
+        '''
+        from collections import Counter, defaultdict
+
+        if axis not in ('samples', 'features'):
+            raise ValueError('axis must be "samples" or "features"')
+
+        cou = Counter()
+        tra = defaultdict(list)
+
+        if axis == 'features':
+            for idx, val in self.featuresheet[column].items():
+                tra[val].append(idx)
+                cou[val] += 1
+            index_new = []
+            counts = np.zeros(
+                        (len(cou), self.n_samples),
+                        dtype=self.counts.values.dtype,
+                        )
+            n = 0
+            todo = []
+            for idx, val in self.featuresheet[column].items():
+                if cou[val] == 1:
+                    index_new.append(idx)
+                    counts[n] += self.counts.loc[idx]
+                    n += 1
+                else:
+                    trai = tra[val]
+                    if keep == 'first':
+                        jdx = trai[0]
+                    elif keep == 'last':
+                        jdx = trai[-1]
+                    else:
+                        jdx = trai[np.random.randint(len(trai))]
+
+                    # New row
+                    if idx == jdx:
+                        index_new.append(idx)
+                        counts[n] += self.counts.loc[idx]
+                        n += 1
+
+                    else:
+                        todo.append((idx, jdx))
+            counts = self.counts.__class__(
+                counts,
+                index=pd.Index(
+                    index_new, name=self.featuresheet.index.name,
+                    ),
+                columns=self.samplenames,
+                )
+
+            for idx, jdx in todo:
+                counts.loc[jdx] += self.counts.loc[idx]
+            del todo
+
+            if inplace:
+                self._counts = counts
+                self._featuresheet = self._featuresheet.loc[self._counts.index]
+            else:
+                return self.__class__(
+                    counts=counts,
+                    featuresheet=self._featuresheet.loc[counts.index].copy(),
+                    samplesheet=self._samplesheet.copy(),
+                    )
+
+        else:
+            for idx, val in self.samplesheet[column].items():
+                tra[val].append(idx)
+                cou[val] += 1
+            index_new = []
+            counts = np.zeros(
+                        (self.n_features, len(cou)),
+                        dtype=self.counts.values.dtype,
+                        )
+            n = 0
+            todo = []
+            for idx, val in self.samplesheet[column].items():
+                if cou[val] == 1:
+                    index_new.append(idx)
+                    counts[:, n] += self.counts.loc[:, idx]
+                    n += 1
+                else:
+                    trai = tra[val]
+                    if keep == 'first':
+                        jdx = trai[0]
+                    elif keep == 'last':
+                        jdx = trai[-1]
+                    else:
+                        jdx = trai[np.random.randint(len(trai))]
+
+                    # New row
+                    if idx == jdx:
+                        index_new.append(idx)
+                        counts[:, n] += self.counts.loc[:, idx]
+                        n += 1
+
+                    else:
+                        todo.append((idx, jdx))
+            counts = self.counts.__class__(
+                counts,
+                index=self.featurenames,
+                columns=pd.Index(
+                    index_new, name=self.samplesheet.index.name),
+                )
+
+            for idx, jdx in todo:
+                counts.loc[:, jdx] += self.counts.loc[:, idx]
+            del todo
+
+            if inplace:
+                self._counts = counts
+                self._samplesheet = self._sampleesheet.loc[self._counts.columns]
+            else:
+                return self.__class__(
+                    counts=counts,
+                    samplesheet=self._samplesheet.loc[counts.columns].copy(),
+                    featuresheet=self._featuresheet.copy(),
+                    )
 
     def compare(
             self,
@@ -995,16 +1137,16 @@ class Dataset():
             plugins=plugins,
             )
 
-    def average(self, axis, column):
+    def average(self, axis, by):
         '''Average samples or features based on metadata
 
 
         Args:
             axis (string): Must be 'samples' or 'features'.
-            column (string): Must be a column of the samplesheet (for
-                axis='samples') or of the featuresheet (for axis='features').
-                Samples or features with a common value in this column are
-                averaged over.
+            by (string or list): Must be one or more column of the samplesheet
+                (for axis='samples') or of the featuresheet (for
+                axis='features'). Samples or features with a common value in
+                these columns are averaged over.
         Returns:
             A Dataset with the averaged counts.
 
@@ -1015,30 +1157,53 @@ class Dataset():
         if axis not in ('samples', 'features'):
             raise ValueError('axis must be "samples" or "features"')
 
-        if axis == 'samples':
-            if column not in self.samplesheet.columns:
-                raise ValueError(
-                    '{:} is not a column of the SampleSheet'.format(column))
+        by_string = isinstance(by, str)
+        if by_string:
+            by = [by]
+        else:
+            by = list(by)
 
-            vals = pd.Index(np.unique(self.samplesheet[column]), name=column)
+        if axis == 'samples':
+            for column in by:
+                if column not in self.samplesheet.columns:
+                    raise ValueError(
+                        '{:} is not a column of the SampleSheet'.format(column))
+
+            if by_string:
+                vals = pd.Index(
+                        self.samplesheet[by[0]].drop_duplicates(),
+                        name=by[0])
+            else:
+                vals = pd.Index(self.samplesheet[by].drop_duplicates())
             n_conditions = len(vals)
             counts = np.zeros(
                     (self.n_features, n_conditions),
                     dtype=self.counts.values.dtype)
             for i, val in enumerate(vals):
-                ind = self.samplesheet[column] == val
+                ind = (self.samplesheet[by] == val).all(axis=1)
                 counts[:, i] = self.counts.loc[:, ind].values.mean(axis=1)
+
+            if by_string:
+                samplesheet = None
+            else:
+                vals = pd.MultiIndex.from_tuples(vals, names=by)
+                samplesheet = self._samplesheet.__class__(
+                        vals.to_frame(index=True),
+                        )
+
             counts = self.counts.__class__(
                     pd.DataFrame(
                         counts,
                         index=self.counts.index,
-                        columns=vals))
+                        columns=vals),
+                    )
 
             featuresheet = self._featuresheet.copy()
 
             return Dataset(
                     counts_table=counts,
                     featuresheet=featuresheet,
+                    samplesheet=samplesheet,
                     )
 
         elif axis == 'features':
@@ -1046,25 +1211,92 @@ class Dataset():
                 raise ValueError(
                     '{:} is not a column of the FeatureSheet'.format(column))
 
-            vals = pd.Index(np.unique(self.featuresheet[column]), name=column)
+            if by_string:
+                vals = pd.Index(
+                        self.featuresheet[by[0]].drop_duplicates(),
+                        name=by[0])
+            else:
+                vals = pd.Index(self.featuresheet[by].drop_duplicates())
+
             n_conditions = len(vals)
             counts = np.zeros(
                     (n_conditions, self.n_samples),
                     dtype=self.counts.values.dtype)
             for i, val in enumerate(vals):
-                ind = self.featuresheet[column] == val
+                ind = (self.featuresheet[column] == val).all(axis=1)
                 counts[i] = self.counts.loc[ind].values.mean(axis=0)
+
+            if by_string:
+                featuresheet = None
+            else:
+                vals = pd.MultiIndex.from_tuples(vals, names=by)
+                featuresheet = self._featuresheet.__class__(
+                        vals.to_frame(index=True),
+                        )
+
             counts = self.counts.__class__(
                     pd.DataFrame(
                         counts,
                         index=vals,
-                        columns=self.counts.columns))
+                        columns=self.counts.columns),
+                    )
 
             samplesheet = self._samplesheet.copy()
 
             return Dataset(
                     counts_table=counts,
-                    samplesheet=samplesheet)
+                    samplesheet=samplesheet,
+                    featuresheet=featuresheet,
+                    )
+
+
+    @classmethod
+    def from_AnnData(cls, adata, convert_obsm=None):
+        '''Load from AnnData object
+
+        Args:
+            adata (anndata.AnnData): object to load from
+            convert_obsm (list or None): if not None, a list of multidimensional
+                'obsm' to convert to samplesheet columns
+        '''
+        shape = adata.shape
+        counts = np.zeros(shape, np.float32)
+        counts[:, :] = adata.X
+        samplesheet = adata.obs
+        featuresheet = adata.var
+        count_table = CountsTable(
+                counts.T,
+                index=featuresheet.index,
+                columns=samplesheet.index,
+                )
+        self = cls(
+            counts_table=count_table,
+            samplesheet=samplesheet,
+            featuresheet=featuresheet,
+            )
+
+        if convert_obsm is not None:
+            for col in convert_obsm:
+                nc = adata.obsm[col].shape[1]
+                for i in range(nc, 1):
+                    self.samplesheet[f'{col}_{i}'] = adata.obsm[col][:, i-1]
+
+        return self
+
+    def to_AnnData(self):
+        '''Convert to AnnData object'''
+        import anndata
+
+        X = self.counts.values.T
+        obs = self.samplesheet
+        var = self.featuresheet
+
+        adata = anndata.AnnData(
+            X,
+            obs=obs,
+            var=var,
+            )
+        return adata
 
     def subsample(
             self,
@@ -1184,3 +1416,37 @@ class Dataset():
                     samplesheet=samplesheet,
                     featuresheet=featuresheet,
                     )
+
+    def sort_by_metadata(
+            self,
+            by,
+            axis='samples',
+            ascending=True,
+            inplace=False,
+            ):
+        '''Sort samples by one or more metadata columns
+
+        Args:
+            by (string or list): column(s) to use for sorting
+            axis (string): 'samples' or 'features'
+            ascending (bool or list of bools): whether to sort low to high
+                values. It can be a list of the same length as 'by' if the
+                latter is a list.
+            inplace (bool): Whether to change the Dataset in place or return a
+                new one.
+        Returns:
+            If `inplace` is True, None. Else, a Dataset.
+        '''
+
+        if axis == 'samples':
+            samplenames = (self.samplesheet
+                               .sort_values(by, ascending=ascending)
+                               .index)
+            return self.query_samples_by_name(samplenames, inplace=inplace)
+        elif axis == 'features':
+            featurenames = (self.featuresheet
+                                .sort_values(by, ascending=ascending)
+                                .index)
+            return self.query_features_by_name(featurenames, inplace=inplace)
+        else:
+            raise ValueError('axis must be "samples" or "features"')

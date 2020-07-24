@@ -168,6 +168,8 @@ class Correlation(Plugin):
         y = phe.values.T
 
         r = self._correlate(x, y, method=method)
+        if fillna is not None:
+            r[np.isnan(r)] = fillna
 
         if (not isinstance(features, str)) and (not isinstance(phenotypes, str)):
             return pd.DataFrame(
@@ -196,6 +198,7 @@ class Correlation(Plugin):
             features2=None,
             method='spearman',
             zero_identity=False,
+            fillna=True,
             ):
         '''Correlate feature expression with one or more phenotypes.
 
@@ -210,6 +213,7 @@ class Correlation(Plugin):
             method (string): type of correlation. Must be one of 'pearson' or
                 'spearman'.
             zero_identity (bool): if True, put zeroes on self-correlations.
+            fillna (bool): fill all NaN with 0.
 
         Returns:
             pandas.DataFrame with the correlation coefficients. If either
@@ -218,6 +222,7 @@ class Correlation(Plugin):
                 a single correlation coefficient.
         '''
         exp_all = self.dataset.counts
+
         if not isinstance(features, str):
             exp = exp_all.loc[features]
         elif features == 'all':
@@ -227,12 +232,12 @@ class Correlation(Plugin):
             exp = exp_all.loc[[features]]
 
         if features2 is None:
-            features = exp.index
+            features2 = exp.index
             exp2 = exp
         elif not isinstance(features2, str):
             exp2 = exp_all.loc[features2]
         elif features2 == 'all':
-            features = exp_all.index
+            features2 = exp_all.index
             exp2 = exp_all
         else:
             exp2 = exp_all.loc[[features2]]
@@ -248,26 +253,26 @@ class Correlation(Plugin):
                     if xi == yi:
                         r[ix, iy] = 0
 
-        if (not isinstance(features, str)) and (not isinstance(features2, str)):
-            return pd.DataFrame(
+        corr = pd.DataFrame(
                     data=r,
                     index=exp.index,
                     columns=exp2.index,
                     dtype=float)
-        elif isinstance(features, str) and (not isinstance(features2, str)):
-            return pd.Series(
-                    data=r[0],
-                    index=exp2.index,
-                    name='correlation',
-                    dtype=float)
-        elif (not isinstance(features, str)) and isinstance(features2, str):
-            return pd.Series(
-                    data=r[:, 0],
-                    index=exp.index,
-                    name='correlation',
-                    dtype=float)
+
+        if fillna:
+            corr = corr.fillna(0)
+
+        cond1 = isinstance(features, str)
+        cond2 = isinstance(features2, str)
+
+        if cond1 and cond2:
+            return corr.iloc[0, 0]
+        elif cond1:
+            return corr.iloc[0]
+        elif cond2:
+            return corr.iloc[:, 0]
         else:
-            return r[0, 0]
+            return corr
 
     def correlate_phenotypes_phenotypes(
             self,
