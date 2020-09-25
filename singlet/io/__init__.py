@@ -8,7 +8,7 @@ import pandas as pd
 from singlet.config import config
 
 
-integrated_dataset_formats = ['loom']
+integrated_dataset_formats = ['loom', 'h5ad']
 
 
 # Parser
@@ -186,6 +186,7 @@ def parse_dataset(dictionary):
 
     '''
     from .loom import parse_dataset as parse_loom
+    from .h5ad import parse_dataset as parse_h5ad
 
     if 'datasetname' in dictionary:
         dataset = config['io']['datasets'][dictionary['datasetname']]
@@ -197,10 +198,13 @@ def parse_dataset(dictionary):
     if dataset['format'] == 'loom':
         return parse_loom(
                 dataset['path'],
-                dataset['axis_samples'],
                 dataset['index_samples'],
                 dataset['index_features'],
                 bit_precision=dataset['bit_precision'],
+                )
+    elif dataset['format'] == 'h5ad':
+        return parse_h5ad(
+                dataset['path'],
                 )
     else:
         raise ValueError('Integrated dataset parsing supports the following formats: {:}'.format(

@@ -276,9 +276,6 @@ class Dataset():
             extension.
             **kwargs (keyword arguments): depend on the format.
 
-        The additional keyword argument for the supported formats are:
-        - loom:
-         - axis_samples: `rows` or `columns` (default)
         '''
         if fmt is None:
             fmt = filename.split('.')[-1]
@@ -300,11 +297,11 @@ class Dataset():
             else:
                 col_attrs['_index'] = self.samplesheet.index.values
 
-            if kwargs.get('axis_samples', 'columns') != 'columns':
-                matrix = matrix.T
-                row_attrs, col_attrs = col_attrs, row_attrs
-
             loompy.create(filename, matrix, row_attrs, col_attrs)
+
+        elif fmt == 'h5ad':
+            adata = self.to_AnnData()
+            adata.write(filename)
 
         else:
             raise ValueError('File format not supported')
@@ -919,6 +916,8 @@ class Dataset():
         res = []
 
         additional_ordered = []
+        if method == 'kolmogorov-smirnov-rich':
+            additional_ordered.append('KS_xmax')
         if 'log2_fold_change' in additional_attributes:
             additional_ordered.append('log2_fold_change')
         if 'avg_self' in additional_attributes:
@@ -953,6 +952,14 @@ class Dataset():
                         counts_other.iterrows()):
                     tmp = ks_2samp(co1.values, co2.values)
                     res.append([fea, tmp[0], tmp[1]])
+
+            elif method == 'kolmogorov-smirnov-rich':
+                from .utils import ks_2samp
+                for (fea, co1), (_, co2) in zip(
+                        counts.iterrows(),
+                        counts_other.iterrows()):
+                    tmp = ks_2samp(co1.values, co2.values)
+                    res.append([fea, tmp[0], tmp[1], tmp[2]])
 
             elif method == 'mann-whitney':
                 from scipy.stats import mannwhitneyu
@@ -1025,6 +1032,14 @@ class Dataset():
                     val2 = pheno_other.loc[phe]
                     tmp = ks_2samp(val1.values, val2.values)
                     res.append([phe, tmp[0], tmp[1]])
+
+            if method == 'kolmogorov-smirnov-rich':
+                from .utils import ks_2samp
+                for phe, val1 in pheno.iterrows():
+                    val2 = pheno_other.loc[phe]
+                    tmp = ks_2samp(val1.values, val2.values)
+                    res.append([phe, tmp[0], tmp[1], tmp[2]])
+
             elif method == 'mann-whitney':
                 from scipy.stats import mannwhitneyu
                 for phe, val1 in pheno.iterrows():
