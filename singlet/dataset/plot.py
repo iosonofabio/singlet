@@ -479,20 +479,20 @@ class Plot(Plugin):
             if color_by in metadata.columns:
                 color_data = metadata.loc[:, color_by]
                 if hasattr(color_data, 'cat'):
-                    is_numeric = False
+                    color_is_numeric = False
                 else:
-                    is_numeric = np.issubdtype(color_data.dtype, np.number)
+                    color_is_numeric = np.issubdtype(color_data.dtype, np.number)
                 color_by_phenotype = True
             elif color_by in data.index:
                 color_data = data.loc[color_by]
-                is_numeric = True
+                color_is_numeric = True
                 color_by_phenotype = False
             else:
                 raise ValueError(
                     'The label '+color_by+' is neither a phenotype nor a feature')
 
             # Categorical columns get just a list or a dict of colors
-            if (hasattr(color_data, 'cat')) or (not is_numeric):
+            if (hasattr(color_data, 'cat')) or (not color_is_numeric):
                 cd_unique = list(np.unique(color_data.values))
                 if callable(cmap):
                     c_unique = cmap(np.linspace(0, 1, len(cd_unique)))
@@ -518,6 +518,9 @@ class Plot(Plugin):
 
                 cd_min = color_data.values[unmask].min()
                 cd_max = color_data.values[unmask].max()
+
+                if color_log is None:
+                    color_log = not color_by_phenotype
 
                 if color_log:
                     if color_by_phenotype:

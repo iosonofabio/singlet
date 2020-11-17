@@ -8,7 +8,6 @@ import pandas as pd
 
 from ..samplesheet import SampleSheet
 from ..counts_table import CountsTable
-from ..counts_table import CountsTableSparse
 from ..featuresheet import FeatureSheet
 from .plugins import Plugin
 from .utils import concatenate
@@ -29,7 +28,7 @@ class Dataset():
 
         Args:
             counts_table (string): Name of the counts table (to load from a
-                config file) or instance of CountsTable or CountsTableSparse
+                config file) or instance of CountsTable
             samplesheet (string or None): Name of the samplesheet (to load from
                 a config file) or instance of SampleSheet
             featuresheet (string or None): Name of the samplesheet (to load
@@ -109,6 +108,26 @@ class Dataset():
         '''
         return concatenate([self, other])
 
+    @property
+    def obs(self):
+        return self.samplesheet
+
+    @property
+    def var(self):
+        return self.featuresheet
+
+    @property
+    def obs_names(self):
+        return self.samplenames
+
+    @property
+    def var_names(self):
+        return self.featurenames
+
+    @property
+    def X(self):
+        return self.counts.T
+
     def __iadd__(self, other):
         '''Merge two Datasets.
 
@@ -166,16 +185,10 @@ class Dataset():
                         columns=samplesheet.index)
         elif isinstance(counts_table, CountsTable):
             self._counts = counts_table
-        elif isinstance(counts_table, CountsTableSparse):
-            self._counts = counts_table
         elif isinstance(counts_table, pd.DataFrame):
             self._counts = CountsTable(counts_table)
         else:
-            config_table = config['io']['count_tables'][counts_table]
-            if config_table.get('sparse', False):
-                self._counts = CountsTableSparse.from_tablename(counts_table)
-            else:
-                self._counts = CountsTable.from_tablename(counts_table)
+            self._counts = CountsTable.from_tablename(counts_table)
 
         if samplesheet is None:
             self._samplesheet = SampleSheet(
@@ -244,11 +257,7 @@ class Dataset():
             if 'samplesheet' in dataset:
                 self._samplesheet = SampleSheet.from_datasetname(datasetname)
             if 'counts_table' in dataset:
-                config_table = dataset['counts_table']
-                if config_table.get('sparse', False):
-                    counts_table = CountsTableSparse.from_datasetname(datasetname)
-                else:
-                    counts_table = CountsTable.from_datasetname(datasetname)
+                counts_table = CountsTable.from_datasetname(datasetname)
                 self._counts = counts_table
 
             if not hasattr(self, '_samplesheet'):
@@ -902,10 +911,10 @@ class Dataset():
             phenotypes (list of strings): Phenotypes to compare.
             method (string or function): Statistical test to use for the
                 comparison. If a string it must be one of
-                'kolmogorov-smirnov' or 'mann-whitney'. If a function, it
-                must accept two arrays as arguments (one for each
-                dataset, running over the samples) and return a pair
-                (statistic, P-value) for the comparison.
+                'kolmogorov-smirnov', 'kolmogorov-smirnov-rich', or
+                'mann-whitney'. If a function, it must accept two arrays as
+                arguments (one for each dataset, running over the samples) and
+                return a pair (statistic, P-value) for the comparison.
             attitional_attributes (list/tuple of str): a list of additional
                 attributes about the comparison. At the moment thse can be:
                 'log2_fold_change', 'avg_self', 'avg_other'.
@@ -1191,11 +1200,13 @@ class Dataset():
             else:
                 vals = pd.Index(self.samplesheet[by].drop_duplicates())
             n_conditions = len(vals)
+            n_samples = np.zeros(n_conditions, np.int64)
             counts = np.zeros(
                     (self.n_features, n_conditions),
                     dtype=self.counts.values.dtype)
             for i, val in enumerate(vals):
                 ind = (self.samplesheet[by] == val).all(axis=1)
+                n_samples[i] = ind.sum()
                 counts[:, i] = self.counts.loc[:, ind].values.mean(axis=1)
 
             if by_string:
@@ -1215,11 +1226,13 @@ class Dataset():
 
             featuresheet = self._featuresheet.copy()
 
-            return Dataset(
+            dsav = Dataset(
                     counts_table=counts,
                     featuresheet=featuresheet,
                     samplesheet=samplesheet,
                     )
+            dsav.samplesheet['n_samples'] = n_samples
+            return dsav
 
         elif axis == 'features':
             if column not in self.featuresheet.columns:
@@ -1234,11 +1247,13 @@ class Dataset():
                 vals = pd.Index(self.featuresheet[by].drop_duplicates())
 
             n_conditions = len(vals)
+            n_features = np.zeros(n_conditions, np.int64)
             counts = np.zeros(
                     (n_conditions, self.n_samples),
                     dtype=self.counts.values.dtype)
             for i, val in enumerate(vals):
                 ind = (self.featuresheet[column] == val).all(axis=1)
+                n_features[i] = ind.sum()
                 counts[i] = self.counts.loc[ind].values.mean(axis=0)
 
             if by_string:
@@ -1258,12 +1273,13 @@ class Dataset():
 
             samplesheet = self._samplesheet.copy()
 
-            return Dataset(
+            dsav = Dataset(
                     counts_table=counts,
                     samplesheet=samplesheet,
                     featuresheet=featuresheet,
                     )
-
+            dsav.featuresheet['n_features'] = n_features
+            return dsav
 
     @classmethod
     def from_AnnData(cls, adata, convert_obsm=None):

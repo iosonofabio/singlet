@@ -42,8 +42,14 @@ def parse_dataset(
                 print('WARNING: 3+D metadata, skipped: {:}'.format(key))
 
         if index_samples is not None:
+            if index_samples not in samplesheet.columns:
+                raise IndexError('index_samples not found: {:}'.format(
+                    ', '.join(samplesheet.columns)))
             samplesheet.set_index(index_samples, drop=False, inplace=True)
         if index_features is not None:
+            if index_features not in featuresheet.columns:
+                raise IndexError('index_features not found: {:}'.format(
+                    ', '.join(featuresheet.columns)))
             featuresheet.set_index(index_features, drop=False, inplace=True)
 
         # Parse counts
